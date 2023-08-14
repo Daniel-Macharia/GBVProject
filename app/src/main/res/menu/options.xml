@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/journal"
+        android:title="My Learning Journal"
+        android:icon="@drawable/avatar"
+        />
+
+    <item
+        android:id="@+id/groups"
+        android:title="Groups"
+
+        />
+
+    <item
+        android:id="@+id/report"
+        android:title="Report"
+        />
+
+    <item
+        android:id="@+id/assistant"
+        android:title="Assistants"
+        />
+
+    <item
+        android:id="@+id/facts"
+        android:title="FAQs"
+        />
+
+    <item
+        android:id="@+id/about"
+        android:title="About Us"
+        />
+
+</menu>

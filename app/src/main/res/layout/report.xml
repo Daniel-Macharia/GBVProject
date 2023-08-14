@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context=".report"
+    android:orientation="vertical"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.5"
+        android:orientation="horizontal"
+
+        >
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
+            android:orientation="vertical"
+            >
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:textSize="24sp"
+                android:text="Call the GBV Hotline: "
+                android:textColor="@color/black"
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="2"
+                android:text="1195"
+                android:textSize="64sp"
+                android:textColor="@color/black"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            >
+
+            <Button
+                android:id="@+id/hotline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="call"
+                android:textColor="@color/blue"
+                android:textSize="16sp"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/green"
+                />
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- End of Hotline call design -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center|left"
+            android:paddingLeft="20dp"
+            android:text="Call The Police: "
+            android:textSize="24sp"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:paddingRight="20dp"
+            android:orientation="horizontal"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:text="Phone Number: "
+                android:textSize="16sp"
+                android:gravity="center|right"
+                />
+
+            <EditText
+                android:id="@+id/num"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="2"
+                android:inputType="phone"
+                android:background="@drawable/input_rectangle"
+                android:textColor="@color/blue"
+                android:hint="phone number"
+                android:gravity="center"
+                android:layout_margin="2dp"
+                />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:paddingRight="20dp"
+            android:layout_margin="2dp"
+            >
+
+
+            <Button
+                android:id="@+id/call"
+                android:layout_width="70dp"
+                android:layout_height="50dp"
+                android:text="call"
+                android:textColor="@color/blue"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/green"
+                android:layout_margin="2dp"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:orientation="vertical"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="Write a Statement"
+            android:textSize="24sp"
+            android:gravity="left|center"
+            android:paddingLeft="20dp"
+            />
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="3"
+            android:background="@drawable/input_rectangle"
+            >
+
+            <EditText
+                android:id="@+id/statementMessage"
+                android:inputType="textMultiLine"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:hint="type your statement here "
+                android:textColor="@color/blue"
+                android:textSize="16sp"
+                />
+
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="right|center"
+            >
+
+            <Button
+                android:id="@+id/send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/green"
+                android:text="send"
+                android:textColor="@color/blue"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>
