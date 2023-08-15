@@ -13,14 +13,22 @@ public class welcome extends AppCompatActivity {
         setContentView(R.layout.welcome_view);
 
         //android.os.SystemClock.sleep(3000);
+        //sleep();
+        /*try {
+            this.wait(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }*/
 
-        loadHomeView();
+       // loadCreateUserView();
 
     }
+
 
     private void sleep()
     {
         try {
+
             Thread.sleep(3000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -28,9 +36,9 @@ public class welcome extends AppCompatActivity {
 
     }
 
-    private void loadHomeView()
+    private void loadCreateUserView()
     {
-        Intent intent = new Intent(this, homeViewActivity.class);
+        Intent intent = new Intent(this, createUser.class);
         startActivity(intent);
         //setContentView(R.layout.home_view);
     }

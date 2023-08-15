@@ -20,14 +20,14 @@ public class termsAndConditions extends AppCompatActivity {
         toWelcome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadWelcomeView();
+                loadCreateUserView();
             }
         });
     }
 
-    private void loadWelcomeView()
+    private void loadCreateUserView()
     {
-        Intent intent = new Intent( this, welcome.class);
+        Intent intent = new Intent( this, createUser.class);
         startActivity(intent);
     }
 }

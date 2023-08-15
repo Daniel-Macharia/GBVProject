@@ -56,6 +56,7 @@
                 />
 
             <EditText
+                android:id="@+id/user_name"
                 android:layout_marginTop="5dp"
                 android:layout_marginBottom="5dp"
                 android:layout_width="150dp"
@@ -88,6 +89,7 @@
                 />
 
             <EditText
+                android:id="@+id/user_password"
                 android:layout_marginBottom="5dp"
                 android:layout_marginTop="5dp"
                 android:layout_width="150dp"
@@ -145,7 +147,7 @@
                 />
 
             <Button
-                android:id="@+id/create"
+                android:id="@+id/signup"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:text="Sign Up"
