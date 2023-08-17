@@ -1,19 +1,18 @@
 package com.example.frats;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import java.util.Scanner;
 
 public class login extends AppCompatActivity {
-
-    private DatabaseReference mDatabase;
 
     Button login, signup;
     EditText userName,userPassWord;
@@ -33,21 +32,71 @@ public class login extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Intent toHome = new Intent(login.this, homeViewActivity.class);
-                startActivity(toHome);
+                String name,pass,u_name,u_pass;
+                String data[] = new String[2];
+                name = userName.getText().toString();
+                pass = userPassWord.getText().toString();
 
-                //String name = userName.getText().toString();
-                //String  passWord = userPassWord.getText().toString();
+                try {
+                    user validateUser = new user(login.this);
+                    validateUser.open();
+                    data = validateUser.readData();
 
-                // ...Connect to firebase
-                //mDatabase = FirebaseDatabase.getInstance().getReference();
+                    u_name = data[0];
+                    u_pass = data[1];
 
-                //add user
-                //mDatabase.child("user").setValue(name);
-               // mDatabase.child("user").child("password").setValue(passWord);
-               // mDatabase.child("user").child(name).child("password").setValue(passWord);
-                //mDatabase.child("pass").setValue(name);
+                    //validata info
+                    if( name.equals(u_name) )
+                    {
+                        if( pass.equals( u_pass ) )
+                        {
+                            Dialog d = new Dialog(login.this);
+                            d.setTitle("Login Successful!");
+                            TextView tv = new TextView(login.this);
+                            tv.setText("Login Successful!");
+                            d.setContentView(tv);
+                            d.show();
 
+                            Intent toHome = new Intent(login.this, homeViewActivity.class);
+                            startActivity(toHome);
+
+                        }
+                        else {
+                            Dialog d = new Dialog(login.this);
+                            d.setTitle("Login Failed!");
+                            TextView tv = new TextView(login.this);
+                            tv.setText("Invalid password!");
+                            d.setContentView(tv);
+                            d.show();
+
+                            userPassWord.setText("");
+
+                        }
+                    }else {
+                        Dialog d = new Dialog(login.this);
+                        d.setTitle("Login Failed!");
+                        TextView tv = new TextView(login.this);
+                        tv.setText("Invalid Username!");
+                        d.setContentView(tv);
+                        d.show();
+
+                        userPassWord.setText("");
+                        userName.setText("");
+                    }
+
+                    validateUser.close();
+                }
+                catch(Exception e)
+                {
+
+                }
+                finally
+                {
+
+                }
+
+                //Intent toHome = new Intent(login.this, homeViewActivity.class);
+                //startActivity(toHome);
 
             }
         });

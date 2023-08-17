@@ -140,6 +140,8 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         if( menuItem.getItemId() == R.id.journal ) {
             //case R.id.report:
             Toast.makeText(getApplicationContext(), "Journal", Toast.LENGTH_SHORT).show();
+            Intent journalIntent = new Intent( this, journal.class);
+            startActivity(journalIntent);
             return true;
         }
         else

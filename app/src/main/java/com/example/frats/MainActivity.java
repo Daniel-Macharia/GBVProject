@@ -2,10 +2,16 @@ package com.example.frats;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -13,6 +19,36 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //check if there`s a registered user
+        String check[] = new String[2];
+        try{
+            user checkUser = new user( MainActivity.this );
+            checkUser.open();
+
+            check = checkUser.readData();
+            if( !check[0].equals("") )//if a user account exists
+            {                             //load the login page
+                //setContentView(R.layout.login_xml);
+                Intent intent = new Intent(MainActivity.this, login.class);
+                startActivity(intent);
+
+                return;
+            }
+
+            checkUser.close();
+        }catch( Exception e)
+        {
+            Dialog d = new Dialog(MainActivity.this);
+            d.setTitle("Failed to fetch data");
+            TextView tv = new TextView(MainActivity.this);
+            tv.setText("Failed to connect to the databases!");
+            d.setContentView(tv);
+            d.show();
+        }
+
+        //if no user account exists
+        //load and setup the sign up page
         setContentView(R.layout.signup);
 
         login = findViewById(R.id.login);
@@ -39,12 +75,10 @@ public class MainActivity extends AppCompatActivity {
                 switchToLogin();
             }
         });
-    }
 
-    private void switchToHome()//switch to the landing or home activity
-    {
-        Intent switchToHomeIntent = new Intent(this, homeViewActivity.class);
-        startActivity(switchToHomeIntent);
+
+
+
     }
 
     private void switchToTermsAndConditions()

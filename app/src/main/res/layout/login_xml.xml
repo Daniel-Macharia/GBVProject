@@ -17,7 +17,7 @@
         android:textSize="24sp"
         android:text="Gender Based Violence"
         android:textColor="@color/blue"
-        android:backgroundTint="@color/cream"
+        android:backgroundTint="@color/cream2"
         android:gravity="center"
         />
 
