@@ -10,11 +10,10 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.Scanner;
-
 public class login extends AppCompatActivity {
 
-    Button login, signup;
+    Button login;
+    //Button signup;
     EditText userName,userPassWord;
 
     @Override
@@ -24,7 +23,7 @@ public class login extends AppCompatActivity {
         setContentView(R.layout.login_xml);
 
         login = findViewById(R.id.login);
-        signup = findViewById(R.id.signup);
+        //signup = findViewById(R.id.signup);
         userName = findViewById(R.id.user_name);
         userPassWord = findViewById(R.id.user_password);
 
@@ -101,7 +100,7 @@ public class login extends AppCompatActivity {
             }
         });
 
-        signup.setOnClickListener(new View.OnClickListener() {
+       /* signup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -109,7 +108,7 @@ public class login extends AppCompatActivity {
                 startActivity(toSignUp);
 
             }
-        });
+        });*/
 
 
 

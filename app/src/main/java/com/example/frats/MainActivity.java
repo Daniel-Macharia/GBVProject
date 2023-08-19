@@ -9,10 +9,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-
 public class MainActivity extends AppCompatActivity {
 
     Button user,assistant,login;
@@ -23,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
         //check if there`s a registered user
         String check[] = new String[2];
         try{
-            user checkUser = new user( MainActivity.this );
+            com.example.frats.user checkUser = new user( MainActivity.this );
             checkUser.open();
 
             check = checkUser.readData();
@@ -44,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
             TextView tv = new TextView(MainActivity.this);
             tv.setText("Failed to connect to the databases!");
             d.setContentView(tv);
-            d.show();
+            //d.show();
         }
 
         //if no user account exists

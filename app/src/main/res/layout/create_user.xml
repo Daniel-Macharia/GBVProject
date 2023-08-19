@@ -17,7 +17,7 @@
         android:textSize="24sp"
         android:text="The FRATS"
         android:textColor="@color/blue"
-        android:backgroundTint="@color/cream"
+        android:background="@color/cream2"
         android:gravity="center"
         />
 
@@ -83,7 +83,7 @@
                     android:hint="username"
                     android:inputType="text"
                     android:textColor="@color/blue"
-                    android:textColorHint="@color/blue"
+                    android:textColorHint="@color/grey"
                     android:background="@drawable/input_rectangle"
                     android:gravity="center"
                     android:textCursorDrawable="@color/black"
@@ -137,7 +137,7 @@
                     android:hint="password"
                     android:inputType="textWebPassword"
                     android:textColor="@color/blue"
-                    android:textColorHint="@color/blue"
+                    android:textColorHint="@color/grey"
                     android:background="@drawable/input_rectangle"
                     android:gravity="center"
                     android:textCursorDrawable="@color/black"
@@ -192,7 +192,7 @@
                     android:hint="confirm password"
                     android:inputType="textWebPassword"
                     android:textColor="@color/blue"
-                    android:textColorHint="@color/blue"
+                    android:textColorHint="@color/grey"
                     android:background="@drawable/input_rectangle"
                     android:gravity="center"
                     android:textCursorDrawable="@color/black"
@@ -205,20 +205,22 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="50dp"
+            android:layout_height="70dp"
             android:orientation="horizontal"
-            android:gravity="center"
+            android:gravity="right"
+            android:paddingRight="20dp"
             >
 
             <LinearLayout
                 android:layout_width="240dp"
                 android:layout_height="match_parent"
-                android:gravity="right"
+                android:gravity="right|bottom"
+                android:paddingRight="10dp"
                 >
                 <Button
                     android:id="@+id/create"
                     android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:text="Create Account"
                     android:textColor="@color/blue"
                     android:background="@drawable/input_rectangle"

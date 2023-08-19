@@ -25,6 +25,8 @@
         <activity android:name=".report"></activity>
         <activity android:name=".createUser"></activity>
         <activity android:name=".journal"></activity>
+        <activity android:name=".journalEntriesList"></activity>
+        <activity android:name=".entryLayout"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

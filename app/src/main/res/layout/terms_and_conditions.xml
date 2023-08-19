@@ -34,11 +34,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:padding="5dp"
-                android:text="hello terms and conditions of service hello terms and conditions of service hello terms and conditions of service hello terms and conditions of service"
+                android:text="FRATS terms and conditions of service "
                 android:textStyle="italic"
                 android:gravity="left"
                 android:textAlignment="gravity"
-                android:textSize="64sp"
+                android:textSize="24sp"
                 />
 
         </ScrollView>
@@ -51,11 +51,21 @@
         android:layout_weight="1"
         android:gravity="right"
         >
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:gravity="center"
+            android:paddingLeft="10dp"
+            android:textSize="16sp"
+            android:text="By clicking 'I agree' you accept FRATS` terms and conditions of service"
+            />
 
         <Button
             android:id="@+id/accept"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="match_parent"
+            android:layout_weight="2"
             android:text="( I Accept )"
             android:textColor="@color/blue"
             />
