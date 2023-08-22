@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "567228754989",
+    "project_id": "fratsgbv",
+    "storage_bucket": "fratsgbv.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:567228754989:android:991e2c671f86ec77869ca4",
+        "android_client_info": {
+          "package_name": "com.example.frats"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "567228754989-4lgqldmegavetm9u7cbcu2n333vdail1.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBH4QGO_Fp-qaMarm2Fher8kh0uSxdZP9Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "567228754989-4lgqldmegavetm9u7cbcu2n333vdail1.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

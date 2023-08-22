@@ -27,6 +27,8 @@
         <activity android:name=".journal"></activity>
         <activity android:name=".journalEntriesList"></activity>
         <activity android:name=".entryLayout"></activity>
+        <activity android:name=".assistantsClass"></activity>
+        <activity android:name=".chat"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
                 //setContentView(R.layout.login_xml);
                 Intent intent = new Intent(MainActivity.this, login.class);
                 startActivity(intent);
+                finish();
 
                 return;
             }

@@ -148,6 +148,9 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         if( menuItem.getItemId() == R.id.assistant ) {
             //case R.id.report:
             Toast.makeText(getApplicationContext(), "Assistants", Toast.LENGTH_SHORT).show();
+
+            Intent assistantsIntent = new Intent( homeViewActivity.this, assistantsClass.class );
+            startActivity( assistantsIntent);
             return true;
         }
         else
