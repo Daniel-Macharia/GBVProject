@@ -13,6 +13,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -41,6 +42,7 @@ public class chat extends AppCompatActivity {
             chatList = findViewById(R.id.chatList);
             e = findViewById(R.id.messageToSend);
             send = findViewById(R.id.sendMessage);
+            //FirebaseApp.initializeApp(getBaseContext());
 
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference myRef = database.getReference("message");
@@ -49,7 +51,7 @@ public class chat extends AppCompatActivity {
 
             ArrayList<String> arr = new ArrayList<>(10);
 
-       /* myRef.addValueEventListener(new ValueEventListener() {
+            myRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // This method is called once with the initial value and again
@@ -69,7 +71,7 @@ public class chat extends AppCompatActivity {
                 // Failed to read value
               //  Log.w(TAG, "Failed to read value.", error.toException());
             }
-        });*/
+        });
 
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
