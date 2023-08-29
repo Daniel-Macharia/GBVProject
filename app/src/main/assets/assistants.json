@@ -1,0 +1,21 @@
+{
+  "users": {
+
+      "username": "",
+      "phone": ""
+
+
+  },
+
+  "assistant":{
+    "username": "",
+    "phone": ""
+  },
+
+  "message": {
+    "sender_id": "",
+    "recepient_id": "",
+    "content": "",
+    "time_sent": ""
+  }
+}

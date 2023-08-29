@@ -11,46 +11,66 @@
         android:id="@+id/chatList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="3"
+        android:layout_weight="6"
         android:divider="@color/grey"
-        android:dividerHeight="2dp">
-
-    </ListView>
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="2"
-        android:background="@drawable/input_rectangle"
+        android:dividerHeight="2dp"
         >
 
-        <EditText
-            android:id="@+id/messageToSend"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:textColor="@color/blue"
-            android:hint="enter message"
-            android:inputType="textMultiLine|textAutoCorrect"
-            />
+    </ListView>
+    <!-- TableLayout
+        android:id="@+id/chat_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        >
 
-    </ScrollView>
+    </TableLayout -->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center|right"
-        android:paddingRight="20dp"
+        android:padding="5dp"
+        android:orientation="horizontal"
         >
-
-        <Button
-            android:id="@+id/sendMessage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:text="send"
+        <ScrollView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="2"
             android:background="@drawable/input_rectangle"
-            android:backgroundTint="@color/green"
-            />
+            >
+
+            <EditText
+                android:id="@+id/messageToSend"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:textColor="@color/blue"
+                android:hint="enter message"
+                android:inputType="textMultiLine|textAutoCorrect"
+                />
+
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="top|left"
+            android:padding="10dp"
+            >
+
+            <Button
+                android:id="@+id/sendMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:text="send"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/green"
+                />
+
+        </LinearLayout>
+
 
     </LinearLayout>
 

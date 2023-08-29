@@ -172,6 +172,12 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         }
 
     }
+
+    public void loadProfile(View view)
+    {
+        Intent intent = new Intent(homeViewActivity.this, userProfile.class);
+        startActivity(intent);
+    }
 }
 
 class anime extends Thread{

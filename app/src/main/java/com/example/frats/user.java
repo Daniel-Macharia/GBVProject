@@ -6,12 +6,14 @@ import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 public class user {
 
 
     public static final String userName = "user_name";
     public static final String passWord = "user_password";
+    public static final String phoneNumber = "phone_number";
 
 
     private static final String dbName = "userAccountdb";
@@ -33,7 +35,8 @@ public class user {
 
             db.execSQL( "CREATE TABLE " + tableName + " ( " +
                     userName + " TEXT NOT NULL PRIMARY KEY , " +
-                    passWord + " TEXT NOT NULL ); "
+                    passWord + " TEXT NOT NULL , " +
+                    phoneNumber + " TEXT NOT NULL ); "
 
             );
 
@@ -67,27 +70,36 @@ public class user {
         helper.close();
     }
 
-    public long createUser(String name, String password)
+    public long createUser(String name, String password, String phone)
     {
         ContentValues cv = new ContentValues();
         cv.put(userName,name);
         cv.put(passWord,password);
-        return userdb.insert(tableName,null,cv);
+        cv.put(phoneNumber, phone);
+        long l = userdb.insert(tableName,null,cv);
+
+        //Toast.makeText(thisContext,"Phone: " +cv.get(phoneNumber), Toast.LENGTH_SHORT).show();
+
+        return l;
     }
     public String[] readData()
     {
-        String userInfo[] = new String[2];
-        String []columns = new String[]{userName,passWord};
+        String userInfo[] = new String[3];
+        String []columns = new String[]{userName,passWord,phoneNumber};
 
         Cursor c = userdb.query(tableName,columns,null,null,null,null,null);
 
         int nameIndex = c.getColumnIndex(userName);
         int passwordIndex = c.getColumnIndex(passWord);
+        int phoneIndex = c.getColumnIndex(phoneNumber);
 
         c.moveToFirst();
 
         userInfo[0] = c.getString(nameIndex);
         userInfo[1] = c.getString(passwordIndex);
+        userInfo[2] = c.getString(phoneIndex);
+        //Toast.makeText(thisContext,"Phone: " + c.getString(phoneIndex), Toast.LENGTH_SHORT).show();
+
 
         return userInfo;
     }

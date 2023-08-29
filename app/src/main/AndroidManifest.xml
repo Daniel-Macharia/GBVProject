@@ -29,6 +29,7 @@
         <activity android:name=".entryLayout"></activity>
         <activity android:name=".assistantsClass"></activity>
         <activity android:name=".chat"></activity>
+        <activity android:name=".userProfile"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

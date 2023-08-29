@@ -11,6 +11,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.ktx.Firebase;
+
 public class createUser extends AppCompatActivity {
 
     Button create;
@@ -26,6 +30,10 @@ public class createUser extends AppCompatActivity {
         username = findViewById(R.id.user_name);
         password = findViewById(R.id.pass);
         confirmPassword = findViewById(R.id.confirm);
+
+        Intent intent = getIntent();
+        String phone = intent.getStringExtra("phone").toString();
+        boolean isUser = intent.getBooleanExtra("isUser", true);
 
         create.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,7 +56,24 @@ public class createUser extends AppCompatActivity {
 
                        if( u_pass.equals(confirm) )
                        {
-                           newUser.createUser(u_name,u_pass);
+                           newUser.createUser(u_name,u_pass, phone);
+                           String user_OR_assistant = "";
+
+                           if( isUser )
+                               user_OR_assistant = "users";
+                           else
+                               user_OR_assistant = "assistant";
+
+                           FirebaseDatabase database = FirebaseDatabase.getInstance();
+                           DatabaseReference myRef = database.getReference(user_OR_assistant);
+                           //myRef.push().child("user").child("username").setValue("u_name");
+                           //myRef.child("user/username").setValue(u_name);
+                           //myRef.child("user/phone").setValue(phone);
+                           //myRef.push().child("username").setValue(u_name);
+                           //myRef.push().child(u_name).child("phone").setValue(phone);
+                           newUser u = new newUser(u_name,phone);
+
+                           myRef.push().setValue(u);
 
                            welcomeAndLoadLogin w = new welcomeAndLoadLogin(createUser.this);
                            w.start();
@@ -147,3 +172,14 @@ class welcomeAndLoadLogin extends Thread{
     }
 }
 
+class newUser
+{
+    public String username;
+    public String phone;
+
+    public newUser(String name, String phoneNumber)
+    {
+        username = name;
+        phone = phoneNumber;
+    }
+}

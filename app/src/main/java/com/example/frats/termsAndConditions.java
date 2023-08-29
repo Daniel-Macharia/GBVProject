@@ -47,14 +47,20 @@ public class termsAndConditions extends AppCompatActivity {
         toWelcome.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadCreateUserView();
+
+                Intent intent = getIntent();
+                String phone = intent.getStringExtra("phone").toString();
+                boolean isUser = intent.getBooleanExtra("isUser",true);
+                loadCreateUserView(phone, isUser);
             }
         });
     }
 
-    private void loadCreateUserView()
+    private void loadCreateUserView( String s, boolean isUser)
     {
         Intent intent = new Intent( this, createUser.class);
+        intent.putExtra("phone", new String(s) );
+        intent.putExtra("isUser", isUser);
         startActivity(intent);
     }
 }

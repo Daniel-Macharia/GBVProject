@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -32,7 +33,7 @@ public class login extends AppCompatActivity {
             public void onClick(View view) {
 
                 String name,pass,u_name,u_pass;
-                String data[] = new String[2];
+                String data[] = new String[3];
                 name = userName.getText().toString();
                 pass = userPassWord.getText().toString();
 
@@ -56,6 +57,7 @@ public class login extends AppCompatActivity {
                             d.setContentView(tv);
                             d.show();
 
+                            //Toast.makeText(login.this,data[2],Toast.LENGTH_SHORT).show();
                             Intent toHome = new Intent(login.this, homeViewActivity.class);
                             startActivity(toHome);
                             finish();

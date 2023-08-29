@@ -7,11 +7,13 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     Button user,assistant,login;
+    EditText phone;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,18 +53,27 @@ public class MainActivity extends AppCompatActivity {
         login = findViewById(R.id.login);
         user = findViewById(R.id.user);
         assistant = findViewById(R.id.assist);
+        phone = findViewById(R.id.phone_number);
 
         user.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switchToTermsAndConditions();
+
+                String phoneNumber = phone.getText().toString();
+                boolean isUser = true;
+
+                switchToTermsAndConditions(phoneNumber,isUser);
             }
         });
 
         assistant.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                switchToTermsAndConditions();
+
+                String phoneNumber = phone.getText().toString();
+                boolean isUser = false;
+
+                switchToTermsAndConditions(phoneNumber,isUser);
             }
         });
 
@@ -78,9 +89,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void switchToTermsAndConditions()
+    private void switchToTermsAndConditions( String s, boolean isUser)
     {
         Intent intent = new Intent( this, termsAndConditions.class);
+        intent.putExtra("phone", new String(s) );
+        intent.putExtra("isUser", isUser);
         startActivity(intent);
     }
 
