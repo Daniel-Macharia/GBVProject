@@ -26,12 +26,14 @@ public class journalEntriesList extends AppCompatActivity {
 
             ArrayList<String[]> data = e.getEntries();
             //entryLayout arr[] = new entryLayout[data.size()];
-            String arr[] = new String[data.size()];
+            final int s = data.size();
+            String arr[] = new String[s];
+            //int j = s - 1;
 
-            for(int i = 0; i < arr.length; i++)
+            for(int i = 0, j = s - 1; i < s; i++, j--)
             {
                 //arr[i].tv.setText( data.get(i)[2] );//set text view`s text to the journal entry
-                arr[i] = data.get(i)[2];
+                arr[j] = data.get(i)[0] + "\n\n" + data.get(i)[2];
             }
 
             //ArrayAdapter<entryLayout> arrAdapt = new ArrayAdapter<entryLayout>(journalEntriesList.this,R.layout.entry_layout, arr);

@@ -22,6 +22,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class chat extends AppCompatActivity {
 
@@ -68,9 +69,23 @@ public class chat extends AppCompatActivity {
                 //String value = dataSnapshot.getValue(String.class);
                 //arr.add(value);
 
-                String m = dataSnapshot.getValue().toString();
-                arr.add(m);
+                //msg m = (msg) dataSnapshot.getValue(msg.class);
+                //arr.add(m.content);
+                //String m = dataSnapshot.getValue().toString();
+                //arr.add(m);
 
+                Iterable<DataSnapshot> iter = dataSnapshot.getChildren();
+
+               //iter.forEach( (element) -> {arr.add( ( element.getValue().toString()) );});
+
+                for( DataSnapshot msgSnapShot : iter)
+                {
+                    String s = msgSnapShot.getValue().toString();
+                    if( arr.contains(s))
+                        continue;
+                    else
+                        arr.add(s);
+                }
                // ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(chat.this, R.layout.chat_message, R.id.msg, arr);
                 //chatList.setAdapter(arrayAdapter);
                 
@@ -128,6 +143,9 @@ class msg
     public String recipient;
     public String content;
     public String time;
+
+    public msg(){}
+
     public msg(String sender,String recipient,String content)
     {
         this.sender = sender;

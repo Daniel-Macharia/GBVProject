@@ -6,13 +6,18 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.util.Calendar;
+import java.util.Scanner;
+
 public class journal extends AppCompatActivity {
 
     private Button save,review;
+    private TextView date;
     private EditText notes;
 
     @Override
@@ -25,6 +30,9 @@ public class journal extends AppCompatActivity {
         save = findViewById(R.id.saveData);
         notes = findViewById(R.id.note);
         review = findViewById(R.id.review);
+        date = findViewById(R.id.date);
+
+        date.setText( parseDate(java.util.Calendar.getInstance().getTime().toString()) );
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,5 +72,23 @@ public class journal extends AppCompatActivity {
             }
         });
 
+    }
+
+    private String parseDate(String s)
+    {
+        String d = "";
+
+        //int spaces = 0;
+        Scanner read = new Scanner(s);
+
+        for(int j = 0; read.hasNext(); j++)
+        {
+            if(j == 3 || j == 4)
+                continue;
+
+            d += " " + read.next();
+
+        }
+        return d;
     }
 }
