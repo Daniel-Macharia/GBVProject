@@ -33,7 +33,7 @@ public class login extends AppCompatActivity {
             public void onClick(View view) {
 
                 String name,pass,u_name,u_pass;
-                String data[] = new String[3];
+                String data[] = new String[4];
                 name = userName.getText().toString();
                 pass = userPassWord.getText().toString();
 
@@ -90,7 +90,7 @@ public class login extends AppCompatActivity {
                 }
                 catch(Exception e)
                 {
-
+                    Toast.makeText(login.this, e.toString(), Toast.LENGTH_SHORT).show();
                 }
                 finally
                 {

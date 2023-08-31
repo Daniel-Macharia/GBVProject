@@ -9,6 +9,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //check if there`s a registered user
-        String check[] = new String[2];
+        String check[] = new String[4];
         try{
             com.example.frats.user checkUser = new user( MainActivity.this );
             checkUser.open();
@@ -60,6 +61,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 String phoneNumber = phone.getText().toString();
+                if( validatePhone(phoneNumber) )
+                    return;
                 boolean isUser = true;
 
                 switchToTermsAndConditions(phoneNumber,isUser);
@@ -71,6 +74,8 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 String phoneNumber = phone.getText().toString();
+                if( validatePhone(phoneNumber) )
+                    return;
                 boolean isUser = false;
 
                 switchToTermsAndConditions(phoneNumber,isUser);
@@ -87,6 +92,16 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+    }
+
+    private boolean validatePhone(String phone)
+    {
+        if( phone.equals(null) || phone.equals("") )
+        {
+            Toast.makeText(MainActivity.this, "Enter a valid Phone Number", Toast.LENGTH_SHORT).show();
+            return true;
+        }
+        return false;
     }
 
     private void switchToTermsAndConditions( String s, boolean isUser)

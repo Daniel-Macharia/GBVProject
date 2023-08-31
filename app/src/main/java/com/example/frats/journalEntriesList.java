@@ -33,7 +33,7 @@ public class journalEntriesList extends AppCompatActivity {
             for(int i = 0, j = s - 1; i < s; i++, j--)
             {
                 //arr[i].tv.setText( data.get(i)[2] );//set text view`s text to the journal entry
-                arr[j] = data.get(i)[0] + "\n\n" + data.get(i)[2];
+                arr[j] = data.get(i)[0] + "\n" + data.get(i)[1] + "\n\n" + data.get(i)[2];
             }
 
             //ArrayAdapter<entryLayout> arrAdapt = new ArrayAdapter<entryLayout>(journalEntriesList.this,R.layout.entry_layout, arr);

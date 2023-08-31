@@ -2,6 +2,7 @@ package com.example.frats;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -22,6 +23,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.function.Consumer;
 
 public class chat extends AppCompatActivity {
@@ -59,6 +61,9 @@ public class chat extends AppCompatActivity {
 
             //myRef.setValue("Hello, World!");
 
+            Intent thisIntent = getIntent();
+            String myRecipient = thisIntent.getStringExtra("recipient");
+
             ArrayList<String> arr = new ArrayList<>(10);
 
              myRef.addValueEventListener(new ValueEventListener() {
@@ -80,7 +85,42 @@ public class chat extends AppCompatActivity {
 
                 for( DataSnapshot msgSnapShot : iter)
                 {
-                    String s = msgSnapShot.getValue().toString();
+                    //check if this message is sent to me
+                    if( msgSnapShot.hasChild("recipient") )
+                    {
+                        String p = msgSnapShot.child("recipient").getValue().toString();
+                        user u = new user(chat.this);
+                        u.open();
+                        String data[] = new String[3];
+                        data = u.readData();
+
+                       if( !( p.equals( data[2] ) ) && !(p.equals(myRecipient)) )
+                       {
+                           if( msgSnapShot.hasChild("sender") )
+                           {
+                               String s = msgSnapShot.child("sender").getValue().toString();
+                               if( !( s.equals( data[2] ) ) && !( s.equals(myRecipient)))
+                                   continue;
+                           }
+
+                       }
+
+                        u.close();
+                    }
+
+                    String s = "";
+                    if( msgSnapShot.hasChild("content") )
+                    {
+                        s = msgSnapShot.child("content").getValue().toString();
+
+                    }
+
+                    if( msgSnapShot.hasChild("time"))
+                    {
+                        s += "\n\n" + msgSnapShot.child("time").getValue().toString();
+
+                    }
+
                     if( arr.contains(s))
                         continue;
                     else
@@ -114,7 +154,12 @@ public class chat extends AppCompatActivity {
                     data = u.readData();
                     u.close();
 
-                    msg m = new msg(data[2],"0712696965",s);
+                    Calendar c = Calendar.getInstance();
+                    String time = c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
+                            ( ( c.get(Calendar.AM_PM) == Calendar.AM) ? " AM" : " PM" );
+
+                    //msg m = new msg(data[2],"0712696965",s, time);
+                    msg m = new msg(data[2],myRecipient,s, time);
                     myRef.push().setValue(m);
                     //ArrayList<String> arr = new ArrayList<>(10);
 
@@ -146,13 +191,13 @@ class msg
 
     public msg(){}
 
-    public msg(String sender,String recipient,String content)
+    public msg(String sender,String recipient,String content, String time)
     {
         this.sender = sender;
         this.recipient = recipient;
         this.content = content;
          //time = android.os.SystemClock.currentNetworkTimeClock().toString();
-        time = "";
+        this.time = time;
     }
 
 }

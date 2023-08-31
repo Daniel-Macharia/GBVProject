@@ -32,13 +32,18 @@ public class journal extends AppCompatActivity {
         review = findViewById(R.id.review);
         date = findViewById(R.id.date);
 
-        date.setText( parseDate(java.util.Calendar.getInstance().getTime().toString()) );
+        Calendar c = Calendar.getInstance();
+        String dateStr = c.get(Calendar.DATE) + "/" + ( c.get(Calendar.MONTH) + 1 ) + "/" + c.get(Calendar.YEAR);
+
+        date.setText( dateStr );
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String date = java.util.Calendar.getInstance().getTime().toString();
-                String time = "";
+
+                String date = c.get(Calendar.DATE) + "/" + ( c.get(Calendar.MONTH) + 1 ) + "/" + c.get(Calendar.YEAR);   ;
+                String time = "" + c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
+                        ((c.get(Calendar.AM_PM) == Calendar.AM ) ? " AM" : " PM");
                 String entry = notes.getText().toString();
 
                 journalEntry e = new journalEntry(journal.this);
@@ -74,21 +79,4 @@ public class journal extends AppCompatActivity {
 
     }
 
-    private String parseDate(String s)
-    {
-        String d = "";
-
-        //int spaces = 0;
-        Scanner read = new Scanner(s);
-
-        for(int j = 0; read.hasNext(); j++)
-        {
-            if(j == 3 || j == 4)
-                continue;
-
-            d += " " + read.next();
-
-        }
-        return d;
-    }
 }
