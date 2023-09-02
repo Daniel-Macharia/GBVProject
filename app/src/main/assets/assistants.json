@@ -12,10 +12,46 @@
     "phone": ""
   },
 
-  "message": {
-    "sender_id": "",
-    "recepient_id": "",
-    "content": "",
-    "time_sent": ""
+  "chat_room": {
+    "room1": {
+      "participants": {
+        "p1":"",
+        "p2": ""
+      },
+      "messages": {
+        "message1": {
+          "sender_id": "",
+          "recepient_id": "",
+          "content": "",
+          "time_sent": ""
+        },
+        "message2": {
+          "sender_id": "",
+          "recepient_id": "",
+          "content": "",
+          "time_sent": ""
+        }
+      }
+    },
+    "room2": {
+      "participants": {
+        "p1":"",
+        "p2": ""
+      },
+      "messages": {
+        "message1": {
+          "sender_id": "",
+          "recepient_id": "",
+          "content": "",
+          "time_sent": ""
+        },
+        "message2": {
+          "sender_id": "",
+          "recepient_id": "",
+          "content": "",
+          "time_sent": ""
+        }
+      }
+    }
   }
 }
