@@ -17,7 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,7 +37,8 @@ public class chat extends AppCompatActivity {
     //TableLayout chatList;
     EditText e;
     Button send;
-    String thisChatKey;
+    String thisChatKey = new String();
+    ArrayList<String> arr = new ArrayList<>(10);
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -72,134 +75,178 @@ public class chat extends AppCompatActivity {
             data = u.readData();
             u.close();*/
 
-            ArrayList<String> arr = new ArrayList<>(10);
+            //ArrayList<String> arr = new ArrayList<>(10);
 
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             //DatabaseReference myRef = database.getReference("chat_room");
             DatabaseReference chatRoomRef = database.getReference("chat_room");
-            Toast.makeText(this, "adding on complete listener to chat_room", Toast.LENGTH_SHORT).show();
-            chatRoomRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                boolean found = false;
+           // Toast.makeText(this, "adding on complete listener to chat_room", Toast.LENGTH_SHORT).show();
+
+            //DataSnapshot chatSnap = chatRoomRef.get().getResult();
+            //Toast.makeText(chat.this, chatRoomRef.get().toString(), Toast.LENGTH_SHORT).show();
+
+            chatRoomRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
                 @Override
-                public void onComplete(Task<DataSnapshot> task) {
-                    //boolean found = false;
-                    Toast.makeText(chat.this, "getting snapshot of chat_room", Toast.LENGTH_SHORT).show();
+                public void onSuccess(DataSnapshot chatSnapshot) {
+                    //Toast.makeText(chat.this, chatSnapshot.toString(), Toast.LENGTH_SHORT).show();
 
-                    if( task.isSuccessful() )
+                    if( loadChat(chatRoomRef,chatSnapshot,myRecipient,data[2]) )
                     {
-                        DataSnapshot chats = task.getResult();
-
-                        Toast.makeText(chat.this, chats.toString(), Toast.LENGTH_SHORT).show();
-                        if( chats.hasChildren() )
-                        {
-                            Iterable<DataSnapshot>  allChats = chats.getChildren();
-                            for( DataSnapshot c : allChats )
-                            {
-                                if( c.hasChild("participants") )
+                        //after loading chats,add value event listener
+                        chatRoomRef.child(thisChatKey).child("messages").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                if( snapshot.hasChildren() )
                                 {
-                                    String []participants = new String[2];
-                                    participants[0] = c.child("participants").child("p1").getValue().toString();
-                                    participants[1] = c.child("paticipants").child("p2").getValue().toString();
-
-                                    Toast.makeText(chat.this, c.toString(), Toast.LENGTH_SHORT).show();
-                                    //validate the sender and receiver
-                                    if( (participants[0].equals(data[2]) || participants.equals(myRecipient) ) &&
-                                            ( participants[1].equals(data[2]) || participants[1].equals(myRecipient) ) )
+                                    for( DataSnapshot message : snapshot.getChildren() )
                                     {
-                                        found = true;
-                                        //load the chat
-                                        if( c.hasChild("messages") )
-                                        {
-                                            if( c.child("messages").hasChildren() )
-                                            {
-                                                Iterable<DataSnapshot> messages = c.child("messages").getChildren();
-                                                for( DataSnapshot message : messages )
-                                                {
-                                                    String s = "";
-                                                    if( message.hasChild("content") )
-                                                    {
-                                                        s = message.child("content").getValue().toString();
+                                        String s = "";
+                                        if(message.hasChild("content") )
+                                            s+= message.child("content").getValue().toString();
+                                        if( message.hasChild("time") )
+                                            s+= "\n\n" + message.child("time").getValue().toString();
 
-                                                    }
-
-                                                    if( message.hasChild("time"))
-                                                    {
-                                                        s += "\n\n" + message.child("time").getValue().toString();
-
-                                                    }
-
-                                                    arr.add( new String(s));
-
-                                                }
-                                            }
-                                        }
-
-                                        DatabaseReference dbr = c.child(c.getKey()).child("messages").getRef();
-                                        thisChatKey = dbr.getKey();
-
-                                        dbr.addValueEventListener(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot snapshot) {
-                                                if( snapshot.hasChildren() )
-                                                {
-                                                    for( DataSnapshot d : snapshot.getChildren())
-                                                    {
-                                                        String s = "";
-                                                        if( d.hasChild("content") )
-                                                        {
-                                                            s += d.child("content").getValue().toString();
-                                                        }
-                                                        if( d.hasChild("time") )
-                                                        {
-                                                            s += d.child("time").getValue().toString();
-                                                        }
-
-                                                        if( arr.contains(s) )
-                                                            continue;
-                                                        else
-                                                            arr.add(s);
-                                                    }
-                                                }
-                                            }
-
-                                            @Override
-                                            public void onCancelled(DatabaseError error) {
-                                                Toast.makeText(chat.this, error.toString(), Toast.LENGTH_SHORT).show();
-                                            }
-                                        });
-                                    }
-                                    else {
-                                        //create a new chat
-                                        //chatRoom newRoom = new chatRoom(data[2], myRecipient);
-                                        //chatRoomRef.push().setValue(newRoom);
+                                        if(arr.contains(s) )
+                                            continue;
+                                        else
+                                            arr.add(s);
                                     }
                                 }
                             }
-                        }
 
-                        //if chat is not found
-                        if( !found )
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError error) {
+
+                            }
+                        });
+                    }
+                }
+            });
+
+               /*  chatRoomRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                    boolean found = false;
+                    @Override
+                    public void onComplete(Task<DataSnapshot> task) {
+                        //Tasks.whenAllComplete(task);
+                        //boolean found = false;
+                        Toast.makeText(chat.this, "getting snapshot of chat_room", Toast.LENGTH_SHORT).show();
+
+                        if( task.isSuccessful() )
                         {
-                            chatRoom newRoom = new chatRoom(data[2], myRecipient);
-                            chatRoomRef.push().setValue(newRoom);
+                            DataSnapshot chats = task.getResult();
+
+                            Toast.makeText(chat.this, chats.toString(), Toast.LENGTH_SHORT).show();
+                            if( chats.hasChildren() )
+                            {
+                                Iterable<DataSnapshot>  allChats = chats.getChildren();
+                                for( DataSnapshot c : allChats )
+                                {
+                                    if( c.hasChild("participants") )
+                                    {
+                                        String []participants = new String[2];
+                                        participants[0] = c.child("participants").child("p1").getValue().toString();
+                                        participants[1] = c.child("paticipants").child("p2").getValue().toString();
+
+                                        Toast.makeText(chat.this, c.toString(), Toast.LENGTH_SHORT).show();
+                                        //validate the sender and receiver
+                                        if( (participants[0].equals(data[2]) || participants.equals(myRecipient) ) &&
+                                                ( participants[1].equals(data[2]) || participants[1].equals(myRecipient) ) )
+                                        {
+                                            found = true;
+                                            //load the chat
+                                            if( c.hasChild("messages") )
+                                            {
+                                                if( c.child("messages").hasChildren() )
+                                                {
+                                                    Iterable<DataSnapshot> messages = c.child("messages").getChildren();
+                                                    for( DataSnapshot message : messages )
+                                                    {
+                                                        String s = "";
+                                                        if( message.hasChild("content") )
+                                                        {
+                                                            s = message.child("content").getValue().toString();
+
+                                                        }
+
+                                                        if( message.hasChild("time"))
+                                                        {
+                                                            s += "\n\n" + message.child("time").getValue().toString();
+
+                                                        }
+
+                                                        arr.add( new String(s));
+
+                                                    }
+                                                }
+                                            }
+
+                                            DatabaseReference dbr = c.child(c.getKey()).child("messages").getRef();
+                                            thisChatKey = dbr.getKey();
+
+                                            dbr.addValueEventListener(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot snapshot) {
+                                                    if( snapshot.hasChildren() )
+                                                    {
+                                                        for( DataSnapshot d : snapshot.getChildren())
+                                                        {
+                                                            String s = "";
+                                                            if( d.hasChild("content") )
+                                                            {
+                                                                s += d.child("content").getValue().toString();
+                                                            }
+                                                            if( d.hasChild("time") )
+                                                            {
+                                                                s += d.child("time").getValue().toString();
+                                                            }
+
+                                                            if( arr.contains(s) )
+                                                                continue;
+                                                            else
+                                                                arr.add(s);
+                                                        }
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError error) {
+                                                    Toast.makeText(chat.this, error.toString(), Toast.LENGTH_SHORT).show();
+                                                }
+                                            });
+                                        }
+                                        else {
+                                            //create a new chat
+                                            //chatRoom newRoom = new chatRoom(data[2], myRecipient);
+                                            //chatRoomRef.push().setValue(newRoom);
+                                        }
+                                    }
+                                }
+                            }
+
+                            //if chat is not found
+                            if( !found )
+                            {
+                                chatRoom newRoom = new chatRoom(data[2], myRecipient);
+                                chatRoomRef.push().setValue(newRoom);
+                            }
+
+                        }
+                        else {
+                            Toast.makeText(chat.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
+                            //if the chat isn`t found create a new one
+
                         }
 
-                    }
-                    else {
-                        Toast.makeText(chat.this, task.getException().toString(), Toast.LENGTH_SHORT).show();
-                        //if the chat isn`t found create a new one
-
-                    }
-
-                    /* //if the chat isn`t found create a new one
-                    if( found == false )
+                     //if the chat isn`t found create a new one
+                    /* if( found == false )
                     {
                         chatRoom newRoom = new chatRoom(data[2], myRecipient);
                         chatRoomRef.push().setValue(newRoom);
-                    } */
-                }
+                    }
 
-            });
+                    }
+                }); */
+
 
             //myRef.setValue("Hello, World!");
 
@@ -283,35 +330,100 @@ public class chat extends AppCompatActivity {
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String s = "";
-                    s = e.getText().toString();
-                    e.setText("");
+                    try {
 
-                    Calendar c = Calendar.getInstance();
-                    String time = c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
-                            ( ( c.get(Calendar.AM_PM) == Calendar.AM) ? " AM" : " PM" );
 
-                    //msg m = new msg(data[2],"0712696965",s, time);
-                    msg m = new msg(data[2],myRecipient,s, time);
-                   // myRef.push().setValue(m);
-                    //ArrayList<String> arr = new ArrayList<>(10);
+                        String s = "";
+                        s = e.getText().toString();
+                        e.setText("");
 
-                    //arr.add(s);
+                        Calendar c = Calendar.getInstance();
+                        String time = c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
+                                ((c.get(Calendar.AM_PM) == Calendar.AM) ? " AM" : " PM");
 
-                    // Read from the database
+                        //msg m = new msg(data[2],"0712696965",s, time);
+                        msg m = new msg(data[2], myRecipient, s, time);
+                        // myRef.push().setValue(m);
+                        //ArrayList<String> arr = new ArrayList<>(10);
+                        chatRoomRef.child(thisChatKey).child("messages").push().setValue(m);
+
+                        //arr.add(s);
+
+                        // Read from the database
+                    }catch(Exception e)
+                    {
+                        Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
 
             ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(chat.this, R.layout.chat_message, R.id.msg, arr);
             chatList.setAdapter(arrayAdapter);
+            chatList.setStackFromBottom(true);
 
-
-        }catch(Exception e)
+        }catch (Exception e)
         {
-            Toast.makeText(chat.this, e.toString(),Toast.LENGTH_SHORT).show();
+            Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
     }
+
+    private boolean loadChat(DatabaseReference chatRoomRef,DataSnapshot chatSnapshot,String myRecipient,String myPhone)
+    {
+        try {
+            boolean found = false;
+
+
+            if (chatSnapshot.hasChildren()) {
+
+                for (DataSnapshot room : chatSnapshot.getChildren()) {
+                    String participants[] = {new String(myPhone), new String(myRecipient)};
+                    if (room.hasChild("participants")) {
+                        String p1, p2;
+                        p1 = room.child("participants").child("p1").getValue().toString();
+                        p2 = room.child("participants").child("p2").getValue().toString();
+
+                        if ((p1.equals(participants[0]) && p2.equals(participants[1])) ||
+                                (p2.equals(participants[0]) && p1.equals(participants[1]))) {
+                            found = true;
+                            thisChatKey = room.getKey().toString();
+                            Toast.makeText(this, "found chat!", Toast.LENGTH_SHORT).show();
+                            if (room.hasChild("messages")) {
+
+                                if (room.child("messages").hasChildren()) {
+                                    for (DataSnapshot message : room.child("messages").getChildren()) {
+                                        String s = "";
+                                        if (message.hasChild("content"))
+                                            s += message.child("content").getValue().toString();
+                                        if (message.hasChild("time"))
+                                            s += "/n/n" + message.child("time").getValue().toString();
+                                        arr.add(s);
+                                    }
+                                }
+                            }
+                        } else {
+                            //nothing
+                        }
+                    }
+                }
+
+                if( !found )
+                {
+                    Toast.makeText(this, "creating new chat", Toast.LENGTH_SHORT).show();
+                    chatRoom newChat = new chatRoom(myPhone, myRecipient);
+                    chatRoomRef.push().setValue(newChat);
+                }
+
+            }
+
+        }catch (Exception e)
+        {
+            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+
+        return true;
+    }
+
 }
 
 
@@ -337,8 +449,8 @@ class msg
 
 class p
 {
-    public String p1;
-    public String p2;
+    public String p1 = new String();
+    public String p2 = new String();
 
     public p(){}
     public p(String p1, String p2)
@@ -350,8 +462,9 @@ class p
 
 class chatRoom
 {
-    public p participants;
-    public ArrayList<msg> messages;
+    public p participants = new p();
+    //public ArrayList<msg> messages;
+    public msg messages = new msg();
 
     public chatRoom(){}
     public chatRoom(String sender,String recipient)
