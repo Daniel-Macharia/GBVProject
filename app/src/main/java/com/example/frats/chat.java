@@ -360,7 +360,9 @@ public class chat extends AppCompatActivity {
                         e.setText("");
 
                         Calendar c = Calendar.getInstance();
-                        String time = c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
+                        int hr = c.get(Calendar.HOUR);
+                        int min = c.get(Calendar.MINUTE);
+                        String time = ( (hr < 10) ? ("0" + hr) : ("" + hr)) + ":" + ( (min < 10) ? ("0" + min) : ("" + min)) +
                                 ((c.get(Calendar.AM_PM) == Calendar.AM) ? " AM" : " PM");
 
                         //msg m = new msg(data[2],"0712696965",s, time);
