@@ -134,12 +134,13 @@ public class assistantsClass extends AppCompatActivity {
         String phoneStr = t.getText().toString();
 
         Scanner s = new Scanner(phoneStr);
-        s.next();//discard name
+        String name = s.next();//get name
         s.next();//discard colon
-        String phone = s.next();
+        String phone = s.next();//get phone
 
         Intent chatIntent = new Intent( assistantsClass.this, chat.class);
         chatIntent.putExtra("recipient",phone);
+        chatIntent.putExtra("chatName", name);
         startActivity(chatIntent);
     }
 }

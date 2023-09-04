@@ -5,12 +5,14 @@ import static android.content.ContentValues.TAG;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TableLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -37,8 +39,10 @@ public class chat extends AppCompatActivity {
     //TableLayout chatList;
     EditText e;
     Button send;
+
+    TextView title;
     String thisChatKey = new String();
-    ArrayList<String> arr = new ArrayList<>(10);
+    //ArrayList<chatMessage> arr = new ArrayList<>(10);
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -47,6 +51,12 @@ public class chat extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.chat);
+
+        title = findViewById(R.id.chat_name);
+
+        Intent in = getIntent();
+
+        title.setText( in.getStringExtra("chatName"));
 
 
         try {
@@ -98,19 +108,31 @@ public class chat extends AppCompatActivity {
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if( snapshot.hasChildren() )
                                 {
+                                    ArrayList<chatMessage> arr = new ArrayList<>(10);
                                     for( DataSnapshot message : snapshot.getChildren() )
                                     {
-                                        String s = "";
+                                        String m = "";
+                                        String t = "";
+                                        int g = 0;
                                         if(message.hasChild("content") )
-                                            s+= message.child("content").getValue().toString();
+                                            m = message.child("content").getValue().toString();
+                                            //s+= message.child("content").getValue().toString();
                                         if( message.hasChild("time") )
-                                            s+= "\n\n" + message.child("time").getValue().toString();
+                                            t = message.child("time").getValue().toString();
+                                            //s+= "\n\n" + message.child("time").getValue().toString();
+                                        if( message.hasChild("sender") )
+                                        {
+                                            String sender = message.child("sender").getValue().toString();
+                                            g = ( (sender.equals(data[2]) ) ? Gravity.END : Gravity.START);
+                                        }
 
-                                        if(arr.contains(s) )
-                                            continue;
-                                        else
-                                            arr.add(s);
+                                        //if(arr.contains( new chatMessage( new String(m), new String(t) )) )
+                                        //    continue;
+                                       // else
+                                            arr.add( new chatMessage( new String(m), new String(t), g) );
                                     }
+                                    chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+                                    chatList.setAdapter(arrayAdapter);
                                 }
                             }
 
@@ -357,9 +379,9 @@ public class chat extends AppCompatActivity {
                 }
             });
 
-            ArrayAdapter<String> arrayAdapter = new ArrayAdapter<>(chat.this, R.layout.chat_message, R.id.msg, arr);
-            chatList.setAdapter(arrayAdapter);
-            chatList.setStackFromBottom(true);
+            //chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+            //chatList.setAdapter(arrayAdapter);
+           // chatList.setStackFromBottom(true);
 
         }catch (Exception e)
         {
@@ -385,22 +407,43 @@ public class chat extends AppCompatActivity {
 
                         if ((p1.equals(participants[0]) && p2.equals(participants[1])) ||
                                 (p2.equals(participants[0]) && p1.equals(participants[1]))) {
+                            ArrayList<chatMessage> arr = new ArrayList<>(10);
                             found = true;
                             thisChatKey = room.getKey().toString();
-                            Toast.makeText(this, "found chat!", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(this, "found chat!", Toast.LENGTH_SHORT).show();
                             if (room.hasChild("messages")) {
 
                                 if (room.child("messages").hasChildren()) {
                                     for (DataSnapshot message : room.child("messages").getChildren()) {
-                                        String s = "";
+                                        String m = "";
+                                        String t = "";
+                                        int g = 0;
                                         if (message.hasChild("content"))
-                                            s += message.child("content").getValue().toString();
+                                            m = message.child("content").getValue().toString();
+                                           // s += message.child("content").getValue().toString();
                                         if (message.hasChild("time"))
-                                            s += "/n/n" + message.child("time").getValue().toString();
-                                        arr.add(s);
+                                            t = message.child("time").getValue().toString();
+                                            //s += "/n/n" + message.child("time").getValue().toString();
+                                        if( message.hasChild("sender") )
+                                        {
+                                            String sender = message.child("sender").getValue().toString();
+
+                                            g = ( (sender.equals(myPhone) ) ? Gravity.END : Gravity.START );
+                                        }
+                                        chatMessage newMessage = new chatMessage( new String(m), new String(t), g );
+                                        //if(arr.contains( newMessage ) )
+                                         //   continue;
+                                       // else
+                                            arr.add( newMessage );
                                     }
                                 }
                             }
+
+                            //if chat is found,then load the messages
+                            //to the list view
+                            chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+                            chatList.setAdapter(arrayAdapter);
+
                         } else {
                             //nothing
                         }
@@ -409,9 +452,10 @@ public class chat extends AppCompatActivity {
 
                 if( !found )
                 {
-                    Toast.makeText(this, "creating new chat", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(this, "creating new chat", Toast.LENGTH_SHORT).show();
                     chatRoom newChat = new chatRoom(myPhone, myRecipient);
-                    chatRoomRef.push().setValue(newChat);
+                    thisChatKey = chatRoomRef.push().getKey().toString();
+                    chatRoomRef.child(thisChatKey).setValue(newChat);
                 }
 
             }
