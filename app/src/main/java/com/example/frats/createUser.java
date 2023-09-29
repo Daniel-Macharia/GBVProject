@@ -56,7 +56,7 @@ public class createUser extends AppCompatActivity {
 
                        if( u_pass.equals(confirm) )
                        {
-                           newUser.createUser(u_name,u_pass, phone,( isUser ? "users" : "assistant"));
+                           newUser.createUser(u_name,u_pass, phone,( isUser ? "users" : "assistant"), 1);
                            String user_OR_assistant = "";
 
                            if( isUser )

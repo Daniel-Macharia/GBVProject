@@ -86,6 +86,7 @@ public class chat extends AppCompatActivity {
             u.close();*/
 
             //ArrayList<String> arr = new ArrayList<>(10);
+            loadFromLocalDB(myRecipient);
 
             FirebaseDatabase database = FirebaseDatabase.getInstance();
             //DatabaseReference myRef = database.getReference("chat_room");
@@ -111,28 +112,54 @@ public class chat extends AppCompatActivity {
                                     ArrayList<chatMessage> arr = new ArrayList<>(10);
                                     for( DataSnapshot message : snapshot.getChildren() )
                                     {
+                                        msg mess = new msg();
                                         String m = "";
                                         String t = "";
                                         int g = 0;
                                         if(message.hasChild("content") )
+                                        {
                                             m = message.child("content").getValue().toString();
                                             //s+= message.child("content").getValue().toString();
+                                            mess.content = new String(m);
+                                        }
                                         if( message.hasChild("time") )
+                                        {
                                             t = message.child("time").getValue().toString();
                                             //s+= "\n\n" + message.child("time").getValue().toString();
+                                            mess.time = new String(t);
+                                        }
                                         if( message.hasChild("sender") )
                                         {
                                             String sender = message.child("sender").getValue().toString();
                                             g = ( (sender.equals(data[2]) ) ? Gravity.END : Gravity.START);
+                                            mess.sender = new String(sender);
+                                        }
+                                        if( message.hasChild("recipient") )
+                                        {
+                                            String r = message.child("recipient").getValue().toString();
+
+                                            mess.recipient = new String(r);
                                         }
 
                                         //if(arr.contains( new chatMessage( new String(m), new String(t) )) )
                                         //    continue;
                                        // else
-                                            arr.add( new chatMessage( new String(m), new String(t), g) );
+                                        arr.add( new chatMessage( new String(m), new String(t), g) );
+
+                                        try{
+                                            messages ms = new messages(chat.this);
+                                            ms.open();
+                                            ms.addNewMessage(mess.sender, mess.recipient, mess.content, mess.time );
+                                            ms.close();
+                                        }catch( Exception e)
+                                        {
+                                            Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
+                                        }
+
                                     }
                                     chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
                                     chatList.setAdapter(arrayAdapter);
+
                                 }
                             }
 
@@ -354,7 +381,6 @@ public class chat extends AppCompatActivity {
                 public void onClick(View view) {
                     try {
 
-
                         String s = "";
                         s = e.getText().toString();
                         e.setText("");
@@ -371,6 +397,14 @@ public class chat extends AppCompatActivity {
                         //ArrayList<String> arr = new ArrayList<>(10);
                         chatRoomRef.child(thisChatKey).child("messages").push().setValue(m);
 
+                        messages ms = new messages(chat.this);
+                        ms.open();
+                        ms.addNewMessage( new String(m.sender),
+                                new String(m.recipient),
+                                new String(m.content),
+                                new String(m.time));
+                        ms.close();
+                        loadFromLocalDB(myRecipient);
                         //arr.add(s);
 
                         // Read from the database
@@ -391,9 +425,33 @@ public class chat extends AppCompatActivity {
         }
 
     }
+    private void loadFromLocalDB(String recipient)
+    {
+        ArrayList<msg> ms = new ArrayList<>(10);
+
+        messages messageDB = new messages( chat.this);
+        messageDB.open();
+        ms = messageDB.getMessagesSentTo(recipient);
+        messageDB.close();
+
+        ArrayList<chatMessage> thisChat = new ArrayList<>(10);
+
+        for( msg m : ms)
+        {
+            int g = (recipient.equals( m.recipient ) ? Gravity.END : Gravity.START );
+            thisChat.add( new chatMessage(m.content, m.time, g) );
+        }
+
+        chatMessageAdapter arr = new chatMessageAdapter( chat.this, thisChat);
+
+        chatList.setAdapter(arr);
+
+        //return thisChat;
+    }
 
     private boolean loadChat(DatabaseReference chatRoomRef,DataSnapshot chatSnapshot,String myRecipient,String myPhone)
     {
+        //loadFromLocalDB(myRecipient);
         try {
             boolean found = false;
 
@@ -409,6 +467,7 @@ public class chat extends AppCompatActivity {
 
                         if ((p1.equals(participants[0]) && p2.equals(participants[1])) ||
                                 (p2.equals(participants[0]) && p1.equals(participants[1]))) {
+
                             ArrayList<chatMessage> arr = new ArrayList<>(10);
                             found = true;
                             thisChatKey = room.getKey().toString();
@@ -417,26 +476,55 @@ public class chat extends AppCompatActivity {
 
                                 if (room.child("messages").hasChildren()) {
                                     for (DataSnapshot message : room.child("messages").getChildren()) {
+                                        msg mess = new msg();
                                         String m = "";
                                         String t = "";
                                         int g = 0;
                                         if (message.hasChild("content"))
+                                        {
                                             m = message.child("content").getValue().toString();
-                                           // s += message.child("content").getValue().toString();
+                                            // s += message.child("content").getValue().toString();
+                                            mess.content = new String( m );
+                                        }
                                         if (message.hasChild("time"))
+                                        {
                                             t = message.child("time").getValue().toString();
                                             //s += "/n/n" + message.child("time").getValue().toString();
+                                            mess.time = new String( t );
+                                        }
                                         if( message.hasChild("sender") )
                                         {
                                             String sender = message.child("sender").getValue().toString();
 
                                             g = ( (sender.equals(myPhone) ) ? Gravity.END : Gravity.START );
+                                            mess.sender = new String( sender );
+                                        }
+                                        if( message.hasChild("recipient") )
+                                        {
+                                            String recipient = message.child( "recipient" ).getValue().toString();
+                                            mess.recipient = new String(recipient);
                                         }
                                         chatMessage newMessage = new chatMessage( new String(m), new String(t), g );
                                         //if(arr.contains( newMessage ) )
                                          //   continue;
                                        // else
-                                            arr.add( newMessage );
+                                        arr.add( newMessage );
+                                        try{
+
+                                            messages ms = new messages(chat.this);
+                                            ms.open();
+                                            ms.addNewMessage( new String( mess.sender),
+                                                    new String(mess.recipient),
+                                                    new String(mess.content),
+                                                    new String(mess.time));
+                                            ms.close();
+
+                                        }catch(Exception e)
+                                        {
+                                            Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
+                                        }
+
+                                        //delete the message from firebase after reading it
                                     }
                                 }
                             }
@@ -445,6 +533,8 @@ public class chat extends AppCompatActivity {
                             //to the list view
                             chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
                             chatList.setAdapter(arrayAdapter);
+
+
 
                         } else {
                             //nothing
@@ -475,10 +565,10 @@ public class chat extends AppCompatActivity {
 
 class msg
 {
-    public String sender;
-    public String recipient;
-    public String content;
-    public String time;
+    public String sender = "";
+    public String recipient = "";
+    public String content = "";
+    public String time = "";
 
     public msg(){}
 

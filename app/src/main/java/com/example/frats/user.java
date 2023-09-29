@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class user {
 
 
@@ -15,11 +17,15 @@ public class user {
     public static final String passWord = "user_password";
     public static final String phoneNumber = "phone_number";
     public static final String userOrAssistant = "user_or_assistant";
+    private static final String imageURI = "image_uri";
+    private static final String thisUser = "this_user";
+
+    private static final String userID = "user_id";
 
 
     private static final String dbName = "userAccountdb";
     private static final String tableName = "account";
-    private static final int dbversion = 1;
+    private static final int dbversion = 3;
 
     private DBHelper helper;
     private final Context thisContext;
@@ -35,10 +41,13 @@ public class user {
         public void onCreate(SQLiteDatabase db) {
 
             db.execSQL( "CREATE TABLE " + tableName + " ( " +
-                    userName + " TEXT NOT NULL PRIMARY KEY, " +
+                    userID + " INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, " +
+                    userName + " TEXT NOT NULL , " +
                     passWord + " TEXT NOT NULL, " +
                     phoneNumber + " TEXT NOT NULL, " +
-                    userOrAssistant + " TEXT NOT NULL );"
+                    userOrAssistant + " TEXT NOT NULL, " +
+                    imageURI + " TEXT , " +
+                    thisUser + " INTEGER NOT NULL );"
 
             );
 
@@ -48,11 +57,14 @@ public class user {
         public void onUpgrade(SQLiteDatabase db, int i, int i1) {
 
             db.execSQL(
-                    "DROP TABLE IF EXISTS " + tableName + " ; "
+                    " DROP TABLE IF EXISTS " + tableName + " ; "
             );
 
             onCreate(db);
         }
+
+
+
     }
 
     public user(Context c)
@@ -72,7 +84,7 @@ public class user {
         helper.close();
     }
 
-    public long createUser(String name, String password, String phone, String user_or_assistant )
+    public long createUser(String name, String password, String phone, String user_or_assistant, int isThisUser )
     {
         ContentValues cv = new ContentValues();
         cv.put(userName,name);
@@ -82,19 +94,43 @@ public class user {
         //if( user_or_assistant == null)
          //   user_or_assistant = "users";
         cv.put(userOrAssistant, user_or_assistant);
+        cv.put( thisUser, isThisUser);
         long l = userdb.insert(tableName,null,cv);
 
        // Toast.makeText(thisContext,"User or Assistant: " + cv.get(userOrAssistant), Toast.LENGTH_SHORT).show();
 
         return l;
     }
+
+    public ArrayList<String[]> getUsers()
+    {
+        String query = " SELECT * FROM " + tableName +
+                " WHERE " + thisUser + " = 0 ; ";
+        Cursor c = userdb.rawQuery( query, null );
+
+        int nameIndex = c.getColumnIndex( userName);
+        int phoneIndex = c.getColumnIndex( phoneNumber );
+        int imageURIIndex = c.getColumnIndex( imageURI );
+
+        ArrayList<String[]> result = new ArrayList<>(10);
+
+        for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext() )
+        {
+            result.add( new String[]{ new String( c.getString(nameIndex)),
+                    new String(c.getString(phoneIndex))} );
+            Toast.makeText( thisContext, "read user: " + c.getString( nameIndex ) +
+                    " ~ " + c.getString( phoneIndex ), Toast.LENGTH_SHORT ).show();
+        }
+
+        return result;
+    }
     public String[] readData()
     {
         String userInfo[] = new String[4];
-        String []columns = new String[]{userName,passWord,phoneNumber,userOrAssistant};
+        String query = " SELECT * FROM " + tableName +
+                " WHERE " + thisUser + " = 1 ; ";
 
-        Cursor c = userdb.query(tableName,columns,null,null,null,null,null);
-
+        Cursor c = userdb.rawQuery(query, null);
         int nameIndex = c.getColumnIndex(userName);
         int passwordIndex = c.getColumnIndex(passWord);
         int phoneIndex = c.getColumnIndex(phoneNumber);

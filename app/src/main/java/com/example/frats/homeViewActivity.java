@@ -11,6 +11,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
+
 public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
     //Button popup;
@@ -125,6 +130,7 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
 
         if( menuItem.getItemId() == R.id.report ) {
             //case R.id.report:
+            //policeLine("");
             Toast.makeText(getApplicationContext(), "Report", Toast.LENGTH_SHORT).show();
             Intent intent = new Intent( this, report.class);
             startActivity(intent);
@@ -172,6 +178,7 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         }
 
     }
+
 
     public void loadProfile(View view)
     {

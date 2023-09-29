@@ -5,9 +5,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.renderscript.ScriptGroup;
 import android.telecom.TelecomManager;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +18,10 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Scanner;
 
 public class report extends AppCompatActivity {
 
@@ -35,12 +41,14 @@ public class report extends AppCompatActivity {
         sendStatement = findViewById(R.id.send);
         statement = findViewById(R.id.statementMessage);
         num = findViewById(R.id.num);
+       // num.setInputType(InputType.TYPE_CLASS_TEXT);
 
         call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // String number = policeLine( num.getText().toString() );
                 String number = num.getText().toString();
-                num.setText("");
+                num.setText(number);
                 Intent callIntent = new Intent(Intent.ACTION_CALL);
                 //Intent callIntent = new Intent(Intent.ACTION_DIAL);
                 callIntent.setData(Uri.parse("tel:" + number));
@@ -153,7 +161,50 @@ public class report extends AppCompatActivity {
                 break;
         }
 
-        //super.onRequestPermissionsResult(requestCode,permissions,grantResult);
+        super.onRequestPermissionsResult(requestCode,permissions,grantResult);
+    }
+
+    public String policeLine( String Location)
+    {
+        String s = "";
+        String line = "";
+
+        try {
+            InputStream readTerms = getAssets().open("policeLines.txt");
+
+            Scanner in = new Scanner(readTerms);
+            while ( in.hasNextLine() )
+            {
+                String name = "", number = "";
+                line = in.nextLine();
+                Scanner n = new Scanner( new String(line));
+                while( n.hasNext() )
+                {
+                    String t = n.next();
+                    if( t.toLowerCase().equals( t.toUpperCase() ))
+                    {
+                        //this is a number
+                        number = new String( t);
+                    }
+                    else{
+                        name += t + " ";
+                    }
+                }
+                if( name.toLowerCase().contains(Location.toLowerCase()))
+                    return number;
+
+                s += name + "  " + number + "\n";
+
+                //s += n.next() + "\n";
+
+            }
+
+            Toast.makeText(this, s, Toast.LENGTH_LONG).show();
+
+        }catch (IOException ioException) {
+            Toast.makeText(report.this, ioException.toString(),Toast.LENGTH_SHORT).show();
+        }
+        return "";
     }
 
 

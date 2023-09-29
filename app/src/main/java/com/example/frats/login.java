@@ -45,7 +45,7 @@ public class login extends AppCompatActivity {
                     u_name = data[0];
                     u_pass = data[1];
 
-                    //validata info
+                    //validate info
                     if( name.equals(u_name) )
                     {
                         if( pass.equals( u_pass ) )
