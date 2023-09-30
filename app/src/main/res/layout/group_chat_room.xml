@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:background="@drawable/balloon1"
+
+    tools:context=".groupChat"
+
+    >
+
+    <TextView
+        android:id="@+id/groupName"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:textSize="24sp"
+        android:textColor="@color/blue"
+        android:gravity="center"
+        android:background="@color/cream"
+        />
+
+    <ListView
+        android:id="@+id/messageList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:stackFromBottom="true"
+        android:cacheColorHint="#00000000"
+        android:divider="@null"
+        >
+
+    </ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:cacheColorHint="#00000000"
+        >
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:padding="10dp"
+            >
+
+            <EditText
+                android:id="@+id/messageToSend"
+                android:layout_width="match_parent"
+                android:layout_height="80dp"
+                android:textSize="24sp"
+                android:textColor="@color/blue"
+                android:inputType="textMultiLine|textAutoCorrect"
+                android:hint="type message"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/cream"
+                android:gravity="start|top"
+                />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingTop="10dp"
+            >
+
+            <Button
+                android:id="@+id/send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="send"
+                android:textSize="32sp"
+                android:textColor="@color/blue"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/green"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+</LinearLayout>

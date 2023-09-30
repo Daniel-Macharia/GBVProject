@@ -2,7 +2,6 @@ package com.example.frats;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.PopupMenu;
@@ -10,11 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Scanner;
 
 public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
@@ -140,6 +134,8 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         if( menuItem.getItemId() == R.id.groups ) {
             //case R.id.report:
             Toast.makeText(getApplicationContext(), "Groups", Toast.LENGTH_SHORT).show();
+            Intent groupIntent = new Intent( homeViewActivity.this, groups.class);
+            startActivity(groupIntent);
             return true;
         }
         else

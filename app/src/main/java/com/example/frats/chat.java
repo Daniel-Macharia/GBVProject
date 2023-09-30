@@ -39,6 +39,7 @@ public class chat extends AppCompatActivity {
     //TableLayout chatList;
     EditText e;
     Button send;
+    ArrayList<chatMessage> arr = new ArrayList<>(10);
 
     TextView title;
     String thisChatKey = new String();
@@ -109,7 +110,7 @@ public class chat extends AppCompatActivity {
                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                 if( snapshot.hasChildren() )
                                 {
-                                    ArrayList<chatMessage> arr = new ArrayList<>(10);
+                                    //ArrayList<chatMessage> arr = new ArrayList<>(10);
                                     for( DataSnapshot message : snapshot.getChildren() )
                                     {
                                         msg mess = new msg();
@@ -144,7 +145,11 @@ public class chat extends AppCompatActivity {
                                         //if(arr.contains( new chatMessage( new String(m), new String(t) )) )
                                         //    continue;
                                        // else
-                                        arr.add( new chatMessage( new String(m), new String(t), g) );
+                                        chatMessage meso = new chatMessage( new String(m), new String(t), g);
+                                        if( !arr.contains( meso ))
+                                        {
+                                            arr.add( meso );
+                                        }
 
                                         try{
                                             messages ms = new messages(chat.this);
@@ -157,8 +162,8 @@ public class chat extends AppCompatActivity {
                                         }
 
                                     }
-                                    chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
-                                    chatList.setAdapter(arrayAdapter);
+                                    //chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+                                    //chatList.setAdapter(arrayAdapter);
 
                                 }
                             }
@@ -396,7 +401,6 @@ public class chat extends AppCompatActivity {
                         // myRef.push().setValue(m);
                         //ArrayList<String> arr = new ArrayList<>(10);
                         chatRoomRef.child(thisChatKey).child("messages").push().setValue(m);
-
                         messages ms = new messages(chat.this);
                         ms.open();
                         ms.addNewMessage( new String(m.sender),
@@ -419,6 +423,10 @@ public class chat extends AppCompatActivity {
             //chatList.setAdapter(arrayAdapter);
            // chatList.setStackFromBottom(true);
 
+            chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+            chatList.setAdapter(arrayAdapter);
+            chatList.setStackFromBottom( true );
+
         }catch (Exception e)
         {
             Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
@@ -434,17 +442,22 @@ public class chat extends AppCompatActivity {
         ms = messageDB.getMessagesSentTo(recipient);
         messageDB.close();
 
-        ArrayList<chatMessage> thisChat = new ArrayList<>(10);
+        //ArrayList<chatMessage> thisChat = new ArrayList<>(10);
 
         for( msg m : ms)
         {
             int g = (recipient.equals( m.recipient ) ? Gravity.END : Gravity.START );
-            thisChat.add( new chatMessage(m.content, m.time, g) );
+
+            if( !arr.contains( m ) )
+            {
+                arr.add( new chatMessage(m.content, m.time, g) );
+            }
+
         }
 
-        chatMessageAdapter arr = new chatMessageAdapter( chat.this, thisChat);
+        //chatMessageAdapter adapter = new chatMessageAdapter( chat.this, arr);
 
-        chatList.setAdapter(arr);
+        //chatList.setAdapter(adapter);
 
         //return thisChat;
     }
@@ -468,7 +481,7 @@ public class chat extends AppCompatActivity {
                         if ((p1.equals(participants[0]) && p2.equals(participants[1])) ||
                                 (p2.equals(participants[0]) && p1.equals(participants[1]))) {
 
-                            ArrayList<chatMessage> arr = new ArrayList<>(10);
+                            //ArrayList<chatMessage> arr = new ArrayList<>(10);
                             found = true;
                             thisChatKey = room.getKey().toString();
                             //Toast.makeText(this, "found chat!", Toast.LENGTH_SHORT).show();
@@ -508,21 +521,29 @@ public class chat extends AppCompatActivity {
                                         //if(arr.contains( newMessage ) )
                                          //   continue;
                                        // else
-                                        arr.add( newMessage );
-                                        try{
-
-                                            messages ms = new messages(chat.this);
-                                            ms.open();
-                                            ms.addNewMessage( new String( mess.sender),
-                                                    new String(mess.recipient),
-                                                    new String(mess.content),
-                                                    new String(mess.time));
-                                            ms.close();
-
-                                        }catch(Exception e)
+                                        if( !arr.contains( newMessage ) )
                                         {
-                                            Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
+                                            arr.add( newMessage );
+
+                                            try{
+
+                                                messages ms = new messages(chat.this);
+                                                ms.open();
+                                                ms.addNewMessage( new String( mess.sender),
+                                                        new String(mess.recipient),
+                                                        new String(mess.content),
+                                                        new String(mess.time));
+                                                ms.close();
+
+                                            }catch(Exception e)
+                                            {
+                                                Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
+                                            }
+
                                         }
+
+
+
 
                                         //delete the message from firebase after reading it
                                     }
@@ -531,8 +552,8 @@ public class chat extends AppCompatActivity {
 
                             //if chat is found,then load the messages
                             //to the list view
-                            chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
-                            chatList.setAdapter(arrayAdapter);
+                            //chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+                            //chatList.setAdapter(arrayAdapter);
 
 
 
