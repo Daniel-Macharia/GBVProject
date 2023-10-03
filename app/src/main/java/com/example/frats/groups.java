@@ -11,10 +11,13 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
+import android.util.Pair;
 
 public class groups extends AppCompatActivity {
 
     ListView groupList;
+   // public static Map<String, String> group;
+    public static ArrayList<Pair<String, String> > group = new ArrayList<Pair<String, String>>(4);
 
     ArrayList<String> groupNames = new ArrayList<>(10);
 
@@ -38,7 +41,7 @@ public class groups extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
                     Intent groupChatRoomIntent = new Intent( groups.this, groupChat.class );
-                    groupChatRoomIntent.putExtra("groupName", groupNames.get( i ) );
+                    groupChatRoomIntent.putExtra("index", i );
                     startActivity( groupChatRoomIntent );
 
                 }
@@ -53,11 +56,17 @@ public class groups extends AppCompatActivity {
 
     private void initGroupNames()
     {
-        groupNames.add("Rape");
-        groupNames.add("Female Genital Mutilation (FGM)");
-        groupNames.add("Physical Violence");
-        groupNames.add("Trafficking");
-        groupNames.add("other Forms of Violence");
+        group.add( new Pair("rape", "Rape") );
+        group.add( new Pair("fgm", "Female Genital Mutilation (FGM)") );
+        group.add( new Pair( "physical", "Physical Violence") );
+        group.add( new Pair("trafficking", "Trafficking") );
+        group.add( new Pair( "other", "Other Forms of Violence") );
+
+        for( Pair<String, String> val: group)
+        {
+            groupNames.add( new String( val.second ) );
+        }
+
     }
 
 }

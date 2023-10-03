@@ -1,5 +1,9 @@
 package com.example.frats;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.database.SQLException;
 import android.os.Bundle;
@@ -19,6 +23,8 @@ public class journal extends AppCompatActivity {
     private Button save,review;
     private TextView date;
     private EditText notes;
+
+    private static final int Notification_ID = 1;
 
     @Override
     protected void onCreate(Bundle savedStateInstance)
@@ -40,6 +46,8 @@ public class journal extends AppCompatActivity {
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
 
                 String date = c.get(Calendar.DATE) + "/" + ( c.get(Calendar.MONTH) + 1 ) + "/" + c.get(Calendar.YEAR);   ;
                 String time = "" + c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
@@ -76,6 +84,31 @@ public class journal extends AppCompatActivity {
                 startActivity(listIntent);
             }
         });
+
+    }
+
+    private void notifyUser()
+    {
+
+        String title = " notification ";
+        String body = " this is a notification ";
+
+        Notification n = new Notification( R.drawable.avatar, title, System.currentTimeMillis());
+        Context appContext = getApplicationContext();
+
+        PendingIntent wrappedIntent = PendingIntent.getActivity( this, 0 , new Intent(), 0);
+
+       // n.setLatestEventInfo( appContext, title, body, wrappedIntent );
+        //n.setLatestEventInfo( appContext, title, body, wrappedIntent );
+
+
+        n.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        String notificationService = Context.NOTIFICATION_SERVICE;
+
+        NotificationManager nm = (NotificationManager) getSystemService(notificationService);
+
+        nm.notify( Notification_ID, n);
 
     }
 
