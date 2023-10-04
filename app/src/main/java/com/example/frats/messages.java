@@ -77,6 +77,11 @@ public class messages {
         ourHelper.close();
     }
 
+    public void deleteMessage(chatMessage message)
+    {
+
+    }
+
     public long addNewMessage( String sender, String receiver, String content, String timeStamp )
     {
         ContentValues cv = new ContentValues();
@@ -86,8 +91,8 @@ public class messages {
         cv.put( this.content, content );
         cv.put( this.time, timeStamp );
 
-        Toast.makeText(thisContext, "inserted " + sender + "\t" + receiver
-                + content + "\n " + timeStamp, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(thisContext, "inserted " + sender + "\t" + receiver
+           //     + content + "\n " + timeStamp, Toast.LENGTH_SHORT).show();
 
         return msgDB.insert( tableName, null, cv);
 

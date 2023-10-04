@@ -46,4 +46,10 @@ public class chatMessageAdapter extends ArrayAdapter<chatMessage> {
 
         return currentItemView;
     }
+
+    public void change()
+    {
+        this.notifyDataSetChanged();
+    }
+
 }

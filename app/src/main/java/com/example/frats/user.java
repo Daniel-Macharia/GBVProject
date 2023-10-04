@@ -118,8 +118,8 @@ public class user {
         {
             result.add( new String[]{ new String( c.getString(nameIndex)),
                     new String(c.getString(phoneIndex))} );
-            Toast.makeText( thisContext, "read user: " + c.getString( nameIndex ) +
-                    " ~ " + c.getString( phoneIndex ), Toast.LENGTH_SHORT ).show();
+            //Toast.makeText( thisContext, "read user: " + c.getString( nameIndex ) +
+             //       " ~ " + c.getString( phoneIndex ), Toast.LENGTH_SHORT ).show();
         }
 
         return result;

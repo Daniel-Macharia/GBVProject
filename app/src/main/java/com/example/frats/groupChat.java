@@ -1,5 +1,6 @@
 package com.example.frats;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Gravity;
@@ -17,8 +18,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -31,10 +34,10 @@ public class groupChat extends AppCompatActivity {
     Button send;
 
     ListView chatList;
-    String key = new String();
+    public String groupKey = new String();
     String myPhone = new String("");
 
-    ArrayList<String> messages = new ArrayList<>(10);
+    public ArrayList<chatMessage> chatMessages = new ArrayList<>(10);
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -53,15 +56,19 @@ public class groupChat extends AppCompatActivity {
             Intent intent = getIntent();
             int index = intent.getIntExtra("index", 0);
 
-            key = groups.group.get( index ).first;
+            groupKey = groups.group.get( index ).first;
             groupName.setText( groups.group.get( index ).second );
 
             getMyPhone();
-            initWithAnyChats();
+            //initWithAnyChats();
+
 
             FirebaseDatabase db = FirebaseDatabase.getInstance();
             DatabaseReference myRef = db.getReference("group");
 
+            myTask task = new myTask(myRef);
+            Thread t = new Thread( task );
+            t.start();
 
 
             send.setOnClickListener(new View.OnClickListener() {
@@ -70,13 +77,15 @@ public class groupChat extends AppCompatActivity {
                     Calendar cal = Calendar.getInstance();
                     String message = et.getText().toString();
                     et.setText("");
-                    String time = new String(cal.get( Calendar.HOUR ) +
-                            " : " + cal.get( Calendar.MINUTE ) +
+                    int hour = cal.get( Calendar.HOUR );
+                    int min = cal.get( Calendar.MINUTE );
+                    String time = new String(  ( (hour < 10 ) ? ("0" + hour ) : hour) +
+                            " : " + ( (min < 10 ) ? ( "0" + min ) :  min) +
                             ( ( cal.get( Calendar.AM_PM ) == Calendar.AM ) ? " AM " : " PM " ) );
 
                     groupMsg meso = new groupMsg(myPhone, message, time);
 
-                    myRef.child(key).push().setValue( meso );
+                    myRef.child(groupKey).push().setValue( meso );
 
                     Toast.makeText(groupChat.this, message, Toast.LENGTH_SHORT).show();
 
@@ -118,6 +127,89 @@ public class groupChat extends AppCompatActivity {
         chatMessageAdapter adapter = new chatMessageAdapter( groupChat.this, result);
         chatList.setAdapter( adapter );
     }
+
+    private boolean contains(ArrayList<chatMessage> list, chatMessage value)
+    {
+        for( chatMessage listItem : list )
+        {
+            if( listItem.getMessage().equals( value.getMessage() ) && listItem.getTime().equals( value.getTime() ) )
+                return true;
+        }
+        return false;
+    }
+
+
+    class myTask implements Runnable
+    {
+        DatabaseReference dbRef;
+        public myTask(DatabaseReference dbRef)
+        {
+            this.dbRef = dbRef;
+
+        }
+
+        @Override
+        public void run()
+        {
+            try{
+                dbRef.child(groupKey).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        if( snapshot.hasChildren() )
+                        {
+                            for( DataSnapshot data : snapshot.getChildren() )
+                            {
+                                String content = new String( "" );
+                                String sender = new String( "" );
+                                String time = new String( "" );
+                                int g = Gravity.END;
+
+                                if( data.hasChild( "content" ) )
+                                {
+                                    content = data.child( "content" ).getValue().toString();
+                                }
+                                if( data.hasChild( "sender" ) )
+                                {
+                                    sender = data.child( "sender" ).getValue().toString();
+                                }
+                                if( data.hasChild( "time" ) )
+                                {
+                                    time = data.child( "time" ).getValue().toString();
+                                }
+
+                                if( sender.equals(myPhone) )
+                                    g = Gravity.END;
+                                else
+                                    g = Gravity.START;
+
+                                chatMessage m = new chatMessage( new String(content), new String(time), g);
+
+                                if( !contains( chatMessages, m ) )
+                                    chatMessages.add( new chatMessage( new String(content), new String(time), g) );
+
+                            }
+                        }
+
+                        chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, chatMessages);
+                        chatList.setAdapter( adapter );
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                        Toast.makeText(groupChat.this, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+
+                });
+            }catch( Exception e )
+            {
+                Toast.makeText(groupChat.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
 }
 
 class groupMsg
@@ -150,23 +242,3 @@ class GroupChatRoom
 
 }
 
-class readFromCloud implements Runnable
-{
-    DatabaseReference dbRef;
-
-    public readFromCloud(DatabaseReference dbRef)
-    {
-        this.dbRef = dbRef;
-    }
-    @Override
-    public void run() {
-
-        dbRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-
-            }
-        });
-
-    }
-}
