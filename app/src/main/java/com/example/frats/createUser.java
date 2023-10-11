@@ -9,11 +9,17 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.ktx.Firebase;
+
+import java.util.ArrayList;
 
 public class createUser extends AppCompatActivity {
 
@@ -56,27 +62,30 @@ public class createUser extends AppCompatActivity {
 
                        if( u_pass.equals(confirm) )
                        {
+                           FirebaseDatabase database = FirebaseDatabase.getInstance();
+
                            newUser.createUser(u_name,u_pass, phone,( isUser ? "users" : "assistant"), 1);
                            String user_OR_assistant = "";
 
                            if( isUser )
+                           {
                                user_OR_assistant = "users";
+                           }
                            else
+                           {
                                user_OR_assistant = "assistant";
 
-                           FirebaseDatabase database = FirebaseDatabase.getInstance();
-                           DatabaseReference myRef = database.getReference(user_OR_assistant);
-                           //myRef.push().child("user").child("username").setValue("u_name");
-                           //myRef.child("user/username").setValue(u_name);
-                           //myRef.child("user/phone").setValue(phone);
-                           //myRef.push().child("username").setValue(u_name);
-                           //myRef.push().child(u_name).child("phone").setValue(phone);
-                           newUser u = new newUser(u_name,phone);
+                               addToListOfParticipantsOfAllGroups(database.getReference("group"), u_name, phone);
 
-                           myRef.push().setValue(u);
+                               DatabaseReference myRef = database.getReference(user_OR_assistant);
+                               newUser u = new newUser(u_name,phone);
+                               myRef.push().setValue(u);
+
+                           }
 
                            welcomeAndLoadLogin w = new welcomeAndLoadLogin(createUser.this);
                            w.start();
+
                        }
                        else {
                            Toast.makeText(createUser.this, "Password and the \nconfirm password do not match! ", Toast.LENGTH_SHORT).show();
@@ -109,6 +118,88 @@ public class createUser extends AppCompatActivity {
                // w.start();
             }
         });
+    }
+
+    private void addToListOfParticipantsOfAllGroups(DatabaseReference dbRef, String username, String phone)
+    {
+        groupParticipant p = new groupParticipant( new String( username), new String(phone) );
+
+        dbRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+
+               // Toast.makeText(createUser.this, "getting groups", Toast.LENGTH_SHORT).show();
+
+                DataSnapshot groups = task.getResult();
+
+                if( groups.hasChildren() )
+                {
+                    for( DataSnapshot group : groups.getChildren() )
+                    {
+                        String thisGroupKey = group.getKey();
+
+                        if( group.hasChild("member" ) )
+                        {
+                            Toast.makeText(createUser.this, "there exists members in this group", Toast.LENGTH_SHORT).show();
+                            boolean isInGroup = false;
+
+                            if( group.child("member").hasChildren() )
+                            {
+                                Toast.makeText(createUser.this, "getting groups", Toast.LENGTH_SHORT).show();
+
+                                ArrayList<String> membersPhones = new ArrayList<>(10);
+                                for( DataSnapshot member : group.child("member").getChildren() )
+                                {
+                                    String name = "", contact = "";
+
+                                    if( member.hasChild("usename") )
+                                    {
+                                        name = member.child("username").getValue().toString();
+                                    }
+                                    if( member.hasChild("phone") )
+                                    {
+                                        contact = member.child("phone").getValue().toString();
+                                    }
+
+
+                                    membersPhones.add( new String( contact ) );
+                                }
+
+                                if( !membersPhones.contains( p.phone ) )
+                                {
+                                    //add participant p to the group
+                                    assert  thisGroupKey != null;
+                                    dbRef.child(thisGroupKey).child("member").push().setValue(p);
+
+                                }
+
+                            }
+                        }else {
+                            Toast.makeText(createUser.this, "Creating new members list\n"
+                                    + "key value is " + thisGroupKey, Toast.LENGTH_SHORT).show();
+                            //create member node in the chat
+                            //dbRef.child(thisGroupKey).push().setValue(new participants() );
+                           // if( thisGroupKey == null )
+                           //     Toast.makeText(createUser.this, "Group key is null", Toast.LENGTH_SHORT).show();
+                           // else
+                           try{
+                               dbRef.child(thisGroupKey).child("member").push().setValue(p);
+                           }catch( Exception e )
+                           {
+                               Toast.makeText(createUser.this, e.toString(), Toast.LENGTH_SHORT).show();
+                           }
+                        }
+
+
+
+
+                    }
+                }
+
+            }
+
+        });
+
     }
 
     private boolean invalidDetails(String name, String password, String confirm)

@@ -2,7 +2,14 @@ package com.example.frats;
 
 import static android.content.ContentValues.TAG;
 
+import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
@@ -17,6 +24,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -47,8 +57,7 @@ public class chat extends AppCompatActivity {
     String myRecipient;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
 
 
         super.onCreate(savedInstanceState);
@@ -56,9 +65,11 @@ public class chat extends AppCompatActivity {
 
         title = findViewById(R.id.chat_name);
 
+        notifyOfMessage();
+
         Intent in = getIntent();
 
-        title.setText( in.getStringExtra("chatName"));
+        title.setText(in.getStringExtra("chatName"));
 
 
         try {
@@ -81,7 +92,7 @@ public class chat extends AppCompatActivity {
             chatRoomRef = database.getReference("chat_room");
 
             readFromFirebase readTask = new readFromFirebase();
-            Thread t = new Thread( readTask );
+            Thread t = new Thread(readTask);
             t.start();
 
             send.setOnClickListener(new View.OnClickListener() {
@@ -96,82 +107,77 @@ public class chat extends AppCompatActivity {
                         Calendar c = Calendar.getInstance();
                         int hr = c.get(Calendar.HOUR);
                         int min = c.get(Calendar.MINUTE);
-                        String time = ( (hr < 10) ? ("0" + hr) : ("" + hr)) + ":" + ( (min < 10) ? ("0" + min) : ("" + min)) +
+                        String time = ((hr < 10) ? ("0" + hr) : ("" + hr)) + ":" + ((min < 10) ? ("0" + min) : ("" + min)) +
                                 ((c.get(Calendar.AM_PM) == Calendar.AM) ? " AM" : " PM");
 
                         msg m = new msg(data[2], myRecipient, s, time);
 
-                        chatRoomRef.child(thisChatKey).child("messages").push().setValue(m);
-                        messages ms = new messages(chat.this);
-                        ms.open();
-                        ms.addNewMessage( new String(m.sender),
-                                new String(m.recipient),
-                                new String(m.content),
-                                new String(m.time));
-                        ms.close();
+                        if (thisChatKey == null) {
+                            Toast.makeText(chat.this, "Check your internet connection\n and try again", Toast.LENGTH_SHORT).show();
+                        } else {
+                            chatRoomRef.child(thisChatKey).child("messages").push().setValue(m);
+                            messages ms = new messages(chat.this);
+                            ms.open();
+                            ms.addNewMessage(new String(m.sender),
+                                    new String(m.recipient),
+                                    new String(m.content),
+                                    new String(m.time));
+                            ms.close();
+                        }
                         //loadFromLocalDB(myRecipient);
 
-                    }catch(Exception e)
-                    {
+                    } catch (Exception e) {
                         Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
 
-           // chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+            // chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
             //chatList.setAdapter(arrayAdapter);
 
-        }catch (Exception e)
-        {
+        } catch (Exception e) {
             Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
     }
 
-    private boolean contains( ArrayList<chatMessage> list, chatMessage value)
-    {
+    private boolean contains(ArrayList<chatMessage> list, chatMessage value) {
 
-        for( chatMessage listItem : list )
-        {
-            if( listItem.getMessage().equals( value.getMessage() ) && listItem.getTime().equals( value.getTime() ) )
+        for (chatMessage listItem : list) {
+            if (listItem.getMessage().equals(value.getMessage()) && listItem.getTime().equals(value.getTime()))
                 return true;
         }
 
         return false;
     }
 
-    private void loadFromLocalDB(String recipient)
-    {
+    private void loadFromLocalDB(String recipient) {
         ArrayList<msg> ms = new ArrayList<>(10);
 
-        messages messageDB = new messages( chat.this);
+        messages messageDB = new messages(chat.this);
         messageDB.open();
-        ms = messageDB.getMessagesSentTo(recipient);
+        ms = messageDB.getMessagesSentTo(recipient, data[2]);
         messageDB.close();
 
-        for( msg m : ms)
-        {
-            int g = (recipient.equals( m.recipient ) ? Gravity.END : Gravity.START );
-            chatMessage chatM = new chatMessage( m.content, m.time, g);
+        for (msg m : ms) {
+            int g = (recipient.equals(m.recipient) ? Gravity.END : Gravity.START);
+            chatMessage chatM = new chatMessage(m.content, m.time, g);
 
-            if( !contains( arr, chatM ) )
-            {
-                arr.add( new chatMessage(m.content, m.time, g) );
+            if (!contains(arr, chatM)) {
+                arr.add(new chatMessage(m.content, m.time, g));
             }
 
         }
 
-        chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+        chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this, arr);
         chatList.setAdapter(arrayAdapter);
 
     }
 
 
-    class readFromFirebase implements Runnable
-    {
+    class readFromFirebase implements Runnable {
 
-        private Task<DataSnapshot> initThisChatKey()
-        {
+        private Task<DataSnapshot> initThisChatKey() {
             Task<DataSnapshot> t = chatRoomRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DataSnapshot> task) {
@@ -179,27 +185,21 @@ public class chat extends AppCompatActivity {
 
                     DataSnapshot result = task.getResult();
 
-                    if( result.hasChildren() )
-                    {
-                        for( DataSnapshot chat : result.getChildren() )
-                        {
-                            if( chat.hasChild( "participants") )
-                            {
+                    if (result.hasChildren()) {
+                        for (DataSnapshot chat : result.getChildren()) {
+                            if (chat.hasChild("participants")) {
                                 String p1 = new String("");
                                 String p2 = new String("");
-                                if( chat.child("participants").hasChild("p1") )
-                                {
+                                if (chat.child("participants").hasChild("p1")) {
                                     p1 = chat.child("participants").child("p1").getValue().toString();
                                 }
-                                if( chat.child("participants").hasChild("p2") )
-                                {
+                                if (chat.child("participants").hasChild("p2")) {
                                     p2 = chat.child("participants").child("p2").getValue().toString();
                                 }
 
                                 //verify
-                                if( ( p1.equals( data[2] ) && p2.equals( myRecipient) ) ||
-                                        ( p1.equals( myRecipient ) && p2.equals( data[2] ) ) )
-                                {
+                                if ((p1.equals(data[2]) && p2.equals(myRecipient)) ||
+                                        (p1.equals(myRecipient) && p2.equals(data[2]))) {
                                     thisChatKey = chat.getKey().toString();
                                     return;
                                 }
@@ -210,9 +210,8 @@ public class chat extends AppCompatActivity {
                     }
 
 
-                    if( thisChatKey == null )
-                    {
-                        chatRoom c = new chatRoom( data[2], myRecipient);
+                    if (thisChatKey == null) {
+                        chatRoom c = new chatRoom(data[2], myRecipient);
                         thisChatKey = chatRoomRef.push().getKey().toString();
                         chatRoomRef.child(thisChatKey).setValue(c);
                     }
@@ -227,64 +226,54 @@ public class chat extends AppCompatActivity {
         }
 
         @Override
-        public void run()
-        {
+        public void run() {
             initThisChatKey().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
                 @Override
                 public void onComplete(@NonNull Task<DataSnapshot> task) {
                     chatRoomRef.child(thisChatKey).child("messages").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
-                            if( snapshot.hasChildren() )
-                            {
-                                for( DataSnapshot message : snapshot.getChildren() )
-                                {
+                            if (snapshot.hasChildren()) {
+                                for (DataSnapshot message : snapshot.getChildren()) {
                                     msg mess = new msg();
                                     String m = "";
                                     String t = "";
                                     int g = 0;
-                                    if(message.hasChild("content") )
-                                    {
+                                    if (message.hasChild("content")) {
                                         m = message.child("content").getValue().toString();
                                         mess.content = new String(m);
                                     }
-                                    if( message.hasChild("time") )
-                                    {
+                                    if (message.hasChild("time")) {
                                         t = message.child("time").getValue().toString();
                                         mess.time = new String(t);
                                     }
-                                    if( message.hasChild("sender") )
-                                    {
+                                    if (message.hasChild("sender")) {
                                         String sender = message.child("sender").getValue().toString();
-                                        g = ( (sender.equals(data[2]) ) ? Gravity.END : Gravity.START);
+                                        g = ((sender.equals(data[2])) ? Gravity.END : Gravity.START);
                                         mess.sender = new String(sender);
                                     }
-                                    if( message.hasChild("recipient") )
-                                    {
+                                    if (message.hasChild("recipient")) {
                                         String r = message.child("recipient").getValue().toString();
 
                                         mess.recipient = new String(r);
                                     }
 
-                                    chatMessage meso = new chatMessage( new String(mess.content), new String(mess.time), g);
-                                    if( !contains( arr, meso ))
-                                    {
-                                        Toast.makeText(chat.this, "inserted " + meso.getMessage(), Toast.LENGTH_SHORT).show();
-                                        arr.add( meso );
-                                        try{
+                                    chatMessage meso = new chatMessage(new String(mess.content), new String(mess.time), g);
+                                    if (!contains(arr, meso)) {
+                                       // Toast.makeText(chat.this, "inserted " + meso.getMessage(), Toast.LENGTH_SHORT).show();
+                                        arr.add(meso);
+                                        try {
                                             messages ms = new messages(chat.this);
                                             ms.open();
-                                            ms.addNewMessage( mess.sender, mess.recipient, mess.content, mess.time );
+                                            ms.addNewMessage(mess.sender, mess.recipient, mess.content, mess.time);
                                             ms.close();
-                                        }catch( Exception e)
-                                        {
+                                        } catch (Exception e) {
                                             Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();
                                         }
 
                                     }
 
-                                    if( mess.recipient.equals( data[2] ) )
-                                    {
+                                    if (mess.recipient.equals(data[2])) {
                                         message.getRef().removeValue();
                                     }
 
@@ -294,8 +283,9 @@ public class chat extends AppCompatActivity {
 
                             }
 
-                            chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this,arr);
+                            chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this, arr);
                             chatList.setAdapter(arrayAdapter);
+                            //notifyOfMessage();
 
                         }
 
@@ -309,6 +299,49 @@ public class chat extends AppCompatActivity {
             });
 
         }
+
+    }
+
+    private void notifyOfMessage() {
+        String id = "noId";
+        String body = " new Message(s)";
+       /*  NotificationManager nm = (NotificationManager) getSystemService( Context.NOTIFICATION_SERVICE );
+
+        Notification notify = new Notification.Builder( getApplicationContext() )
+                .setContentTitle( "Notification" )
+                .setContentText(body)
+                .setSmallIcon(R.drawable.balloon1).build();
+
+        //notify.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        nm.notify(0, notify); */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = "name";
+            String description = "desc";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel channel = new NotificationChannel(id, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            nm.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(chat.this, id)
+                .setSmallIcon(R.drawable.balloon1)
+                .setContentTitle("Notification")
+                .setContentText(body)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat nmc = NotificationManagerCompat.from(chat.this);
+
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions( this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1);
+        }
+
+        nmc.notify(7, builder.build());
 
     }
 
@@ -350,7 +383,7 @@ class p
 class chatRoom
 {
     public p participants = new p();
-    public msg messages = new msg();
+    //public msg messages = new msg();
 
     public chatRoom(){}
     public chatRoom(String sender,String recipient)

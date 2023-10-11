@@ -40,6 +40,12 @@ public class groups extends AppCompatActivity {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
+                    if( !allowedAccessToGroup() )
+                    {
+                        Toast.makeText(groups.this, "Please request an 'Assistant' for access to the group", Toast.LENGTH_LONG).show();
+                        return;
+                    }
+
                     Intent groupChatRoomIntent = new Intent( groups.this, groupChat.class );
                     groupChatRoomIntent.putExtra("index", i );
                     startActivity( groupChatRoomIntent );
@@ -52,6 +58,21 @@ public class groups extends AppCompatActivity {
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    private boolean allowedAccessToGroup()
+    {
+        user u = new user(getApplication());
+        u.open();
+        String[] data = u.readData();
+        u.close();
+
+        //only assistant is allowed direct access to the group chat
+        //users must request assistants for permission
+        if( data[3].equals("assistant") )
+            return true;
+        else
+            return false;
     }
 
     private void initGroupNames()

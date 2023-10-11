@@ -1,17 +1,33 @@
 package com.example.frats;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
+import androidx.work.Configuration;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+import androidx.work.WorkRequest;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity {
+import com.google.android.material.snackbar.Snackbar;
+
+public class MainActivity extends AppCompatActivity implements Configuration.Provider {
 
     Button user,assistant,login;
     EditText phone;
@@ -19,9 +35,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        //workerThread();
         //check if there`s a registered user
         String check[] = new String[4];
         try{
+
+            getMessagesFromFirebase messagesFromFirebase = new getMessagesFromFirebase(getApplicationContext());
+            messagesFromFirebase.add();
+            //workerThread();
             com.example.frats.user checkUser = new user( MainActivity.this );
             checkUser.open();
 
@@ -91,6 +112,54 @@ public class MainActivity extends AppCompatActivity {
 
 
 
+
+    }
+
+    @Override
+    public Configuration getWorkManagerConfiguration()
+    {
+        Toast.makeText(getApplicationContext(), "Getting custom work manager configuration", Toast.LENGTH_SHORT).show();
+
+        return new Configuration.Builder()
+                .setMinimumLoggingLevel( Log.INFO )
+                .build();
+    }
+
+    private void workerThread()
+    {
+       // android.content.Context context = getApplicationContext();
+        try{
+            Toast.makeText( getApplicationContext(), "Hello", Toast.LENGTH_SHORT).show();
+
+
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            WorkRequest w = new OneTimeWorkRequest.Builder(LoadMessages.class)
+                    .setConstraints(constraints)
+                    .build();
+
+            WorkManager.initialize( getApplicationContext(), getWorkManagerConfiguration() );
+            WorkManager wm = WorkManager.getInstance(getApplicationContext());
+            wm.enqueue(w);
+           /* wm.getWorkInfoByIdLiveData( w.getId() ).observe(new LifecycleOwner() {
+                @NonNull
+                @Override
+                public Lifecycle getLifecycle() {
+                    return null;
+                }
+            }, workInfo -> {
+                if( workInfo.getState() != null && wor)
+
+            }); */
+
+            Toast.makeText(getApplicationContext(), "Hello II", Toast.LENGTH_SHORT).show();
+
+        }catch( Exception e )
+        {
+            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
+        }
 
     }
 

@@ -59,6 +59,7 @@ public class login extends AppCompatActivity {
 
                             //Toast.makeText(login.this,data[2],Toast.LENGTH_SHORT).show();
                             Intent toHome = new Intent(login.this, homeViewActivity.class);
+                            toHome.putExtra("isUser", new String( data[3] ) );
                             startActivity(toHome);
                             finish();
 

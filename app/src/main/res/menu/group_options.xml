@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/rape"
+        android:titleCondensed="rape"
+        android:title="Rape"
+        />
+
+    <item android:id="@+id/fgm"
+        android:titleCondensed="fgm"
+        android:title="Female Genital Mutilation(FGM)"
+        />
+
+    <item android:id="@+id/physical"
+        android:titleCondensed="physical"
+        android:title="Physical Violence"
+        />
+
+    <item android:id="@+id/trafficking"
+        android:titleCondensed="trafficking"
+        android:title="Trafficking"
+        />
+
+    <item android:id="@+id/other"
+        android:titleCondensed="other"
+        android:title="Other Forms of Violence"
+        />
+
+</menu>

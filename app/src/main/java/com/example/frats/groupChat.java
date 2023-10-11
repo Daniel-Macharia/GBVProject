@@ -1,7 +1,12 @@
 package com.example.frats;
 
+import android.Manifest;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
@@ -14,6 +19,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -53,6 +61,8 @@ public class groupChat extends AppCompatActivity {
             send = findViewById( R.id.send );
             chatList = findViewById( R.id.messageList );
 
+            notifyOfMessage();
+
             Intent intent = getIntent();
             int index = intent.getIntExtra("index", 0);
 
@@ -66,9 +76,10 @@ public class groupChat extends AppCompatActivity {
             FirebaseDatabase db = FirebaseDatabase.getInstance();
             DatabaseReference myRef = db.getReference("group");
 
-            myTask task = new myTask(myRef);
-            Thread t = new Thread( task );
-            t.start();
+           // myTask task = new myTask(myRef);
+            //Thread t = new Thread( task );
+           // t.start();
+            loadFromLocalDb();
 
 
             send.setOnClickListener(new View.OnClickListener() {
@@ -85,9 +96,25 @@ public class groupChat extends AppCompatActivity {
 
                     groupMsg meso = new groupMsg(myPhone, message, time);
 
-                    myRef.child(groupKey).push().setValue( meso );
+                    myRef.child(groupKey).child("message").push().setValue( meso ).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
 
-                    Toast.makeText(groupChat.this, message, Toast.LENGTH_SHORT).show();
+                            if( task.isSuccessful() )
+                            {
+                                Toast.makeText(groupChat.this, "sent: " + message, Toast.LENGTH_SHORT).show();
+
+                            }
+                            else
+                            {
+                                Toast.makeText(groupChat.this, "Failed to connect to the internet\n" +
+                                        "check your internet connection \n" +
+                                        "and try again ", Toast.LENGTH_SHORT).show();
+
+                            }
+
+                        }
+                    });
 
                 }
             });
@@ -107,20 +134,21 @@ public class groupChat extends AppCompatActivity {
     }
 
 
-    private void initWithAnyChats()
+    private void loadFromLocalDb()
     {
         ArrayList<chatMessage> result = new ArrayList<>(10);
-        String myPhone = new String("0712696965");
+        //String myPhone = new String("0712696965");
 
         messages m = new messages( groupChat.this );
         m.open();
-        ArrayList<msg> data = m.getMessagesSentTo(myPhone);
+        ArrayList<msg> data = m.getMessagesSentTo(groupKey);
         m.close();
 
         //String s = "";
         for( msg message : data)
         {
-            chatMessage s = new chatMessage( message.content, message.time, Gravity.END);
+            int gravity = message.sender.equals(myPhone) ? Gravity.END : Gravity.START;
+            chatMessage s = new chatMessage( message.sender + "\n\n" + message.content, message.time, gravity);
             result.add( s );
         }
 
@@ -193,6 +221,8 @@ public class groupChat extends AppCompatActivity {
 
                         chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, chatMessages);
                         chatList.setAdapter( adapter );
+
+                        notifyOfMessage();
                     }
 
                     @Override
@@ -210,6 +240,54 @@ public class groupChat extends AppCompatActivity {
 
     }
 
+
+
+    private void notifyOfMessage()
+    {
+        String id = "noId";
+        String body = " new Message(s)";
+       /*  NotificationManager nm = (NotificationManager) getSystemService( Context.NOTIFICATION_SERVICE );
+
+        Notification notify = new Notification.Builder( getApplicationContext() )
+                .setContentTitle( "Notification" )
+                .setContentText(body)
+                .setSmallIcon(R.drawable.balloon1).build();
+
+        //notify.flags |= Notification.FLAG_AUTO_CANCEL;
+
+        nm.notify(0, notify); */
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O )
+        {
+            CharSequence name = "name";
+            String description = "desc";
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+            NotificationChannel channel = new NotificationChannel( id, name, importance);
+            channel.setDescription(description);
+
+            NotificationManager nm = getSystemService(NotificationManager.class);
+            nm.createNotificationChannel(channel);
+        }
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(groupChat.this, id)
+                .setSmallIcon(R.drawable.balloon1)
+                .setContentTitle("Notification")
+                .setContentText(body)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat nmc = NotificationManagerCompat.from( this);
+
+        if( ActivityCompat.checkSelfPermission( this, Manifest.permission.POST_NOTIFICATIONS )
+        != PackageManager.PERMISSION_GRANTED )
+        {
+
+            ActivityCompat.requestPermissions( this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+
+        }
+
+        nmc.notify( 7, builder.build() );
+    }
+
 }
 
 class groupMsg
@@ -225,6 +303,28 @@ class groupMsg
         this.sender = sender;
         this.content = content;
         this.time = time;
+    }
+}
+
+class groupParticipant
+{
+    public String username = new String("");
+    public String phone = new String("");
+
+    public groupParticipant(){}
+
+    public groupParticipant( String username, String phone )
+    {
+        this.username = username;
+        this.phone = phone;
+    }
+}
+
+class participants
+{
+    public participants()
+    {
+
     }
 }
 

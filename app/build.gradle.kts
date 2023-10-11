@@ -35,6 +35,10 @@ android {
 
 dependencies {
 
+    implementation("androidx.work:work-runtime:2.8.1")
+    implementation("androidx.lifecycle:lifecycle-extensions:2.2.0")
+    implementation("androidx.startup:startup-runtime:1.1.1")
+
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.9.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")

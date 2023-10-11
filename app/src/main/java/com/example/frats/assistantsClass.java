@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,8 +28,8 @@ public class assistantsClass extends AppCompatActivity {
     ListView l;
     TextView title;
     String[] userOrAssistant = new String[4];
-    String selectedAssistant;
     ArrayList<String> list = new ArrayList<>(10);
+    ArrayList<userOrAssistant> newList = new ArrayList<>(10);
     @Override
     protected void onCreate( Bundle savedInstanceState)
     {
@@ -65,98 +66,63 @@ public class assistantsClass extends AppCompatActivity {
                         if( task.isSuccessful())
                         {
                             DataSnapshot snap = task.getResult();
-                            Iterable<DataSnapshot> iter = snap.getChildren();
+                            //Iterable<DataSnapshot> iter = snap.getChildren();
 
-                            for( DataSnapshot s : iter)
+                            if( snap.hasChildren() )
                             {
-
-                                String a[] = new String[2];
-                                if(s.hasChild("username") )
-                                    a[0] = s.child("username").getValue().toString();
-                                if(s.hasChild("phone") )
-                                    a[1] = s.child("phone").getValue().toString();
-
-                                if( contains( list, a[1] ) )
+                                for( DataSnapshot s : snap.getChildren() )
                                 {
-                                    continue;
+
+                                    String a[] = new String[2];
+                                    if(s.hasChild("username") )
+                                        a[0] = s.child("username").getValue().toString();
+                                    if(s.hasChild("phone") )
+                                        a[1] = s.child("phone").getValue().toString();
+
+                                    if( contains( list, a[1] ) )
+                                    {
+                                        continue;
+                                    }
+
+                                    list.add( a[1]);
+                                    newList.add( new userOrAssistant( new String( a[0] ), new String( a[1] ) ) );
+
+                                    user u = new user(assistantsClass.this);
+                                    u.open();
+                                    u.createUser( new String(a[0]), "", new String(a[1]),
+                                            "", 0);
+                                    u.close();
+
                                 }
-
-                                list.add( a[1]);
-
-                                user u = new user(assistantsClass.this);
-                                u.open();
-                                u.createUser( new String(a[0]), "", new String(a[1]),
-                                        "", 0);
-                                u.close();
-
                             }
 
                             //ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
                             //l.setAdapter(arr);
                         }
                         else {
-
+                            //if the task failed to complete successfully
                         }
 
 
                     }
 
-
                 });
 
-                ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
+                //ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
+                userOrAssistantAdapter arr = new userOrAssistantAdapter( this, newList);
                 l.setAdapter(arr);
 
             }
             else
             {
                 uOa = "users";
-                title.setText("my survivors");
+                title.setText("My Survivors");
                 loadChats();
-                //check messages chats in which I'm a participant
-                /* ArrayList<String> survivors =  loadChats();
-                if( list.isEmpty() )
-                {
-                    Toast.makeText(this, "No old users ", Toast.LENGTH_SHORT).show();
-                }
-                if( survivors.isEmpty() )
-                {
-                    Toast.makeText(this, "No new users either ", Toast.LENGTH_SHORT).show();
-                }
 
-                 String s = "";
-                for( String survivor : survivors )
-                {
-                    s += survivor + "\n";
-                    //String user = survivor + " : " + survivor;
-                    if( contains( list, survivor ) )
-                    {
-                        continue;
-                    }
-
-                    list.add( survivor );
-
-                    user us = new user( assistantsClass.this);
-                    us.open();
-                    us.createUser( new String(survivor),
-                            new String( survivor ),
-                            new String(survivor),
-                            new String(uOa),
-                            0 );
-                    us.close();
-
-                    //Toast.makeText(this, "adding new users\n" + s, Toast.LENGTH_SHORT).show();
-                } */
-
-                //Toast.makeText(this, "adding only old users", Toast.LENGTH_SHORT).show();
-                ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
+                userOrAssistantAdapter arr = new userOrAssistantAdapter( this, newList);
                 l.setAdapter(arr);
             }
 
-           // DataSnapshot snap = myRef.get().getResult();
-            //Toast.makeText( this, list.toString(), Toast.LENGTH_LONG).show();
-            //ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
-            //l.setAdapter(arr);
 
         }catch(Exception e)
         {
@@ -260,7 +226,7 @@ public class assistantsClass extends AppCompatActivity {
                                     }
 
                                     String theirNumber = new String();
-                                    if( userOrAssistant.equals( participants[0] ) )
+                                    if( userOrAssistant[2].equals( participants[0] ) )
                                         theirNumber = participants[1];
                                     else
                                         theirNumber = participants[0];
@@ -268,15 +234,8 @@ public class assistantsClass extends AppCompatActivity {
                                     if( !contains( list, theirNumber ) )
                                     {
                                         list.add( new String( theirNumber ) );
+                                        mySurvivors.add( new String( theirNumber ) );
 
-                                        user us = new user( assistantsClass.this);
-                                        us.open();
-                                        us.createUser( new String(theirNumber),
-                                                new String( theirNumber ),
-                                                new String(theirNumber),
-                                                new String("users"),
-                                                0 );
-                                        us.close();
                                     }
 
 
@@ -291,6 +250,51 @@ public class assistantsClass extends AppCompatActivity {
                     }
 
                 }
+            }).addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                    DatabaseReference usersReference = db.getReference("users");
+
+                    usersReference.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DataSnapshot> task) {
+                            DataSnapshot result = task.getResult();
+
+                            if( result.hasChildren() )
+                            {
+                                for( DataSnapshot userData : result.getChildren() )
+                                {
+                                    String username = "", phone = "";
+
+                                    if( userData.hasChild("username") )
+                                    {
+                                        username = userData.child("username").getValue().toString();
+                                    }
+                                    if( userData.hasChild("phone") )
+                                    {
+                                        phone = userData.child("phone").getValue().toString();
+                                    }
+
+                                    if( mySurvivors.contains( phone ) )
+                                    {
+                                        newList.add( new userOrAssistant( new String( username ), new String( phone )));
+
+                                        user us = new user( assistantsClass.this);
+                                        us.open();
+                                        us.createUser( new String(username),
+                                                new String( phone ),
+                                                new String(phone),
+                                                new String("users"),
+                                                0 );
+                                        us.close();
+                                    }
+
+                                }
+                            }
+                        }
+
+                    });
+                }
             });
 
 
@@ -298,6 +302,7 @@ public class assistantsClass extends AppCompatActivity {
         {
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
+
 
         return mySurvivors;
 
@@ -318,6 +323,7 @@ public class assistantsClass extends AppCompatActivity {
         {
            // s += user[0] + " " + user[1] + " \n";
             result.add( new String( user[1] ));
+            newList.add( new userOrAssistant( new String( user[0] ), new String( user[1] ) ) );
             //Toast.makeText(this, "Old user = " + user[1], Toast.LENGTH_SHORT).show();
         }
         //Toast.makeText( this, s, Toast.LENGTH_LONG).show();
@@ -327,17 +333,26 @@ public class assistantsClass extends AppCompatActivity {
 
     public void loadChat(View view)
     {
-        TextView t = view.findViewById(R.id.name);
-        String phoneStr = t.getText().toString();
+        TextView n = view.findViewById(R.id.name);
+        TextView p = view.findViewById(R.id.phone);
+        String nameStr = n.getText().toString();
+        String phoneStr = p.getText().toString();
 
-        Scanner s = new Scanner(phoneStr);
-        String name = s.next();//get name
+        Toast.makeText(this, "Clicked on user contact: " + nameStr + " ~ " + phoneStr, Toast.LENGTH_SHORT).show();
+        //Scanner s = new Scanner(phoneStr);
+       // String name = s.next();//get name
        // s.next();//discard colon
        // String phone = s.next();//get phone
 
+        /*
         Intent chatIntent = new Intent( assistantsClass.this, chat.class);
-        chatIntent.putExtra("recipient",name);
-        chatIntent.putExtra("chatName", name);
-        startActivity(chatIntent);
+        chatIntent.putExtra("recipient",phoneStr);
+        chatIntent.putExtra("chatName", nameStr);
+        startActivity(chatIntent);*/
+    }
+
+    public void showMore(View view)
+    {
+        Toast.makeText(this, "Clicked on more", Toast.LENGTH_SHORT).show();
     }
 }

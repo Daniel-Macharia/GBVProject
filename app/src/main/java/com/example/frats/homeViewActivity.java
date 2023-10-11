@@ -17,6 +17,8 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
 
     private TextView tv;
 
+    private boolean isUser = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -28,6 +30,14 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
 
         tv.setText("");
         addMessage();
+
+        Intent intent = getIntent();
+        String userOrAssistant = intent.getStringExtra("isUser");
+
+        if( userOrAssistant.equals("assistant") )
+            isUser = false;
+        else
+            isUser = true;
 
         anime worker = new anime(tv, text);
         worker.start();
@@ -62,60 +72,15 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
     {
         PopupMenu popUp = new PopupMenu( this, v);
         popUp.setOnMenuItemClickListener(homeViewActivity.this);
-        //MenuInflater inflater = popUp.getMenuInflater();
-        //inflater.inflate(R.menu.options, popUp.getMenu());
         popUp.inflate(R.menu.options);
 
-        //add a listener for handling the menu click events
-        /*popUp.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem menuItem) {
-
-
-                if( menuItem.getItemId() == R.id.report ) {
-                    //case R.id.report:
-                    Toast.makeText(getApplicationContext(), "Reported", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                else
-                if( menuItem.getItemId() == R.id.groups ) {
-                    //case R.id.report:
-                    Toast.makeText(getApplicationContext(), "Groups", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                else
-                if( menuItem.getItemId() == R.id.journal ) {
-                    //case R.id.report:
-                    Toast.makeText(getApplicationContext(), "Journal", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                else
-                if( menuItem.getItemId() == R.id.assistant ) {
-                    //case R.id.report:
-                    Toast.makeText(getApplicationContext(), "Assistants", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                else
-                if( menuItem.getItemId() == R.id.facts ) {
-                    //case R.id.report:
-                    Toast.makeText(getApplicationContext(), "FAQs", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                else
-                if( menuItem.getItemId() == R.id.about ) {
-                    //case R.id.report:
-                    Toast.makeText(getApplicationContext(), "About", Toast.LENGTH_SHORT).show();
-                    return true;
-                }
-                else
-                {
-                    Toast.makeText(getApplicationContext(), "Nothing", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-            }
-        });*/
-
         popUp.show();
+
+        if( !isUser )
+        {
+            MenuItem m = popUp.getMenu().findItem(R.id.assistant);
+            m.setTitle("My Survivors");
+        }
 
     }
 

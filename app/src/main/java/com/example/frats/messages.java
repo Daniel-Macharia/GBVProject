@@ -98,13 +98,38 @@ public class messages {
 
     }
 
-    public ArrayList<msg> getMessagesSentTo(String recipient )
+    public ArrayList<msg> getMessagesSentTo(String recipient, String senderOfMessage )
     {
         String query = " SELECT * FROM " + tableName +
                 " WHERE " + receiver + " LIKE ('%" + recipient + "%') " +
-                " OR " + sender + " LIKE ('%" + recipient + "%'); ";
+                " AND " + sender + " LIKE ('%" + senderOfMessage + "%'); ";
         Cursor c = msgDB.rawQuery(query, null);
         
+        int receiverIndex = c.getColumnIndex( this.receiver );
+        int senderIndex = c.getColumnIndex( this.sender );
+        int contentIndex = c.getColumnIndex( this.content );
+        int timeStampIndex = c.getColumnIndex( this.time );
+        ArrayList<msg> result = new ArrayList<>(10);
+        for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext() )
+        {
+            result.add( new msg(
+                    new String( c.getString(senderIndex)),
+                    new String(c.getString( receiverIndex )),
+                    new String(c.getString(contentIndex )),
+                    new String(c.getString( timeStampIndex ))
+            ) );
+        }
+
+
+        return result;
+    }
+
+    public ArrayList<msg> getMessagesSentTo(String recipient )
+    {
+        String query = " SELECT * FROM " + tableName +
+                " WHERE " + receiver + " LIKE ('%" + recipient + "%');";
+        Cursor c = msgDB.rawQuery(query, null);
+
         int receiverIndex = c.getColumnIndex( this.receiver );
         int senderIndex = c.getColumnIndex( this.sender );
         int contentIndex = c.getColumnIndex( this.content );
