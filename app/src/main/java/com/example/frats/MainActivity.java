@@ -40,8 +40,9 @@ public class MainActivity extends AppCompatActivity implements Configuration.Pro
         String check[] = new String[4];
         try{
 
-            getMessagesFromFirebase messagesFromFirebase = new getMessagesFromFirebase(getApplicationContext());
-            messagesFromFirebase.add();
+            //getMessagesFromFirebase messagesFromFirebase = new getMessagesFromFirebase(getApplicationContext());
+            //messagesFromFirebase.add();
+
             //workerThread();
             com.example.frats.user checkUser = new user( MainActivity.this );
             checkUser.open();

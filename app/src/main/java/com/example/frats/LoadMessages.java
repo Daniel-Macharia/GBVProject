@@ -123,10 +123,10 @@ class getMessagesFromFirebase {
                         l = meso.getMessagesSentTo(thisGroupKey);
                         meso.close();
 
-                        if( nthGroup.hasChildren() )
+                        if( nthGroup.child("message").hasChildren() )
                         {
 
-                            for( DataSnapshot message : nthGroup.getChildren() )
+                            for( DataSnapshot message : nthGroup.child("message").getChildren() )
                             {
                                 String content = "", sender = "", time = "";
 

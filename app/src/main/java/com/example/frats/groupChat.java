@@ -71,6 +71,8 @@ public class groupChat extends AppCompatActivity {
 
             getMyPhone();
             //initWithAnyChats();
+            //getMessagesFromFirebase messagesFromFirebase = new getMessagesFromFirebase(getApplicationContext());
+            //messagesFromFirebase.add();
 
 
             FirebaseDatabase db = FirebaseDatabase.getInstance();
