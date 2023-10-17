@@ -101,8 +101,10 @@ public class messages {
     public ArrayList<msg> getMessagesSentTo(String recipient, String senderOfMessage )
     {
         String query = " SELECT * FROM " + tableName +
-                " WHERE " + receiver + " LIKE ('%" + recipient + "%') " +
-                " AND " + sender + " LIKE ('%" + senderOfMessage + "%'); ";
+                " WHERE ( " + receiver + " LIKE ('%" + recipient + "%') " +
+                " AND " + sender + " LIKE ('%" + senderOfMessage + "%') ) " +
+                " OR ( " + receiver + " LIKE ('%" + senderOfMessage + "%') " +
+                " AND " + sender + " LIKE ('%" + recipient + "%') ) ; ";
         Cursor c = msgDB.rawQuery(query, null);
         
         int receiverIndex = c.getColumnIndex( this.receiver );

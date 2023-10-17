@@ -88,7 +88,7 @@ public class groups extends AppCompatActivity {
     private void checkIfMember(String groupKey)
     {
 
-        Toast.makeText(this, "Clicked " + groupKey, Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "Clicked " + groupKey, Toast.LENGTH_SHORT).show();
         FirebaseDatabase db = FirebaseDatabase.getInstance();
 
         DatabaseReference dbRef = db.getReference("group");
@@ -111,7 +111,7 @@ public class groups extends AppCompatActivity {
                         if( myPhone.equals( phone ) )
                         {
                            try{
-                               Toast.makeText(groups.this, "user is in this group", Toast.LENGTH_SHORT).show();
+                              // Toast.makeText(groups.this, "user is in this group", Toast.LENGTH_SHORT).show();
                                //return from function
                                //isMember[0] = true;
                                userGroupAccessPermissions permissions = new userGroupAccessPermissions(groups.this);
@@ -119,13 +119,13 @@ public class groups extends AppCompatActivity {
 
                                if( permissions.isAllowedAccessTo(groupKey) )
                                {
-                                   Toast.makeText(groups.this, "not adding permission to this group", Toast.LENGTH_SHORT).show();
+                                  // Toast.makeText(groups.this, "not adding permission to this group", Toast.LENGTH_SHORT).show();
                                    permissions.close();
                                    return;
                                }
                                else
                                {
-                                   Toast.makeText(groups.this, "adding permission to this group", Toast.LENGTH_SHORT).show();
+                                  // Toast.makeText(groups.this, "adding permission to this group", Toast.LENGTH_SHORT).show();
                                    permissions.insertPermission(groupKey, "allowed");
                                    permissions.close();
                                }
@@ -168,8 +168,8 @@ public class groups extends AppCompatActivity {
             Toast.makeText(groups.this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
-        if( isAllowed )
-            Toast.makeText(this, "users allowed access locally to this group", Toast.LENGTH_SHORT).show();
+        //if( isAllowed )
+            //Toast.makeText(this, "users allowed access locally to this group", Toast.LENGTH_SHORT).show();
 
         //only assistant is allowed direct access to the group chat
         //users must request assistants for permission
@@ -181,11 +181,14 @@ public class groups extends AppCompatActivity {
 
     private void initGroupNames()
     {
-        group.add( new Pair("rape", "Rape") );
-        group.add( new Pair("fgm", "Female Genital Mutilation (FGM)") );
-        group.add( new Pair( "physical", "Physical Violence") );
-        group.add( new Pair("trafficking", "Trafficking") );
-        group.add( new Pair( "other", "Other Forms of Violence") );
+        if( group.isEmpty() )
+        {
+            group.add( new Pair("rape", "Rape") );
+            group.add( new Pair("fgm", "Female Genital Mutilation (FGM)") );
+            group.add( new Pair( "physical", "Physical Violence") );
+            group.add( new Pair("trafficking", "Trafficking") );
+            group.add( new Pair( "other", "Other Forms of Violence") );
+        }
 
         for( Pair<String, String> val: group)
         {

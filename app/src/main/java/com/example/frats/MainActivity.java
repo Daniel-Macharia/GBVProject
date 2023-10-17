@@ -9,6 +9,7 @@ import androidx.work.Configuration;
 import androidx.work.Constraints;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.OutOfQuotaPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -134,17 +135,24 @@ public class MainActivity extends AppCompatActivity implements Configuration.Pro
 
 
             Constraints constraints = new Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
                     .build();
 
-            WorkRequest w = new OneTimeWorkRequest.Builder(LoadMessages.class)
+            WorkRequest w = OneTimeWorkRequest.from(LoadMessages.class);
+            WorkManager.getInstance(getApplicationContext()).enqueue(w);
+
+
+            /* WorkRequest w = new OneTimeWorkRequest.Builder(LoadMessages.class)
                     .setConstraints(constraints)
+                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
                     .build();
+
+           WorkManager.getInstance(getApplicationContext()).enqueue(w);
 
             WorkManager.initialize( getApplicationContext(), getWorkManagerConfiguration() );
             WorkManager wm = WorkManager.getInstance(getApplicationContext());
             wm.enqueue(w);
-           /* wm.getWorkInfoByIdLiveData( w.getId() ).observe(new LifecycleOwner() {
+            wm.getWorkInfoByIdLiveData( w.getId() ).observe(new LifecycleOwner() {
                 @NonNull
                 @Override
                 public Lifecycle getLifecycle() {

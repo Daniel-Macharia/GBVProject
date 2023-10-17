@@ -75,13 +75,15 @@ public class groupChat extends AppCompatActivity {
             //messagesFromFirebase.add();
 
 
+            loadFromLocalDb();
             FirebaseDatabase db = FirebaseDatabase.getInstance();
             DatabaseReference myRef = db.getReference("group");
 
-           // myTask task = new myTask(myRef);
-            //Thread t = new Thread( task );
-           // t.start();
-            loadFromLocalDb();
+            myTask task = new myTask(myRef);
+            Thread t = new Thread( task );
+            t.start();
+
+            //loadFromLocalDb();
 
 
             send.setOnClickListener(new View.OnClickListener() {
@@ -136,7 +138,7 @@ public class groupChat extends AppCompatActivity {
     }
 
 
-    private void loadFromLocalDb()
+    private ArrayList<chatMessage> getFromLocalDb()
     {
         ArrayList<chatMessage> result = new ArrayList<>(10);
         //String myPhone = new String("0712696965");
@@ -154,9 +156,18 @@ public class groupChat extends AppCompatActivity {
             result.add( s );
         }
 
-        chatMessageAdapter adapter = new chatMessageAdapter( groupChat.this, result);
+        return result;
+    }
+
+    private void loadFromLocalDb()
+    {
+
+        chatMessages = getFromLocalDb();
+
+        chatMessageAdapter adapter = new chatMessageAdapter( groupChat.this, chatMessages);
         chatList.setAdapter( adapter );
     }
+
 
     private boolean contains(ArrayList<chatMessage> list, chatMessage value)
     {
@@ -167,82 +178,6 @@ public class groupChat extends AppCompatActivity {
         }
         return false;
     }
-
-
-    class myTask implements Runnable
-    {
-        DatabaseReference dbRef;
-        public myTask(DatabaseReference dbRef)
-        {
-            this.dbRef = dbRef;
-
-        }
-
-        @Override
-        public void run()
-        {
-            try{
-                dbRef.child(groupKey).addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-
-                        if( snapshot.hasChildren() )
-                        {
-                            for( DataSnapshot data : snapshot.getChildren() )
-                            {
-                                String content = new String( "" );
-                                String sender = new String( "" );
-                                String time = new String( "" );
-                                int g = Gravity.END;
-
-                                if( data.hasChild( "content" ) )
-                                {
-                                    content = data.child( "content" ).getValue().toString();
-                                }
-                                if( data.hasChild( "sender" ) )
-                                {
-                                    sender = data.child( "sender" ).getValue().toString();
-                                }
-                                if( data.hasChild( "time" ) )
-                                {
-                                    time = data.child( "time" ).getValue().toString();
-                                }
-
-                                if( sender.equals(myPhone) )
-                                    g = Gravity.END;
-                                else
-                                    g = Gravity.START;
-
-                                chatMessage m = new chatMessage( new String(content), new String(time), g);
-
-                                if( !contains( chatMessages, m ) )
-                                    chatMessages.add( new chatMessage( new String(content), new String(time), g) );
-
-                            }
-                        }
-
-                        chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, chatMessages);
-                        chatList.setAdapter( adapter );
-
-                        notifyOfMessage();
-                    }
-
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
-
-                        Toast.makeText(groupChat.this, error.toString(), Toast.LENGTH_SHORT).show();
-                    }
-
-                });
-            }catch( Exception e )
-            {
-                Toast.makeText(groupChat.this, e.toString(), Toast.LENGTH_SHORT).show();
-            }
-        }
-
-    }
-
-
 
     private void notifyOfMessage()
     {
@@ -290,7 +225,218 @@ public class groupChat extends AppCompatActivity {
         nmc.notify( 7, builder.build() );
     }
 
+
+
+    class myTask implements Runnable
+    {
+        DatabaseReference dbRef;
+        public myTask(DatabaseReference dbRef)
+        {
+            this.dbRef = dbRef;
+        }
+
+        @Override
+        public void run()
+        {
+            try{
+                dbRef.child(groupKey).child("message").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                        ArrayList<chatMessage> result = getMessagesFromLocalDb();
+
+                        if( snapshot.hasChildren() )
+                        {
+
+                            for( DataSnapshot data : snapshot.getChildren() )
+                            {
+                                String content = new String( "" );
+                                String sender = new String( "" );
+                                String time = new String( "" );
+                                int g ;
+
+                                if( data.hasChild( "content" ) )
+                                {
+                                    content = data.child( "content" ).getValue().toString();
+                                }
+                                if( data.hasChild( "sender" ) )
+                                {
+                                    sender = data.child( "sender" ).getValue().toString();
+                                }
+                                if( data.hasChild( "time" ) )
+                                {
+                                    time = data.child( "time" ).getValue().toString();
+                                }
+
+                                if( sender.equals(myPhone) )
+                                    g = Gravity.END;
+                                else
+                                    g = Gravity.START;
+
+                                chatMessage m = new chatMessage( new String(content), new String(time), g);
+
+                                if( !contains( result, m ) )
+                                {
+                                    result.add( new chatMessage( new String(content), new String(time), g) );
+                                    //insert into the local db
+                                    messages messo = new messages( groupChat.this );
+                                    messo.open();
+                                    messo.addNewMessage( new String(sender), new String(groupKey), new String(content), new String(time) );
+                                    messo.close();
+                                }
+                            }
+                        }
+
+                        //chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, result);
+                        //chatList.setAdapter( adapter );
+
+                        notifyOfMessage();
+                        loadFromLocalDb();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                        Toast.makeText(groupChat.this, error.toString(), Toast.LENGTH_SHORT).show();
+                    }
+
+                });
+            }catch( Exception e )
+            {
+                Toast.makeText(groupChat.this, e.toString(), Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        private ArrayList<chatMessage> getMessagesFromLocalDb()
+        {
+
+            ArrayList<chatMessage> result = new ArrayList<>(10);
+            //String myPhone = new String("0712696965");
+
+            messages m = new messages( groupChat.this );
+            m.open();
+            ArrayList<msg> data = m.getMessagesSentTo(groupKey);
+            m.close();
+
+            //String s = "";
+            for( msg message : data)
+            {
+                int gravity = message.sender.equals(myPhone) ? Gravity.END : Gravity.START;
+                chatMessage s = new chatMessage( message.content, message.time, gravity);
+                result.add( s );
+            }
+
+            return result;
+
+        }
+
+
+    }
+
 }
+
+/*
+class myTask implements Runnable
+{
+    DatabaseReference dbRef;
+    Context context;
+    String groupKey;
+    String myPhone;
+
+    ArrayList<chatMessage> chatMessages;
+
+    ListView chatList;
+    public myTask(DatabaseReference dbRef, Context context, ArrayList<chatMessage> chatMessages, ListView chatList, String groupKey, String myPhone)
+    {
+        this.dbRef = dbRef;
+        this.context = context;
+        this.chatMessages = chatMessages;
+        this.chatList = chatList;
+        this.groupKey = groupKey;
+        this.myPhone = myPhone;
+    }
+
+    @Override
+    public void run()
+    {
+        try{
+            dbRef.child(groupKey).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                    if( snapshot.hasChildren() )
+                    {
+                        for( DataSnapshot data : snapshot.getChildren() )
+                        {
+                            String content = new String( "" );
+                            String sender = new String( "" );
+                            String time = new String( "" );
+                            int g = Gravity.END;
+
+                            if( data.hasChild( "content" ) )
+                            {
+                                content = data.child( "content" ).getValue().toString();
+                            }
+                            if( data.hasChild( "sender" ) )
+                            {
+                                sender = data.child( "sender" ).getValue().toString();
+                            }
+                            if( data.hasChild( "time" ) )
+                            {
+                                time = data.child( "time" ).getValue().toString();
+                            }
+
+                            if( sender.equals(myPhone) )
+                                g = Gravity.END;
+                            else
+                                g = Gravity.START;
+
+                            chatMessage m = new chatMessage( new String(content), new String(time), g);
+
+                            if( !contains( chatMessages, m ) )
+                                chatMessages.add( new chatMessage( new String(content), new String(time), g) );
+
+                        }
+                    }
+
+                   // chatMessageAdapter adapter = new chatMessageAdapter(context, chatMessages);
+                   // chatList.setAdapter( adapter );
+
+                    notifyOfMessage();
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                    Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT).show();
+                }
+
+            });
+        }catch( Exception e )
+        {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void notifyOfMessage()
+    {
+
+        //send a notification that some new message has been recieved
+
+    }
+
+    private boolean contains(ArrayList<chatMessage> list, chatMessage value)
+    {
+        for( chatMessage listItem : list )
+        {
+            if( listItem.getMessage().equals( value.getMessage() ) && listItem.getTime().equals( value.getTime() ) )
+                return true;
+        }
+        return false;
+    }
+
+} */
+
 
 class groupMsg
 {

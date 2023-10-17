@@ -1,7 +1,10 @@
 package com.example.frats;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -57,24 +60,30 @@ public class createUser extends AppCompatActivity {
                     //if neither the username, the password nor the confirm password is blank
                     boolean succeeded = true;
                    try{
-                       user newUser = new user(createUser.this );
-                       newUser.open();
+                       user newUserAccount = new user(createUser.this );
+                       newUserAccount.open();
 
                        if( u_pass.equals(confirm) )
                        {
                            FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-                           newUser.createUser(u_name,u_pass, phone,( isUser ? "users" : "assistant"), 1);
+                           newUserAccount.createUser(u_name,u_pass, phone,( isUser ? "users" : "assistant"), 1);
                            String user_OR_assistant = "";
 
                            if( isUser )
                            {
                                user_OR_assistant = "users";
+
+                               DatabaseReference myRef = database.getReference(user_OR_assistant);
+                               newUser u = new newUser(u_name,phone);
+                               myRef.push().setValue(u);
+
                            }
                            else
                            {
                                user_OR_assistant = "assistant";
 
+                               //checkNetworkConnection();
                                addToListOfParticipantsOfAllGroups(database.getReference("group"), u_name, phone);
 
                                DatabaseReference myRef = database.getReference(user_OR_assistant);
@@ -95,7 +104,7 @@ public class createUser extends AppCompatActivity {
                        }
 
 
-                       newUser.close();
+                       newUserAccount.close();
                    }catch(Exception e)
                    {
                        succeeded = false;
@@ -120,6 +129,18 @@ public class createUser extends AppCompatActivity {
         });
     }
 
+    private void checkNetworkConnection()
+    {
+
+        ConnectivityManager c = (ConnectivityManager) getSystemService( Context.CONNECTIVITY_SERVICE );
+        NetworkInfo n = c.getActiveNetworkInfo();
+        if( !n.isAvailable() )
+        {
+            Toast.makeText(this, "No Internet Connection! ", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
     private void addToListOfParticipantsOfAllGroups(DatabaseReference dbRef, String username, String phone)
     {
         groupParticipant p = new groupParticipant( new String( username), new String(phone) );
@@ -140,12 +161,12 @@ public class createUser extends AppCompatActivity {
 
                         if( group.hasChild("member" ) )
                         {
-                            Toast.makeText(createUser.this, "there exists members in this group", Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(createUser.this, "there exists members in this group", Toast.LENGTH_SHORT).show();
                             boolean isInGroup = false;
 
                             if( group.child("member").hasChildren() )
                             {
-                                Toast.makeText(createUser.this, "getting groups", Toast.LENGTH_SHORT).show();
+                                //Toast.makeText(createUser.this, "getting groups", Toast.LENGTH_SHORT).show();
 
                                 ArrayList<String> membersPhones = new ArrayList<>(10);
                                 for( DataSnapshot member : group.child("member").getChildren() )
@@ -175,8 +196,8 @@ public class createUser extends AppCompatActivity {
 
                             }
                         }else {
-                            Toast.makeText(createUser.this, "Creating new members list\n"
-                                    + "key value is " + thisGroupKey, Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(createUser.this, "Creating new members list\n"
+                              //      + "key value is " + thisGroupKey, Toast.LENGTH_SHORT).show();
                             //create member node in the chat
                             //dbRef.child(thisGroupKey).push().setValue(new participants() );
                            // if( thisGroupKey == null )

@@ -49,8 +49,7 @@ public class journal extends AppCompatActivity {
 
 
 
-                String date = c.get(Calendar.DATE) + "/" + ( c.get(Calendar.MONTH) + 1 ) + "/" + c.get(Calendar.YEAR);   ;
-                String time = "" + c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
+                String date = c.get(Calendar.DATE) + " - " + ( c.get(Calendar.MONTH) + 1 ) + " - " + c.get(Calendar.YEAR);     String time = "" + c.get(Calendar.HOUR) + ":" + c.get(Calendar.MINUTE) +
                         ((c.get(Calendar.AM_PM) == Calendar.AM ) ? " AM" : " PM");
                 String entry = notes.getText().toString();
 
@@ -84,31 +83,6 @@ public class journal extends AppCompatActivity {
                 startActivity(listIntent);
             }
         });
-
-    }
-
-    private void notifyUser()
-    {
-
-        String title = " notification ";
-        String body = " this is a notification ";
-
-        Notification n = new Notification( R.drawable.avatar, title, System.currentTimeMillis());
-        Context appContext = getApplicationContext();
-
-        PendingIntent wrappedIntent = PendingIntent.getActivity( this, 0 , new Intent(), 0);
-
-       // n.setLatestEventInfo( appContext, title, body, wrappedIntent );
-        //n.setLatestEventInfo( appContext, title, body, wrappedIntent );
-
-
-        n.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        String notificationService = Context.NOTIFICATION_SERVICE;
-
-        NotificationManager nm = (NotificationManager) getSystemService(notificationService);
-
-        nm.notify( Notification_ID, n);
 
     }
 

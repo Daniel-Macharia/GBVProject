@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class assistantsClass extends AppCompatActivity {
-    ListView l;
-    TextView title;
-    String[] userOrAssistant = new String[4];
-    ArrayList<String> list = new ArrayList<>(10);
-    ArrayList<userOrAssistant> newList = new ArrayList<>(10);
+    private ListView l;
+    private TextView title;
+    private String[] userOrAssistant = new String[4];
+    private ArrayList<String> list = new ArrayList<>(10);
+    private ArrayList<userOrAssistant> newList = new ArrayList<>(10);
     @Override
     protected void onCreate( Bundle savedInstanceState)
     {
@@ -40,6 +40,8 @@ public class assistantsClass extends AppCompatActivity {
 
         //loadUserFromLocalDb();
         list = getUsersFromLocalDB();
+        //newList  = new ArrayList<>(10);
+
 
         try {
 
@@ -133,7 +135,14 @@ public class assistantsClass extends AppCompatActivity {
 
     }
 
-    private boolean contains( ArrayList<String> list, String value)
+    @Override
+    protected void onDestroy() {
+        finish();
+        super.onDestroy();
+        //finish();
+    }
+
+    private boolean contains(ArrayList<String> list, String value)
     {
 
         for( String compare : list )
