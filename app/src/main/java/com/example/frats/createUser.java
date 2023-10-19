@@ -52,11 +52,8 @@ public class createUser extends AppCompatActivity {
                 u_pass = password.getText().toString();
                 confirm = confirmPassword.getText().toString();
 
-                if( invalidDetails(u_name,u_pass,confirm) )
-                {
-                    return;
-                }
-                else {//if the details are valid
+                if( !invalidDetails(u_name,u_pass,confirm) )
+                {//if the details are valid
                     //if neither the username, the password nor the confirm password is blank
                     boolean succeeded = true;
                    try{
@@ -74,9 +71,8 @@ public class createUser extends AppCompatActivity {
                            {
                                user_OR_assistant = "users";
 
-                               DatabaseReference myRef = database.getReference(user_OR_assistant);
                                newUser u = new newUser(u_name,phone);
-                               myRef.push().setValue(u);
+                               MyFirebaseUtilityClass.addNewUser( user_OR_assistant, u);
 
                            }
                            else
@@ -84,11 +80,10 @@ public class createUser extends AppCompatActivity {
                                user_OR_assistant = "assistant";
 
                                //checkNetworkConnection();
-                               addToListOfParticipantsOfAllGroups(database.getReference("group"), u_name, phone);
+                               MyFirebaseUtilityClass.addToListOfParticipantsOfAllGroups( "group", getApplicationContext(), u_name, phone);
 
-                               DatabaseReference myRef = database.getReference(user_OR_assistant);
                                newUser u = new newUser(u_name,phone);
-                               myRef.push().setValue(u);
+                               MyFirebaseUtilityClass.addNewUser( user_OR_assistant, u);
 
                            }
 
@@ -127,100 +122,6 @@ public class createUser extends AppCompatActivity {
                // w.start();
             }
         });
-    }
-
-    private void checkNetworkConnection()
-    {
-
-        ConnectivityManager c = (ConnectivityManager) getSystemService( Context.CONNECTIVITY_SERVICE );
-        NetworkInfo n = c.getActiveNetworkInfo();
-        if( !n.isAvailable() )
-        {
-            Toast.makeText(this, "No Internet Connection! ", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    private void addToListOfParticipantsOfAllGroups(DatabaseReference dbRef, String username, String phone)
-    {
-        groupParticipant p = new groupParticipant( new String( username), new String(phone) );
-
-        dbRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-
-               // Toast.makeText(createUser.this, "getting groups", Toast.LENGTH_SHORT).show();
-
-                DataSnapshot groups = task.getResult();
-
-                if( groups.hasChildren() )
-                {
-                    for( DataSnapshot group : groups.getChildren() )
-                    {
-                        String thisGroupKey = group.getKey();
-
-                        if( group.hasChild("member" ) )
-                        {
-                            //Toast.makeText(createUser.this, "there exists members in this group", Toast.LENGTH_SHORT).show();
-                            boolean isInGroup = false;
-
-                            if( group.child("member").hasChildren() )
-                            {
-                                //Toast.makeText(createUser.this, "getting groups", Toast.LENGTH_SHORT).show();
-
-                                ArrayList<String> membersPhones = new ArrayList<>(10);
-                                for( DataSnapshot member : group.child("member").getChildren() )
-                                {
-                                    String name = "", contact = "";
-
-                                    if( member.hasChild("usename") )
-                                    {
-                                        name = member.child("username").getValue().toString();
-                                    }
-                                    if( member.hasChild("phone") )
-                                    {
-                                        contact = member.child("phone").getValue().toString();
-                                    }
-
-
-                                    membersPhones.add( new String( contact ) );
-                                }
-
-                                if( !membersPhones.contains( p.phone ) )
-                                {
-                                    //add participant p to the group
-                                    assert  thisGroupKey != null;
-                                    dbRef.child(thisGroupKey).child("member").push().setValue(p);
-
-                                }
-
-                            }
-                        }else {
-                            //Toast.makeText(createUser.this, "Creating new members list\n"
-                              //      + "key value is " + thisGroupKey, Toast.LENGTH_SHORT).show();
-                            //create member node in the chat
-                            //dbRef.child(thisGroupKey).push().setValue(new participants() );
-                           // if( thisGroupKey == null )
-                           //     Toast.makeText(createUser.this, "Group key is null", Toast.LENGTH_SHORT).show();
-                           // else
-                           try{
-                               dbRef.child(thisGroupKey).child("member").push().setValue(p);
-                           }catch( Exception e )
-                           {
-                               Toast.makeText(createUser.this, e.toString(), Toast.LENGTH_SHORT).show();
-                           }
-                        }
-
-
-
-
-                    }
-                }
-
-            }
-
-        });
-
     }
 
     private boolean invalidDetails(String name, String password, String confirm)

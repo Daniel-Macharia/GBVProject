@@ -28,7 +28,6 @@ public LoadMessages( Context context, WorkerParameters workerParams )
 
 }
 
-    @NonNull
     @Override
     public Result doWork() {
         Toast.makeText( getApplicationContext(), "Doing some work in doWork() ", Toast.LENGTH_SHORT).show();

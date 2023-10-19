@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.Observer;
 import androidx.work.Configuration;
 import androidx.work.Constraints;
@@ -28,6 +29,8 @@ import android.widget.Toast;
 
 import com.google.android.material.snackbar.Snackbar;
 
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity implements Configuration.Provider {
 
     Button user,assistant,login;
@@ -36,7 +39,15 @@ public class MainActivity extends AppCompatActivity implements Configuration.Pro
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        //workerThread();
+        try{
+            Toast.makeText(this, "Testing Worker Thread", Toast.LENGTH_SHORT).show();
+            workerThread();
+            Toast.makeText(this, "Finished Testing Worker Thread", Toast.LENGTH_SHORT).show();
+
+        }catch( Exception e)
+        {
+            Toast.makeText(this, "Error : " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
         //check if there`s a registered user
         String check[] = new String[4];
         try{
@@ -129,39 +140,11 @@ public class MainActivity extends AppCompatActivity implements Configuration.Pro
 
     private void workerThread()
     {
-       // android.content.Context context = getApplicationContext();
         try{
             Toast.makeText( getApplicationContext(), "Hello", Toast.LENGTH_SHORT).show();
 
-
-            Constraints constraints = new Constraints.Builder()
-                    .setRequiredNetworkType(NetworkType.NOT_REQUIRED)
-                    .build();
-
-            WorkRequest w = OneTimeWorkRequest.from(LoadMessages.class);
-            WorkManager.getInstance(getApplicationContext()).enqueue(w);
-
-
-            /* WorkRequest w = new OneTimeWorkRequest.Builder(LoadMessages.class)
-                    .setConstraints(constraints)
-                    .setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .build();
-
-           WorkManager.getInstance(getApplicationContext()).enqueue(w);
-
-            WorkManager.initialize( getApplicationContext(), getWorkManagerConfiguration() );
-            WorkManager wm = WorkManager.getInstance(getApplicationContext());
-            wm.enqueue(w);
-            wm.getWorkInfoByIdLiveData( w.getId() ).observe(new LifecycleOwner() {
-                @NonNull
-                @Override
-                public Lifecycle getLifecycle() {
-                    return null;
-                }
-            }, workInfo -> {
-                if( workInfo.getState() != null && wor)
-
-            }); */
+             OneTimeWorkRequest w = new OneTimeWorkRequest.Builder(LoadMessages.class).build();
+             WorkManager.getInstance(MainActivity.this).enqueue(w);
 
             Toast.makeText(getApplicationContext(), "Hello II", Toast.LENGTH_SHORT).show();
 

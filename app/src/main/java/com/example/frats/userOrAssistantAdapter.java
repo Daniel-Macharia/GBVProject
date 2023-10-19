@@ -65,7 +65,14 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
 
         phone.setText( currentUserOrAssistant.getPhone() );
         username.setText( currentUserOrAssistant.getUserName() );
-        l.setOnClickListener(new View.OnClickListener() {
+        /* l.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                loadChat(view);
+            }
+        }); */
+
+        currentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 loadChat(view);
@@ -110,10 +117,6 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
         String phoneStr = p.getText().toString();
 
         Toast.makeText(view.getContext(), "Clicked on user contact: " + nameStr + " ~ " + phoneStr, Toast.LENGTH_SHORT).show();
-        //Scanner s = new Scanner(phoneStr);
-        // String name = s.next();//get name
-        // s.next();//discard colon
-        // String phone = s.next();//get phone
 
         Intent chatIntent = new Intent( view.getContext(), chat.class);
         chatIntent.putExtra("recipient",phoneStr);
@@ -141,50 +144,8 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
                         String titleCondensed = menuItem.getTitleCondensed().toString();
 
                         Toast.makeText(context, "Clicked " + titleCondensed, Toast.LENGTH_SHORT).show();
-                        FirebaseDatabase db = FirebaseDatabase.getInstance();
-
-
-                        DatabaseReference dbRef = db.getReference("group");
-
                         //add this contact or user to the group as a member
-                        dbRef.child(titleCondensed).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                            @Override
-                            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                                DataSnapshot result = task.getResult();
-
-                                if( result.hasChild("member") )
-                                {
-                                    if( result.child("member").hasChildren() )
-                                    {
-                                        ArrayList<String> members = new ArrayList<>(10);
-                                        for( DataSnapshot member : result.child("member").getChildren() )
-                                        {
-                                            String phone = "";
-
-                                            if( member.hasChild("phone") )
-                                            {
-                                                phone = member.child("phone").getValue().toString();
-                                            }
-
-                                            members.add( phone );
-
-                                        }
-
-                                        if( !members.contains( phone ) )
-                                        {
-                                            groupParticipant p = new groupParticipant(username, phone);
-                                            dbRef.child(titleCondensed).child("member").push().setValue(p);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    groupParticipant p = new groupParticipant(username, phone);
-                                    dbRef.child(titleCondensed).child("member").push().setValue(p);
-                                }
-                            }
-
-                        });
+                        MyFirebaseUtilityClass.addUserToGroup(titleCondensed, username, phone);
 
                         return false;
                     }

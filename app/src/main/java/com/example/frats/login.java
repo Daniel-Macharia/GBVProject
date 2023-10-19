@@ -57,6 +57,7 @@ public class login extends AppCompatActivity {
                             d.setContentView(tv);
                             d.show();
 
+                            MyFirebaseUtilityClass.loadAssistantsOrUsers( (data[3].equals("users") ? "assistant" : "users" ), login.this);
                             //Toast.makeText(login.this,data[2],Toast.LENGTH_SHORT).show();
                             Intent toHome = new Intent(login.this, homeViewActivity.class);
                             toHome.putExtra("isUser", new String( data[3] ) );
@@ -117,4 +118,5 @@ public class login extends AppCompatActivity {
 
 
     }
+
 }

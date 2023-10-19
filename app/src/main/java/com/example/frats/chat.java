@@ -169,23 +169,6 @@ public class chat extends AppCompatActivity {
 
         }
 
-        /*
-        //get messages which recipient sent to me
-        messages messageDB2 = new messages(chat.this);
-        messageDB.open();
-        ms = messageDB.getMessagesSentTo( data[2], recipient);
-        messageDB.close();
-
-        for (msg m : ms) {
-            int g = (recipient.equals(m.recipient) ? Gravity.END : Gravity.START);
-            chatMessage chatM = new chatMessage(m.content, m.time, g);
-
-            if (!contains(arr, chatM)) {
-                arr.add(new chatMessage(m.content, m.time, g));
-            }
-
-        } */
-
         //now add these messages to the chat message list
         chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this, arr);
         chatList.setAdapter(arrayAdapter);
@@ -251,6 +234,12 @@ public class chat extends AppCompatActivity {
                     chatRoomRef.child(thisChatKey).child("messages").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                            loadFromLocalDB( myRecipient );
+
+                           // MyFirebaseUtilityClass.valueChangedForThisChatRoom( chatList, snapshot, chat.this, myRecipient);
+
+                            /*
                             if (snapshot.hasChildren()) {
                                 for (DataSnapshot message : snapshot.getChildren()) {
                                     msg mess = new msg();
@@ -299,10 +288,10 @@ public class chat extends AppCompatActivity {
                                 }
 
 
-                            }
+                            } */
 
-                            chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this, arr);
-                            chatList.setAdapter(arrayAdapter);
+                            //chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this, arr);
+                           // chatList.setAdapter(arrayAdapter);
                             //notifyOfMessage();
 
                         }

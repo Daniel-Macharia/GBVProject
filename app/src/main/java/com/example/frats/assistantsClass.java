@@ -39,8 +39,9 @@ public class assistantsClass extends AppCompatActivity {
         title = findViewById(R.id.title);
 
         //loadUserFromLocalDb();
-        list = getUsersFromLocalDB();
+       // list = getUsersFromLocalDB();
         //newList  = new ArrayList<>(10);
+        getUsersFromLocalDB();
 
 
         try {
@@ -51,64 +52,12 @@ public class assistantsClass extends AppCompatActivity {
             u.open();
             userOrAssistant = u.readData();
             u.close();
-            FirebaseDatabase myDB = FirebaseDatabase.getInstance();
+            //FirebaseDatabase myDB = FirebaseDatabase.getInstance();
             //DatabaseReference myRef = myDB.getReference("assistant");
             String uOa = "";
             if( userOrAssistant[3].equals("users") )
             {
                 uOa =  "assistant" ;
-
-
-                DatabaseReference myRef = myDB.getReference(uOa);
-                myRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>()
-                {
-                    @Override
-                    public void onComplete(Task<DataSnapshot> task)
-                    {
-                        if( task.isSuccessful())
-                        {
-                            DataSnapshot snap = task.getResult();
-                            //Iterable<DataSnapshot> iter = snap.getChildren();
-
-                            if( snap.hasChildren() )
-                            {
-                                for( DataSnapshot s : snap.getChildren() )
-                                {
-
-                                    String a[] = new String[2];
-                                    if(s.hasChild("username") )
-                                        a[0] = s.child("username").getValue().toString();
-                                    if(s.hasChild("phone") )
-                                        a[1] = s.child("phone").getValue().toString();
-
-                                    if( contains( list, a[1] ) )
-                                    {
-                                        continue;
-                                    }
-
-                                    list.add( a[1]);
-                                    newList.add( new userOrAssistant( new String( a[0] ), new String( a[1] ) ) );
-
-                                    user u = new user(assistantsClass.this);
-                                    u.open();
-                                    u.createUser( new String(a[0]), "", new String(a[1]),
-                                            "", 0);
-                                    u.close();
-
-                                }
-                            }
-
-                            //ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
-                            //l.setAdapter(arr);
-                        }
-                        else {
-                            //if the task failed to complete successfully
-                        }
-
-
-                    }
-
-                });
 
                 //ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
                 userOrAssistantAdapter arr = new userOrAssistantAdapter( this, newList);
@@ -119,7 +68,7 @@ public class assistantsClass extends AppCompatActivity {
             {
                 uOa = "users";
                 title.setText("My Survivors");
-                loadChats();
+                //loadChats();
 
                 userOrAssistantAdapter arr = new userOrAssistantAdapter( this, newList);
                 l.setAdapter(arr);
@@ -134,14 +83,6 @@ public class assistantsClass extends AppCompatActivity {
 
 
     }
-
-    @Override
-    protected void onDestroy() {
-        finish();
-        super.onDestroy();
-        //finish();
-    }
-
     private boolean contains(ArrayList<String> list, String value)
     {
 
@@ -156,7 +97,7 @@ public class assistantsClass extends AppCompatActivity {
         return false;
     }
 
-    private ArrayList<String> loadChats()
+   /* private ArrayList<String> loadChats()
     {
         ArrayList<String> mySurvivors = new ArrayList<>(10);
 
@@ -315,9 +256,9 @@ public class assistantsClass extends AppCompatActivity {
 
         return mySurvivors;
 
-    }
+    }  */
 
-    private ArrayList<String> getUsersFromLocalDB()
+    private void getUsersFromLocalDB()
     {
         ArrayList<String[]> r = new ArrayList<>(10);
 
@@ -327,41 +268,17 @@ public class assistantsClass extends AppCompatActivity {
         u.close();
         //String s = "";
 
-        ArrayList<String> result = new ArrayList<>();
+       // ArrayList<String> result = new ArrayList<>();
         for( String[] user : r )
         {
            // s += user[0] + " " + user[1] + " \n";
-            result.add( new String( user[1] ));
+            //result.add( new String( user[1] ));
             newList.add( new userOrAssistant( new String( user[0] ), new String( user[1] ) ) );
             //Toast.makeText(this, "Old user = " + user[1], Toast.LENGTH_SHORT).show();
         }
         //Toast.makeText( this, s, Toast.LENGTH_LONG).show();
 
-        return result;
+        //return result;
     }
 
-    public void loadChat(View view)
-    {
-        TextView n = view.findViewById(R.id.name);
-        TextView p = view.findViewById(R.id.phone);
-        String nameStr = n.getText().toString();
-        String phoneStr = p.getText().toString();
-
-        Toast.makeText(this, "Clicked on user contact: " + nameStr + " ~ " + phoneStr, Toast.LENGTH_SHORT).show();
-        //Scanner s = new Scanner(phoneStr);
-       // String name = s.next();//get name
-       // s.next();//discard colon
-       // String phone = s.next();//get phone
-
-        /*
-        Intent chatIntent = new Intent( assistantsClass.this, chat.class);
-        chatIntent.putExtra("recipient",phoneStr);
-        chatIntent.putExtra("chatName", nameStr);
-        startActivity(chatIntent);*/
-    }
-
-    public void showMore(View view)
-    {
-        Toast.makeText(this, "Clicked on more", Toast.LENGTH_SHORT).show();
-    }
 }
