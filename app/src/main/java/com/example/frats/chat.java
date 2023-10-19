@@ -153,6 +153,7 @@ public class chat extends AppCompatActivity {
 
     private void loadFromLocalDB(String recipient) {
         ArrayList<msg> ms = new ArrayList<>(10);
+        //ArrayList<chatMessage> arr = new ArrayList<>(10);
 
         messages messageDB = new messages(chat.this);
         messageDB.open();
@@ -239,7 +240,7 @@ public class chat extends AppCompatActivity {
 
                            // MyFirebaseUtilityClass.valueChangedForThisChatRoom( chatList, snapshot, chat.this, myRecipient);
 
-                            /*
+
                             if (snapshot.hasChildren()) {
                                 for (DataSnapshot message : snapshot.getChildren()) {
                                     msg mess = new msg();
@@ -288,7 +289,7 @@ public class chat extends AppCompatActivity {
                                 }
 
 
-                            } */
+                            }
 
                             //chatMessageAdapter arrayAdapter = new chatMessageAdapter(chat.this, arr);
                            // chatList.setAdapter(arrayAdapter);

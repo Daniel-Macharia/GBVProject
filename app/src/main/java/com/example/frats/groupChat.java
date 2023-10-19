@@ -243,6 +243,7 @@ public class groupChat extends AppCompatActivity {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+
                         ArrayList<chatMessage> result = getMessagesFromLocalDb();
 
                         if( snapshot.hasChildren() )
@@ -286,6 +287,7 @@ public class groupChat extends AppCompatActivity {
                                 }
                             }
                         }
+
 
                         //chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, result);
                         //chatList.setAdapter( adapter );

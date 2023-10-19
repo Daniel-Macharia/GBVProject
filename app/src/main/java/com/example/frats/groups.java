@@ -50,7 +50,7 @@ public class groups extends AppCompatActivity {
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
 
 
-                    checkIfMember(group.get(i).first); /* .addOnCompleteListener(new OnCompleteListener() {
+                   /*  checkIfMember(group.get(i).first); .addOnCompleteListener(new OnCompleteListener() {
                         @Override
                         public void onComplete(@NonNull Task task) {
                             Toast.makeText(groups.this, "finished checking if user is member of group " + group.get(i).first, Toast.LENGTH_SHORT).show();
@@ -85,11 +85,17 @@ public class groups extends AppCompatActivity {
         u.close();
     }
 
-    private void checkIfMember(String groupKey)
+    private boolean checkIfMember(String groupKey)
     {
+        userGroupAccessPermissions permissions = new userGroupAccessPermissions(groups.this);
+        permissions.open();
+        boolean isAllowedAccess = permissions.isAllowedAccessTo(groupKey);
+        permissions.close();
+
+        return isAllowedAccess;
 
         //Toast.makeText(this, "Clicked " + groupKey, Toast.LENGTH_SHORT).show();
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
+       /* FirebaseDatabase db = FirebaseDatabase.getInstance();
 
         DatabaseReference dbRef = db.getReference("group");
 
@@ -139,7 +145,7 @@ public class groups extends AppCompatActivity {
                     }
                 }
             }
-        });
+        }); */
 
     }
 
@@ -150,12 +156,9 @@ public class groups extends AppCompatActivity {
         String[] data = u.readData();
         u.close();
 
-        /* checkIfMember(groupKey).addOnCompleteListener(new OnCompleteListener() {
-            @Override
-            public void onComplete(@NonNull Task task) {
-                Toast.makeText(groups.this, "finished checking if user is member of group " + group.get(i).first, Toast.LENGTH_SHORT).show();
-            }
-        }); */
+        if( data[3].equals("assistant") )
+            return true;
+
 
         boolean isAllowed = false;
         try{
@@ -168,15 +171,8 @@ public class groups extends AppCompatActivity {
             Toast.makeText(groups.this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
-        //if( isAllowed )
-            //Toast.makeText(this, "users allowed access locally to this group", Toast.LENGTH_SHORT).show();
 
-        //only assistant is allowed direct access to the group chat
-        //users must request assistants for permission
-        if( data[3].equals("assistant") )
-            return true;
-        else
-            return isAllowed;
+        return isAllowed;
     }
 
     private void initGroupNames()

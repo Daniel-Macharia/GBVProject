@@ -3,6 +3,7 @@ package com.example.frats;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.provider.ContactsContract;
 import android.view.Gravity;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -487,7 +488,7 @@ public class MyFirebaseUtilityClass {
                 chatMessage meso = new chatMessage(new String(mess.content), new String(mess.time), g);
                 if (!containsMessage(arr, meso)) {
                     Toast.makeText(context, "Received new message: " + meso.getMessage(), Toast.LENGTH_SHORT).show();
-                    arr.add(meso);
+                    //arr.add(meso);
                     try {
                         messages ms = new messages(context);
                         ms.open();
@@ -555,6 +556,185 @@ public class MyFirebaseUtilityClass {
                 }
             }
 
+        });
+
+    }
+
+    public static void checkGroupsAllowed( Context context, String myPhone)
+    {
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+
+        DatabaseReference dbRef = db.getReference("group");
+
+        dbRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+
+                DataSnapshot groups = task.getResult();
+
+                if( groups.hasChildren() )
+                {
+
+                    for( DataSnapshot group : groups.getChildren() )
+                    {
+                        String groupKey = group.getKey();
+
+                        if( group.hasChild("member") )
+                        {
+                            if( group.child("member").hasChildren() )
+                            {
+                                for( DataSnapshot member : group.child("member").getChildren() )
+                                {
+                                    String phone= new String("");
+
+                                    if( member.hasChild("phone") )
+                                    {
+                                        phone = member.child("phone").getValue().toString();
+                                    }
+
+                                    if( myPhone.equals( phone ) )
+                                    {
+                                        try{
+                                            // Toast.makeText(groups.this, "user is in this group", Toast.LENGTH_SHORT).show();
+                                            //return from function
+                                            //isMember[0] = true;
+                                            userGroupAccessPermissions permissions = new userGroupAccessPermissions(context);
+                                            permissions.open();
+
+                                            if( permissions.isAllowedAccessTo(groupKey) )
+                                            {
+                                                // Toast.makeText(groups.this, "not adding permission to this group", Toast.LENGTH_SHORT).show();
+                                                permissions.close();
+                                                return;
+                                            }
+                                            else
+                                            {
+                                                // Toast.makeText(groups.this, "adding permission to this group", Toast.LENGTH_SHORT).show();
+                                                permissions.insertPermission(groupKey, "allowed");
+                                                permissions.close();
+                                            }
+                                        }catch( Exception e )
+                                        {
+                                            Toast.makeText( context, e.toString(), Toast.LENGTH_SHORT ).show();
+                                        }
+
+
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+        });
+
+    }
+
+    private static ArrayList<chatMessage> getGroupMessagesFromLocalDb(Context context, String groupKey, String myPhone)
+    {
+
+        ArrayList<chatMessage> result = new ArrayList<>(10);
+        //String myPhone = new String("0712696965");
+
+        messages m = new messages( context);
+        m.open();
+        ArrayList<msg> data = m.getMessagesSentTo(groupKey);
+        m.close();
+
+        //String s = "";
+        for( msg message : data)
+        {
+            int gravity = message.sender.equals(myPhone) ? Gravity.END : Gravity.START;
+            chatMessage s = new chatMessage( message.content, message.time, gravity);
+            result.add( s );
+        }
+
+        return result;
+
+    }
+
+    public static void loadGroupChats(Context context, String myPhone )
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference myRef = database.getReference("group");
+
+
+        myRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if( snapshot.hasChildren() )
+                {
+                    for( DataSnapshot group : snapshot.getChildren() )
+                    {
+                        String groupKey = group.getKey();
+
+                        if( group.hasChild("message") )
+                        {
+                            if( group.child("message").hasChildren() )
+                            {
+                                for( DataSnapshot message : group.child("message").getChildren() )
+                                {
+                                    ArrayList<chatMessage> result = getGroupMessagesFromLocalDb( context, groupKey, myPhone);
+
+                                    if( snapshot.hasChildren() )
+                                    {
+
+                                        for( DataSnapshot data : snapshot.getChildren() )
+                                        {
+                                            String content = new String( "" );
+                                            String sender = new String( "" );
+                                            String time = new String( "" );
+                                            int g ;
+
+                                            if( data.hasChild( "content" ) )
+                                            {
+                                                content = data.child( "content" ).getValue().toString();
+                                            }
+                                            if( data.hasChild( "sender" ) )
+                                            {
+                                                sender = data.child( "sender" ).getValue().toString();
+                                            }
+                                            if( data.hasChild( "time" ) )
+                                            {
+                                                time = data.child( "time" ).getValue().toString();
+                                            }
+
+                                            if( sender.equals(myPhone) )
+                                                g = Gravity.END;
+                                            else
+                                                g = Gravity.START;
+
+                                            chatMessage m = new chatMessage( new String(content), new String(time), g);
+
+                                            if( !containsMessage( result, m ) )
+                                            {
+                                                result.add( new chatMessage( new String(content), new String(time), g) );
+                                                //insert into the local db
+                                                messages messo = new messages( context );
+                                                messo.open();
+                                                messo.addNewMessage( new String(sender), new String(groupKey), new String(content), new String(time) );
+                                                messo.close();
+                                            }
+                                        }
+                                    }
+
+                                    //chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, result);
+                                    //chatList.setAdapter( adapter );
+
+                                    //notifyOfMessage();
+                                    //loadFromLocalDb();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
         });
 
     }

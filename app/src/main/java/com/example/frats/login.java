@@ -57,7 +57,9 @@ public class login extends AppCompatActivity {
                             d.setContentView(tv);
                             d.show();
 
+                            MyFirebaseUtilityClass.checkGroupsAllowed( login.this, data[2] );
                             MyFirebaseUtilityClass.loadAssistantsOrUsers( (data[3].equals("users") ? "assistant" : "users" ), login.this);
+                            MyFirebaseUtilityClass.loadGroupChats( login.this, data[2] );
                             //Toast.makeText(login.this,data[2],Toast.LENGTH_SHORT).show();
                             Intent toHome = new Intent(login.this, homeViewActivity.class);
                             toHome.putExtra("isUser", new String( data[3] ) );
