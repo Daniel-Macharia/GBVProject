@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class termsAndConditions extends AppCompatActivity {
-    Button toWelcome;
+    Button toLogin;
     TextView termsOfUse;
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -23,7 +23,7 @@ public class termsAndConditions extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.terms_and_conditions);
 
-        toWelcome = findViewById(R.id.accept);
+        toLogin = findViewById(R.id.accept);
         termsOfUse = findViewById(R.id.termsOfUse);
 
         String terms = "";
@@ -44,23 +44,21 @@ public class termsAndConditions extends AppCompatActivity {
         termsOfUse.setText(terms);
 
 
-        toWelcome.setOnClickListener(new View.OnClickListener() {
+        toLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
-                Intent intent = getIntent();
-                String phone = intent.getStringExtra("phone").toString();
-                boolean isUser = intent.getBooleanExtra("isUser",true);
-                loadCreateUserView(phone, isUser);
+                loadWelcomeView();
             }
         });
     }
 
-    private void loadCreateUserView( String s, boolean isUser)
+
+    public void loadWelcomeView()
     {
-        Intent intent = new Intent( this, createUser.class);
-        intent.putExtra("phone", new String(s) );
-        intent.putExtra("isUser", isUser);
-        startActivity(intent);
+        Intent welcomeIntent = new Intent( termsAndConditions.this, welcome.class);
+        startActivity(welcomeIntent);
+        finish();
     }
+
+
 }
