@@ -37,7 +37,7 @@ public class MyFirebaseUtilityClass {
         }
         else if( networkInfo.isAvailable() )
         {
-            Toast.makeText(context, "Connected to Network\n\n" + networkInfo.getReason(), Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Connected to Network\n\n" , Toast.LENGTH_SHORT).show();
             return true;
         }
 
@@ -735,6 +735,86 @@ public class MyFirebaseUtilityClass {
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
+        });
+
+    }
+
+    public static void checkIfUserExists(Context context, String username, String phone)
+    {
+
+        if( !isConnectedToNetwork(context) )
+        {
+            Toast.makeText(context, "Network not available\nCheck your network connection and try again!", Toast.LENGTH_SHORT).show();
+            //return null;
+        }
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("user");
+        DatabaseReference assistantRef = database.getReference("assistant");
+
+
+        usersRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+
+                if( dataSnapshot.hasChildren() )
+                {
+                    for( DataSnapshot user : dataSnapshot.getChildren() )
+                    {
+                        String name = "", number = "";
+
+                        if( user.hasChild("username") )
+                        {
+                            name = user.child("username").getValue().toString();
+                        }
+                        if( user.hasChild("phone") )
+                        {
+                            number = user.child("phone").getValue().toString();
+                        }
+
+                        if( username.equals(name) && phone.equals(number) )
+                        {
+                            Toast.makeText(context, "user found", Toast.LENGTH_SHORT).show();
+                            login.isUserOrAssistant = "users";
+                            login.found = true;
+                        }
+                    }
+                }
+
+            }
+
+        });
+
+        assistantRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+
+                if( dataSnapshot.hasChildren() )
+                {
+                    for( DataSnapshot user : dataSnapshot.getChildren() )
+                    {
+                        String name = "", number = "";
+
+                        if( user.hasChild("username") )
+                        {
+                            name = user.child("username").getValue().toString();
+                        }
+                        if( user.hasChild("phone") )
+                        {
+                            number = user.child("phone").getValue().toString();
+                        }
+
+                        if( username.equals(name) && phone.equals(number) )
+                        {
+                            Toast.makeText(context, "assistant found", Toast.LENGTH_SHORT).show();
+                            login.isUserOrAssistant = "assistant";
+                            login.found = true;
+                        }
+                    }
+                }
+
+            }
+
         });
 
     }

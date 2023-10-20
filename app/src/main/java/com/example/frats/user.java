@@ -136,16 +136,25 @@ public class user {
         int phoneIndex = c.getColumnIndex(phoneNumber);
         int userAssistantIndex = c.getColumnIndex(userOrAssistant);
 
-        c.moveToFirst();
+        if( c.getCount() > 0 )
+        {
+           // Toast.makeText(thisContext, "Cursor has values", Toast.LENGTH_SHORT).show();
+            c.moveToFirst();
 
-        userInfo[0] = c.getString(nameIndex);
-        userInfo[1] = c.getString(passwordIndex);
-        userInfo[2] = c.getString(phoneIndex);
-        userInfo[3] = c.getString(userAssistantIndex);
+            userInfo[0] = c.getString(nameIndex);
+            userInfo[1] = c.getString(passwordIndex);
+            userInfo[2] = c.getString(phoneIndex);
+            userInfo[3] = c.getString(userAssistantIndex);
+
+            return new String[]{userInfo[0],userInfo[1],userInfo[2],userInfo[3]} ;
+        }
+        else {
+           // Toast.makeText(thisContext, "Cursor has no values", Toast.LENGTH_SHORT).show();
+
+            return new String[]{ new String(""), new String(""), new String(""), new String("")};
+        }
         //Toast.makeText(thisContext,"Phone: " + c.getString(phoneIndex), Toast.LENGTH_SHORT).show();
 
-
-        return new String[]{userInfo[0],userInfo[1],userInfo[2],userInfo[3]} ;
     }
 
 }

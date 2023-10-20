@@ -17,6 +17,9 @@ public class login extends AppCompatActivity {
     //Button signup;
     EditText userName,userPassWord;
 
+    public static String isUserOrAssistant = null;
+    public static boolean found = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -28,19 +31,29 @@ public class login extends AppCompatActivity {
         userName = findViewById(R.id.user_name);
         userPassWord = findViewById(R.id.user_password);
 
+
+
         login.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 String name,pass,u_name,u_pass;
-                String data[] = new String[4];
+
                 name = userName.getText().toString();
                 pass = userPassWord.getText().toString();
 
                 try {
                     user validateUser = new user(login.this);
                     validateUser.open();
-                    data = validateUser.readData();
+                    String[] data = validateUser.readData();
+                    validateUser.close();
+
+                    if( data[0].equals("") )
+                    {
+                        //Toast.makeText(login.this, "User not in local database", Toast.LENGTH_SHORT).show();
+                        loginWithFirebase(name, pass);
+                        return;
+                    }
 
                     u_name = data[0];
                     u_pass = data[1];
@@ -61,12 +74,9 @@ public class login extends AppCompatActivity {
                             MyFirebaseUtilityClass.loadAssistantsOrUsers( (data[3].equals("users") ? "assistant" : "users" ), login.this);
                             MyFirebaseUtilityClass.loadGroupChats( login.this, data[2] );
 
-                            Toast.makeText(login.this,data[2],Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(login.this,data[2],Toast.LENGTH_SHORT).show();
 
-                            Intent toHome = new Intent(login.this, homeViewActivity.class);
-                            toHome.putExtra("isUser", new String( data[3] ) );
-                            startActivity(toHome);
-                            finish();
+                           loadHomeView(data[3]);
 
                         }
                         else {
@@ -92,7 +102,6 @@ public class login extends AppCompatActivity {
                         userName.setText("");
                     }
 
-                    validateUser.close();
                 }
                 catch(Exception e)
                 {
@@ -103,24 +112,47 @@ public class login extends AppCompatActivity {
 
                 }
 
-                //Intent toHome = new Intent(login.this, homeViewActivity.class);
-                //startActivity(toHome);
-
             }
         });
 
-       /* signup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                Intent toSignUp = new Intent( login.this, MainActivity.class);
-                startActivity(toSignUp);
+    }
+    private void loadHomeView( String userOrAssistant)
+    {
+        Intent toHome = new Intent(login.this, homeViewActivity.class);
+        toHome.putExtra("isUser", new String( userOrAssistant ) );
+        startActivity(toHome);
+        finish();
+    }
 
-            }
-        });*/
+    private void loginWithFirebase(String username, String password)
+    {
+        //Toast.makeText(this, "Loging in with details from firebase", Toast.LENGTH_SHORT).show();
+        MyFirebaseUtilityClass.checkIfUserExists( login.this, username, password);
 
+        if( !found )
+        {
+            //Toast.makeText(this, "User details not found from firebase", Toast.LENGTH_SHORT).show();
+            //finish();
+            return;
+        }
 
+        //loadHomeView(isUserOrAssistant);
+    }
+
+}
+
+class ListenIfFirebaseReturned implements Runnable {
+
+    @Override
+    public void run()
+    {
+        while( ! login.found )
+        {
+
+        }
 
     }
 
 }
+
