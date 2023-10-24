@@ -1,14 +1,22 @@
 package com.example.frats;
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.provider.ContactsContract;
 import android.view.Gravity;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -172,7 +180,7 @@ public class MyFirebaseUtilityClass {
 
     }
 
-    public static void loadAssistantsOrUsers(String url, Context context)
+    public static void loadAssistantsOrUsers( Context context, String url, String contact)
     {
         isConnectedToNetwork(context);
         ArrayList<String> list = readFromLocalDB(context);
@@ -227,7 +235,7 @@ public class MyFirebaseUtilityClass {
                         //if the task failed to complete successfully
                     }
 
-                    Toast.makeText(context, "Finished Loading users", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "Finished Loading users", Toast.LENGTH_SHORT).show();
 
                 }
 
@@ -236,10 +244,10 @@ public class MyFirebaseUtilityClass {
         } else if (url.equals("users")) {
             //load users for this assistant
 
-            user u = new user(context);
-            u.open();
-            String[] userOrAssistant = u.readData();
-            u.close();
+           // user u = new user(context);
+            //u.open();
+            //String[] userOrAssistant = u.readData();
+            //u.close();
 
             ArrayList<String> newChatNumbers = new ArrayList<>(10);
 
@@ -271,11 +279,11 @@ public class MyFirebaseUtilityClass {
                                         participants[1] = roomSnapShot.child("participants").child("p2").getValue().toString();
                                     }
 
-                                    if( userOrAssistant[2].equals( participants[0]) ||
-                                            userOrAssistant[2].equals(participants[1]) )
+                                    if( contact.equals( participants[0]) ||
+                                            contact.equals(participants[1]) )
                                     {
 
-                                        myRef.child( roomSnapShot.getKey() ).addValueEventListener(new ValueEventListener() {
+                                        /* myRef.child( roomSnapShot.getKey() ).addValueEventListener(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot snapshot) {
                                                 valueChangedForThisChatRoom( snapshot, context, ( userOrAssistant[2].equals( participants[0] ) ? participants[1] : participants [0] ) );
@@ -285,7 +293,7 @@ public class MyFirebaseUtilityClass {
                                             public void onCancelled(@NonNull DatabaseError error) {
 
                                             }
-                                        });
+                                        }); */
 
                                         //get this message since I`m among the participants
                                         if( roomSnapShot.hasChild("messages") )
@@ -322,7 +330,7 @@ public class MyFirebaseUtilityClass {
                                                             new String( newMessage.time));
                                                     messo.close();
 
-                                                    if( newMessage.recipient.equals( userOrAssistant[2] ) )
+                                                    if( newMessage.recipient.equals( contact ) )
                                                         message.getRef().removeValue();
 
                                                 }
@@ -330,7 +338,7 @@ public class MyFirebaseUtilityClass {
                                         }
 
                                         String theirNumber = new String();
-                                        if( userOrAssistant[2].equals( participants[0] ) )
+                                        if( contact.equals( participants[0] ) )
                                             theirNumber = participants[1];
                                         else
                                             theirNumber = participants[0];
@@ -371,7 +379,7 @@ public class MyFirebaseUtilityClass {
                                 {
                                     for( DataSnapshot userData : users.getChildren() )
                                     {
-                                        String username = "", phone = "";
+                                        String username = "", phoneNumber = "";
 
                                         if( userData.hasChild("username") )
                                         {
@@ -379,18 +387,18 @@ public class MyFirebaseUtilityClass {
                                         }
                                         if( userData.hasChild("phone") )
                                         {
-                                            phone = userData.child("phone").getValue().toString();
+                                            phoneNumber = userData.child("phone").getValue().toString();
                                         }
 
-                                        if( !list.contains( phone) && newChatNumbers.contains( phone ) )
+                                        if( !list.contains( phoneNumber) && newChatNumbers.contains( phoneNumber ) )
                                         {
                                             //newList.add( new userOrAssistant( new String( username ), new String( phone )));
 
                                             user us = new user( context);
                                             us.open();
                                             us.createUser( new String(username),
-                                                    new String( phone ),
-                                                    new String(phone),
+                                                    new String( phoneNumber ),
+                                                    new String(phoneNumber),
                                                     new String("users"),
                                                     0 );
                                             us.close();
@@ -402,7 +410,7 @@ public class MyFirebaseUtilityClass {
 
                         });
 
-                        Toast.makeText(context, "Finished adding my survivors to local db", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(context, "Finished adding my survivors to local db", Toast.LENGTH_SHORT).show();
                     }
                 });
 
@@ -487,7 +495,7 @@ public class MyFirebaseUtilityClass {
 
                 chatMessage meso = new chatMessage(new String(mess.content), new String(mess.time), g);
                 if (!containsMessage(arr, meso)) {
-                    Toast.makeText(context, "Received new message: " + meso.getMessage(), Toast.LENGTH_SHORT).show();
+                   // Toast.makeText(context, "Received new message: " + meso.getMessage(), Toast.LENGTH_SHORT).show();
                     //arr.add(meso);
                     try {
                         messages ms = new messages(context);
@@ -741,82 +749,165 @@ public class MyFirebaseUtilityClass {
 
     public static void checkIfUserExists(Context context, String username, String phone)
     {
+        try{
 
-        if( !isConnectedToNetwork(context) )
+
+            if( !isConnectedToNetwork(context) )
+            {
+                Toast.makeText(context, "Network not available\nCheck your network connection and try again!", Toast.LENGTH_SHORT).show();
+                //return null;
+            }else{
+                Toast.makeText(context, "Network available\nPlease wait a moment", Toast.LENGTH_SHORT).show();
+
+            }
+
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference usersRef = database.getReference("users");
+            DatabaseReference assistantRef = database.getReference("assistant");
+
+
+            usersRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot) {
+
+                    if( dataSnapshot.hasChildren() )
+                    {
+                        for( DataSnapshot user : dataSnapshot.getChildren() )
+                        {
+                            String name = "", number = "";
+
+                            if( user.hasChild("username") )
+                            {
+                                name = user.child("username").getValue().toString();
+                            }
+                            if( user.hasChild("phone") )
+                            {
+                                number = user.child("phone").getValue().toString();
+                            }
+
+                            if( username.equals(name) && phone.equals(number) )
+                            {
+                                Toast.makeText(context, "user found", Toast.LENGTH_SHORT).show();
+                                login.isUserOrAssistant = "users";
+                                login.found = true;
+                            }
+                        }
+                    }
+
+                }
+
+            });
+
+            assistantRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+                @Override
+                public void onSuccess(DataSnapshot dataSnapshot) {
+
+                    if( dataSnapshot.hasChildren() )
+                    {
+                        for( DataSnapshot user : dataSnapshot.getChildren() )
+                        {
+                            String name = "", number = "";
+
+                            if( user.hasChild("username") )
+                            {
+                                name = user.child("username").getValue().toString();
+                            }
+                            if( user.hasChild("phone") )
+                            {
+                                number = user.child("phone").getValue().toString();
+                            }
+
+                            if( username.equals(name) && phone.equals(number) )
+                            {
+                                Toast.makeText(context, "assistant found", Toast.LENGTH_SHORT).show();
+                                login.isUserOrAssistant = "assistant";
+                                login.found = true;
+                            }
+                        }
+                    }
+
+                }
+
+            });
+        }catch( Exception e )
         {
-            Toast.makeText(context, "Network not available\nCheck your network connection and try again!", Toast.LENGTH_SHORT).show();
-            //return null;
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference usersRef = database.getReference("user");
-        DatabaseReference assistantRef = database.getReference("assistant");
+    }
 
 
-        usersRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
+    public static void updateAllGroups(Context context)
+    {
 
-                if( dataSnapshot.hasChildren() )
-                {
-                    for( DataSnapshot user : dataSnapshot.getChildren() )
-                    {
-                        String name = "", number = "";
+        try{
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference groupRef = database.getReference("group");
 
-                        if( user.hasChild("username") )
-                        {
-                            name = user.child("username").getValue().toString();
-                        }
-                        if( user.hasChild("phone") )
-                        {
-                            number = user.child("phone").getValue().toString();
-                        }
-
-                        if( username.equals(name) && phone.equals(number) )
-                        {
-                            Toast.makeText(context, "user found", Toast.LENGTH_SHORT).show();
-                            login.isUserOrAssistant = "users";
-                            login.found = true;
-                        }
-                    }
+            groupRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    postNotification(context, "new group messages", "check application to see group messages");
                 }
 
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-        });
+                }
+            });
+        }catch( Exception e )
+        {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
 
-        assistantRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
-            @Override
-            public void onSuccess(DataSnapshot dataSnapshot) {
+    }
 
-                if( dataSnapshot.hasChildren() )
-                {
-                    for( DataSnapshot user : dataSnapshot.getChildren() )
-                    {
-                        String name = "", number = "";
+    public static void updateAllChats(Context context)
+    {
+        try{
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference chatRef = database.getReference("chat_room");
 
-                        if( user.hasChild("username") )
-                        {
-                            name = user.child("username").getValue().toString();
-                        }
-                        if( user.hasChild("phone") )
-                        {
-                            number = user.child("phone").getValue().toString();
-                        }
-
-                        if( username.equals(name) && phone.equals(number) )
-                        {
-                            Toast.makeText(context, "assistant found", Toast.LENGTH_SHORT).show();
-                            login.isUserOrAssistant = "assistant";
-                            login.found = true;
-                        }
-                    }
+            chatRef.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    postNotification(context, "New chat Messages", "check application to see chats");
                 }
 
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-        });
+                }
+            });
+        }catch( Exception e )
+        {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
 
+    public static void postNotification( Context context, String title, String text)
+    {
+
+        NotificationManager manager = (NotificationManager) context.getSystemService( Context.NOTIFICATION_SERVICE );
+
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O )
+        {
+            NotificationChannel channel = new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT );
+            manager.createNotificationChannel(channel);
+        }
+
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder( context, "worker")
+                .setContentTitle(title)
+                .setContentText(text)
+                .setSmallIcon( R.mipmap.icon );
+
+        if(ActivityCompat.checkSelfPermission( context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED )
+        {
+            manager.notify(1, builder.build() );
+        }else{
+           // ActivityCompat.requestPermissions( context, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1 );
+        }
     }
 
 }

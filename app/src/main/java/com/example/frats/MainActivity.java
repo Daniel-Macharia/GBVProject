@@ -10,6 +10,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -26,6 +30,8 @@ public class MainActivity extends AppCompatActivity {
             checkUser.open();
             String[] check = checkUser.readData();
             checkUser.close();
+
+            //makeFirebaseWorkRequest();
 
             if( !check[0].equals("") )//if a user account exists
             {                             //load the login page

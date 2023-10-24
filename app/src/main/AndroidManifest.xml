@@ -35,6 +35,7 @@
         <activity android:name=".userProfile"></activity>
         <activity android:name=".groups"></activity>
         <activity android:name=".groupChat"></activity>
+        <activity android:name=".CreateNewPassword"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

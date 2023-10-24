@@ -9,6 +9,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkInfo;
+import androidx.work.WorkManager;
+
+import java.util.concurrent.TimeUnit;
 
 public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnMenuItemClickListener {
 
@@ -22,37 +32,33 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
+       try{
+           super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.home_view);
+           setContentView(R.layout.home_view);
 
-        tv = findViewById(R.id.anime);
+           tv = findViewById(R.id.anime);
 
-        tv.setText("");
-        addMessage();
+           tv.setText("");
+           addMessage();
 
-        Intent intent = getIntent();
-        String userOrAssistant = intent.getStringExtra("isUser");
+           Intent intent = getIntent();
+           String userOrAssistant = intent.getStringExtra("isUser");
 
-        if( userOrAssistant.equals("assistant") )
-            isUser = false;
-        else
-            isUser = true;
+           if( userOrAssistant.equals("assistant") )
+               isUser = false;
+           else
+               isUser = true;
 
-        anime worker = new anime(tv, text);
-        worker.start();
+           anime worker = new anime(tv, text);
+           worker.start();
 
-      /*  popup = findViewById(R.id.popup);
-        popup.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                PopupMenu popUp = new PopupMenu( landingViewActivity.this, view);
-                MenuInflater inflater = popUp.getMenuInflater();
-                inflater.inflate(R.menu.options, popUp.getMenu());
-                popUp.show();
-            }
-        });*/
+           makeFirebaseWorkRequest();
 
+       }catch( Exception e )
+       {
+           Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+       }
 
     }
 
@@ -146,6 +152,53 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         Intent intent = new Intent(homeViewActivity.this, userProfile.class);
         startActivity(intent);
     }
+
+
+    public void makeFirebaseWorkRequest()
+    {
+
+        try{
+            Toast.makeText(getApplicationContext(), "Setting work request" , Toast.LENGTH_SHORT).show();
+
+            Constraints c = new Constraints.Builder()
+                    .setRequiredNetworkType( NetworkType.CONNECTED )
+                    .build();
+
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder( FirebaseWorker.class )
+                  .build();
+            //PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( FirebaseWorker.class, 15, TimeUnit.MINUTES)
+             //       .build();
+
+           // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork( "SyncWithFirebase", ExistingPeriodicWorkPolicy.KEEP, request );
+            WorkManager.getInstance(getApplicationContext()).enqueue(request);
+
+            WorkManager.getInstance(getApplicationContext()).getWorkInfoByIdLiveData( request.getId())
+                    .observe(this, new Observer<WorkInfo>() {
+                        @Override
+                        public void onChanged(WorkInfo workInfo) {
+
+                            if( workInfo.getState() != null )
+                            {
+                                MyFirebaseUtilityClass.postNotification(getApplicationContext(),"Work Request State", new String( workInfo.getState().name() ) );
+                                Toast.makeText(getApplicationContext(), "Status changed " + workInfo.getState().name(), Toast.LENGTH_SHORT).show();
+
+                            }
+
+                            //if( workInfo.getState().isFinished() )
+                            //  WorkManager.getInstance(getApplicationContext()).enqueue(request);
+                        }
+                    });
+            Toast.makeText(getApplicationContext(), "After setting work request" , Toast.LENGTH_SHORT).show();
+
+
+
+        }catch( Exception e )
+        {
+            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
 }
 
 class anime extends Thread{
