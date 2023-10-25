@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:gravity="center"
+    tools:context=".EditProfile">
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="4dp"
+        >
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Enter Details You Wish to update"
+            android:textColor="@color/blue"
+            android:gravity="center"
+            android:textSize="24sp"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="username"
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:textSize="24sp"
+                />
+            <EditText
+                android:id="@+id/username"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1.5"
+                android:text=""
+                android:textColor="@color/blue"
+                android:textSize="24sp"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/cream"
+                android:gravity="center"
+                android:inputType="textVisiblePassword"
+                />
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="phone "
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:textSize="24sp"
+                />
+            <EditText
+                android:id="@+id/phone"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1.5"
+                android:text=""
+                android:textColor="@color/blue"
+                android:textSize="24sp"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/cream"
+                android:gravity="center"
+                android:inputType="phone"
+                />
+
+
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1"
+                android:text="password "
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:textSize="24sp"
+                />
+
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1.5"
+                android:text=""
+                android:textColor="@color/blue"
+                android:textSize="24sp"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/cream"
+                android:gravity="center"
+                android:inputType="textPassword"
+                />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="4dp"
+            android:gravity="center"
+            >
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="confirm \n password "
+                android:textColor="@color/black"
+                android:gravity="center"
+                android:textSize="24sp"
+                />
+
+            <EditText
+                android:id="@+id/confirm"
+                android:layout_width="0dp"
+                android:layout_height="56dp"
+                android:layout_weight="1.5"
+                android:text=""
+                android:textColor="@color/blue"
+                android:textSize="24sp"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/cream"
+                android:gravity="center"
+                android:inputType="textPassword"
+                />
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:gravity="end"
+            android:paddingEnd="20dp"
+            >
+
+            <Button
+                android:id="@+id/save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="save"
+                android:textSize="24sp"
+                android:textColor="@color/blue"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/green"
+                android:gravity="center"
+                />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

@@ -50,6 +50,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="right"
+        android:background="@color/cream"
         >
         <TextView
             android:layout_width="0dp"
@@ -59,6 +60,7 @@
             android:paddingLeft="10dp"
             android:textSize="16sp"
             android:text="By clicking 'I agree' you agree to the FRATS terms and conditions of service"
+
             />
 
         <Button
@@ -68,6 +70,7 @@
             android:layout_weight="2"
             android:text="( I Agree )"
             android:textColor="@color/blue"
+            android:background="@color/cream"
             />
 
     </LinearLayout>

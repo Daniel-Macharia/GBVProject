@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Pair;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -11,6 +12,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import java.util.ArrayList;
 
 public class login extends AppCompatActivity {
 
@@ -21,6 +24,10 @@ public class login extends AppCompatActivity {
 
     public static String isUserOrAssistant = null;
     public static boolean found = false;
+    public static boolean finishedGettingUser = false;
+    public static boolean finishedGettingAssistant = false;
+    ArrayList<Pair<String, String>> userList = new ArrayList<>(10);
+    ArrayList<Pair<String, String>> assistantList = new ArrayList<>(10);
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -41,7 +48,16 @@ public class login extends AppCompatActivity {
 
         if( data[0].equals("") )
         {
-            Toast.makeText(login.this, "User not in local database", Toast.LENGTH_SHORT).show();
+
+            if( !MyFirebaseUtilityClass.isConnectedToNetwork( this ) )
+            {
+                Toast.makeText(this, "Not connected to network.", Toast.LENGTH_SHORT).show();
+            }
+
+            userList = MyFirebaseUtilityClass.findUserData();
+            assistantList = MyFirebaseUtilityClass.findAssistantData();
+
+            //Toast.makeText(login.this, "User not in local database", Toast.LENGTH_SHORT).show();
             password.setText("phone:");
             userPassWord.setInputType(InputType.TYPE_CLASS_PHONE);
             userPassWord.setHint("phone number");
@@ -49,31 +65,50 @@ public class login extends AppCompatActivity {
             login.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String name, phone;
-                    name = userName.getText().toString();
-                    phone = userPassWord.getText().toString();
+                  try{
+                      String name, phone;
+                      name = userName.getText().toString();
+                      phone = userPassWord.getText().toString();
 
-                    if( name.equals("") || phone.equals(""))
-                    {
-                        Toast.makeText(login.this, "Invalid username or phone number", Toast.LENGTH_SHORT).show();
-                    }
-                    else
-                    {
-                        if( !found )
-                        {
-                            MyFirebaseUtilityClass.checkIfUserExists( login.this, name, phone);
-                            Toast.makeText(login.this, "Loading....\nPlease wait.", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
+                      if( !MyFirebaseUtilityClass.isConnectedToNetwork( login.this ) )
+                      {
+                          Toast.makeText( getApplicationContext(), "Not connected to network.", Toast.LENGTH_SHORT).show();
+                      }
 
-                        Intent intent = new Intent( login.this, CreateNewPassword.class);
-                        intent.putExtra("username", name);
-                        intent.putExtra("phone", phone);
-                        intent.putExtra("isUser", isUserOrAssistant.equals("assistant") ? false : true );
-                        startActivity(intent);
 
-                        //initData( phone, isUserOrAssistant.equals("users") ? "assistant" : "users" );
-                    }
+                      if( name.equals("") || phone.equals(""))
+                      {
+                          Toast.makeText(login.this, "Invalid username or phone number", Toast.LENGTH_SHORT).show();
+                      }
+                      else
+                      {
+                          if( !userList.isEmpty() && !assistantList.isEmpty())
+                          {
+                              if( userExists(new Pair<String, String>( name, phone) ) )
+                              {
+                                  Intent intent = new Intent( login.this, CreateNewPassword.class);
+                                  intent.putExtra("username", name);
+                                  intent.putExtra("phone", phone);
+                                  intent.putExtra("isUser", isUserOrAssistant.equals("assistant") ? false : true );
+                                  startActivity(intent);
+                              }
+                          }
+
+                          if( finishedGettingAssistant && finishedGettingUser )
+                          {
+                              Toast.makeText(login.this, "The User does not exist.\n" +
+                                      "Please go back and create a new account", Toast.LENGTH_SHORT).show();
+                          }
+                          else
+                          {
+                              Toast.makeText(login.this, "Loading, please wait ...", Toast.LENGTH_SHORT).show();
+                          }
+
+                      }
+                  }catch( Exception e )
+                  {
+                      Toast.makeText(login.this, e.toString(), Toast.LENGTH_SHORT).show();
+                  }
                 }
             });
 
@@ -149,6 +184,35 @@ public class login extends AppCompatActivity {
 
     }
 
+    private boolean userExists( Pair<String, String> value)
+    {
+        if(!userList.isEmpty() )
+            Toast.makeText(this, "User List has values", Toast.LENGTH_SHORT).show();
+        if( !assistantList.isEmpty() )
+            Toast.makeText(this, "Assistant List has values", Toast.LENGTH_SHORT).show();
+
+
+        for( Pair<String, String> current : assistantList )
+        {
+            if( current.first.equals( value.first) && current.second.equals( value.second ) )
+            {
+                isUserOrAssistant = "assistant";
+                return true;
+            }
+        }
+
+        for( Pair<String, String> current : userList )
+        {
+            if( current.first.equals( value.first) && current.second.equals( value.second ) )
+            {
+                isUserOrAssistant = "users";
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public void initData(String phone, String isUorA)
     {
         MyFirebaseUtilityClass.checkGroupsAllowed( login.this, phone );
@@ -165,43 +229,8 @@ public class login extends AppCompatActivity {
         finish();
 
     }
-    private void loadCreateNewPasswordView( String userOrAssistant)
-    {
-        Intent toCreateNewPassword = new Intent(login.this, CreateNewPassword.class);
-        //toHome.putExtra("isUser", new String( userOrAssistant ) );
-        startActivity(toCreateNewPassword);
-        finish();
-    }
 
-    private void loginWithFirebase(String username, String password)
-    {
-        //Toast.makeText(this, "Loging in with details from firebase", Toast.LENGTH_SHORT).show();
-
-        if( !found )
-        {
-            //Toast.makeText(this, "User details not found from firebase", Toast.LENGTH_SHORT).show();
-            //finish();
-            MyFirebaseUtilityClass.checkIfUserExists( login.this, username, password);
-
-            return;
-        }
-
-        //loadCreateNewPasswordView(isUserOrAssistant);
-    }
 
 }
 
-class ListenIfFirebaseReturned implements Runnable {
-
-    @Override
-    public void run()
-    {
-        while( ! login.found )
-        {
-
-        }
-
-    }
-
-}
 

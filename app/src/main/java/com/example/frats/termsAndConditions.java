@@ -58,7 +58,32 @@ public class termsAndConditions extends AppCompatActivity {
         toLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                loadWelcomeView();
+
+                try{
+                    Intent intent = getIntent();
+                    Bundle data = intent.getBundleExtra("data");
+                    String username = data.getString("username");
+                    String password = data.getString("password");
+                    String phone = data.getString("phone");
+                    String isUser = data.getString("isUser");
+
+                    user newUser = new user( termsAndConditions.this );
+                    newUser.open();
+                    newUser.createUser(username, password, phone, isUser, 1);
+                    newUser.close();
+
+                     MyFirebaseUtilityClass.addNewUser(isUser, new newUser(username, phone) );
+
+                     if( isUser.equals("assistant") )
+                     {
+                         MyFirebaseUtilityClass.addToListOfParticipantsOfAllGroups("group", termsAndConditions.this, username, phone);
+                     }
+
+                    loadWelcomeView();
+                }catch(Exception e )
+                {
+                    Toast.makeText(termsAndConditions.this, e.toString(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }

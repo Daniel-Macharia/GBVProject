@@ -17,25 +17,37 @@ import androidx.work.WorkManager;
 
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
+
 public class MainActivity extends AppCompatActivity {
 
     Button user, assistant, loginButton;
     EditText username, phone, password, confirmPassword;
 
+    public static boolean hasFinishedSearchingUser, hasFinishedSearchingAssistant;
+    public static boolean userFound, assistantFound;
+    ArrayList<String> userList = new ArrayList<>(10);
+    ArrayList<String> assistantList = new ArrayList<>(10);
+
     @Override
     protected void onCreate(Bundle savedStateInstance) {
         super.onCreate(savedStateInstance);
         try{
+
+            loadCurrentUsersAndAssistantsFromFirebase();
+
             com.example.frats.user checkUser = new user( MainActivity.this );
             checkUser.open();
             String[] check = checkUser.readData();
             checkUser.close();
 
-            //makeFirebaseWorkRequest();
+            hasFinishedSearchingUser = false;
+            hasFinishedSearchingAssistant = false;
+            userFound = false;
+            assistantFound = false;
 
             if( !check[0].equals("") )//if a user account exists
             {                             //load the login page
-                //setContentView(R.layout.login_xml);
                 Intent intent = new Intent(MainActivity.this, login.class);
                 startActivity(intent);
                 finish();
@@ -69,10 +81,40 @@ public class MainActivity extends AppCompatActivity {
         user.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 String phoneNumber = phone.getText().toString();
-                Toast.makeText(MainActivity.this, "Phone = " + phoneNumber, Toast.LENGTH_SHORT).show();
-                boolean isUser = true;
-                createUserOrAssistant(phoneNumber, isUser);
+                if( hasFinishedSearchingUser )
+                {
+
+                    if( userExists( phoneNumber ) )
+                    {
+                        Toast.makeText(MainActivity.this, "A user with this phone exists\nclick login to log in", Toast.LENGTH_SHORT).show();
+
+                    }else {
+                        Toast.makeText(MainActivity.this, "Creating New User...", Toast.LENGTH_SHORT).show();
+                        boolean isUser = true;
+                        createUserOrAssistant(phoneNumber, isUser);
+                    }
+
+
+                }else{
+
+
+                    if( !MyFirebaseUtilityClass.isConnectedToNetwork( getApplicationContext() ) )
+                    {
+                        Toast.makeText(MainActivity.this, "No Internet Connection\nPlease connect to a network", Toast.LENGTH_SHORT).show();
+
+                    }
+                    else{
+                        loadCurrentUsersAndAssistantsFromFirebase();
+                        //MyFirebaseUtilityClass.findUser( getApplicationContext(), phoneNumber);
+                        Toast.makeText(MainActivity.this, "Searching for user...", Toast.LENGTH_SHORT).show();
+                    }
+
+
+                }
+
+                //Toast.makeText(MainActivity.this, "Phone = " + phoneNumber, Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -80,9 +122,33 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String phoneNumber = phone.getText().toString();
-                Toast.makeText(MainActivity.this, "Phone = " + phoneNumber, Toast.LENGTH_SHORT).show();
-                boolean isUser = false;
-                createUserOrAssistant(phoneNumber, isUser);
+                if( hasFinishedSearchingAssistant )
+                {
+                    if( assistantExists(phoneNumber) )
+                    {
+                        Toast.makeText(MainActivity.this, "An assistant with this phone exists\nClick login to log in", Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        Toast.makeText(MainActivity.this, "Creating New Assistant", Toast.LENGTH_SHORT).show();
+                        boolean isUser = false;
+                        createUserOrAssistant(phoneNumber, isUser);
+                    }
+
+                }else {
+
+                    if(! MyFirebaseUtilityClass.isConnectedToNetwork(getApplicationContext()) )
+                    {
+                        Toast.makeText(MainActivity.this, "No internet connection\nPlease connect to network", Toast.LENGTH_SHORT).show();
+                    }
+                    else{
+                        loadCurrentUsersAndAssistantsFromFirebase();
+                       // MyFirebaseUtilityClass.findAssistant( getApplicationContext(), phoneNumber );
+                        Toast.makeText(MainActivity.this, "Searching for Assistant...", Toast.LENGTH_SHORT).show();
+                    }
+
+                }
+
+
             }
         });
 
@@ -91,57 +157,73 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
                 Intent intent = new Intent( MainActivity.this, login.class );
                 startActivity( intent );
+
             }
         });
     }
 
+    private boolean assistantExists( String phone )
+    {
+
+        if( assistantList.contains(phone) )
+            return true;
+
+        return false;
+    }
+
+    private boolean userExists( String phone )
+    {
+        if( userList.contains( phone ) )
+            return true;
+
+        return false;
+    }
+
+    private void loadCurrentUsersAndAssistantsFromFirebase()
+    {
+        if( MyFirebaseUtilityClass.isConnectedToNetwork(this) )
+        {
+            userList = MyFirebaseUtilityClass.findUser();
+            assistantList = MyFirebaseUtilityClass.findAssistant();
+        }
+        else{
+            Toast.makeText(this, "No internet connection", Toast.LENGTH_LONG).show();
+        }
+    }
+
     private void createUserOrAssistant(String phoneNumber, boolean isUser) {
-        String u_name, u_phone, u_pass, confirm;
+        String u_name, u_pass, confirm;
         u_name = username.getText().toString();
         u_pass = password.getText().toString();
         confirm = confirmPassword.getText().toString();
 
         if (!invalidDetails(u_name, phoneNumber, u_pass, confirm)) {//if the details are valid
             //if neither the username, the password nor the confirm password is blank
-            boolean succeeded = true;
             try {
-                user newUserAccount = new user(MainActivity.this);
-                newUserAccount.open();
-
                 if (u_pass.equals(confirm)) {
-                    FirebaseDatabase database = FirebaseDatabase.getInstance();
 
-                    newUserAccount.createUser(u_name, u_pass, phoneNumber, (isUser ? "users" : "assistant"), 1);
+                    //newUserAccount.createUser(u_name, u_pass, phoneNumber, (isUser ? "users" : "assistant"), 1);
                     String user_OR_assistant = "";
 
-                    if (isUser) {
+                    if (isUser)
+                    {
                         user_OR_assistant = "users";
 
-                        newUser u = new newUser(u_name, phoneNumber);
-                        MyFirebaseUtilityClass.addNewUser(user_OR_assistant, u);
-
-                    } else {
+                    }
+                    else
+                    {
                         user_OR_assistant = "assistant";
-
-                        //checkNetworkConnection();
-                        MyFirebaseUtilityClass.addToListOfParticipantsOfAllGroups("group", getApplicationContext(), u_name, phoneNumber);
-
-                        newUser u = new newUser(u_name, phoneNumber);
-                        MyFirebaseUtilityClass.addNewUser(user_OR_assistant, u);
-
                     }
 
-                    launchTermsAndConditions();
+                    launchTermsAndConditions( u_name, u_pass, phoneNumber, user_OR_assistant);
 
                 } else {
                     Toast.makeText(MainActivity.this, "Password and the \nconfirm password do not match! ", Toast.LENGTH_SHORT).show();
                     password.setText("");
                     confirmPassword.setText("");
-                    return;
                 }
 
 
-                newUserAccount.close();
             } catch (Exception e) {
                 Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
             }
@@ -154,10 +236,18 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void launchTermsAndConditions() {
+    private void launchTermsAndConditions(String username, String password, String phone, String isUser) {
+
+        Bundle data = new Bundle();
+        data.putString("username", username);
+        data.putString("password", password);
+        data.putString("phone", phone);
+        data.putString("isUser", isUser);
+
         Intent intent = new Intent(MainActivity.this, termsAndConditions.class);
+        intent.putExtra("data", data);
         startActivity(intent);
-        finish();
+        //finish();
     }
 
     private boolean invalidDetails(String name, String phoneNumber, String password, String confirm) {

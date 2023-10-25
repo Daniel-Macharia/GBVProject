@@ -10,6 +10,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.provider.ContactsContract;
+import android.util.Pair;
 import android.view.Gravity;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -29,10 +30,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.ktx.Firebase;
 
 import java.util.ArrayList;
+import java.util.StringJoiner;
 
 public class MyFirebaseUtilityClass {
 
-    private static boolean isConnectedToNetwork(Context context)
+    public static boolean isConnectedToNetwork(Context context)
     {
 
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService( Context.CONNECTIVITY_SERVICE);
@@ -765,7 +767,6 @@ public class MyFirebaseUtilityClass {
             DatabaseReference usersRef = database.getReference("users");
             DatabaseReference assistantRef = database.getReference("assistant");
 
-
             usersRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
                 @Override
                 public void onSuccess(DataSnapshot dataSnapshot) {
@@ -829,6 +830,7 @@ public class MyFirebaseUtilityClass {
                 }
 
             });
+
         }catch( Exception e )
         {
             Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
@@ -836,6 +838,159 @@ public class MyFirebaseUtilityClass {
 
     }
 
+    public static ArrayList<String> findUser()
+    {
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference usersRef = database.getReference("users");
+
+        ArrayList<String> list = new ArrayList<>(10);
+
+        usersRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+
+                if( dataSnapshot.hasChildren() )
+                {
+                    for( DataSnapshot user : dataSnapshot.getChildren() )
+                    {
+                        String number = "";
+
+                        if( user.hasChild("phone") )
+                        {
+                            number = user.child("phone").getValue().toString();
+                        }
+
+                        if( !number.equals("") )
+                            list.add( new String( number ));
+
+
+
+                    }
+                }
+
+               MainActivity.hasFinishedSearchingUser = true;
+
+            }
+
+        });
+
+        return list;
+    }
+
+    public static ArrayList<String> findAssistant()
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference assistantRef = database.getReference("assistant");
+        ArrayList<String> list = new ArrayList<>(10);
+
+        assistantRef.get().addOnSuccessListener(new OnSuccessListener<DataSnapshot>() {
+            @Override
+            public void onSuccess(DataSnapshot dataSnapshot) {
+
+                if( dataSnapshot.hasChildren() )
+                {
+                    for( DataSnapshot user : dataSnapshot.getChildren() )
+                    {
+                        String number = "";
+
+                        if( user.hasChild("phone") )
+                        {
+                            number = user.child("phone").getValue().toString();
+                        }
+
+                        if( !number.equals("") )
+                            list.add( new String(number) );
+
+
+                    }
+                }
+
+                MainActivity.hasFinishedSearchingAssistant = true;
+
+            }
+
+        });
+
+        return list;
+    }
+
+    public static ArrayList<Pair<String, String>> findUserData()
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference userRef = database.getReference("users");
+        ArrayList<Pair<String, String>> userList = new ArrayList<>(10);
+
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                DataSnapshot result = task.getResult();
+
+                if( result.hasChildren() )
+                {
+                    for( DataSnapshot user : result.getChildren() )
+                    {
+                        String username = "", phone = "";
+
+                        if( user.hasChild("username") )
+                        {
+                            username = user.child("username").getValue().toString();
+                        }
+                        if( user.hasChild( "phone" ) )
+                        {
+                            phone = user.child( "phone" ).getValue().toString();
+                        }
+
+                        if( !username.equals("") && !phone.equals("") )
+                            userList.add( new Pair<String, String>( new String(username), new String(phone) ) );
+                    }
+                }
+
+                login.finishedGettingUser = true;
+            }
+        });
+
+
+        return userList;
+    }
+
+    public static ArrayList<Pair<String, String>> findAssistantData()
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference userRef = database.getReference("assistant");
+        ArrayList<Pair<String, String>> assistantList = new ArrayList<>(10);
+
+        userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                DataSnapshot result = task.getResult();
+
+                if( result.hasChildren() )
+                {
+                    for( DataSnapshot assistant : result.getChildren() )
+                    {
+                        String username = "", phone = "";
+
+                        if( assistant.hasChild("username") )
+                        {
+                            username = assistant.child("username").getValue().toString();
+                        }
+                        if( assistant.hasChild( "phone" ) )
+                        {
+                            phone = assistant.child( "phone" ).getValue().toString();
+                        }
+
+                        if( !username.equals("") && !phone.equals("") )
+                            assistantList.add( new Pair<String, String>( new String(username), new String(phone) ) );
+                    }
+                }
+                login.finishedGettingAssistant = true;
+            }
+        });
+
+
+        return assistantList;
+    }
 
     public static void updateAllGroups(Context context)
     {
