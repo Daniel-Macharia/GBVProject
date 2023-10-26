@@ -197,6 +197,12 @@ public class MainActivity extends AppCompatActivity {
         u_pass = password.getText().toString();
         confirm = confirmPassword.getText().toString();
 
+        if( !MyFirebaseUtilityClass.validatePhone(this, phoneNumber ) )
+        {
+            Toast.makeText(this, "Invalid Phone Number", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (!invalidDetails(u_name, phoneNumber, u_pass, confirm)) {//if the details are valid
             //if neither the username, the password nor the confirm password is blank
             try {

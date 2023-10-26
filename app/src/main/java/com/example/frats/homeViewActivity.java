@@ -53,7 +53,7 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
            anime worker = new anime(tv, text);
            worker.start();
 
-           makeFirebaseWorkRequest();
+           //makeFirebaseWorkRequest();
 
        }catch( Exception e )
        {
@@ -130,12 +130,8 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         if( menuItem.getItemId() == R.id.facts ) {
             //case R.id.report:
             Toast.makeText(getApplicationContext(), "FAQs", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        else
-        if( menuItem.getItemId() == R.id.about ) {
-            //case R.id.report:
-            Toast.makeText(getApplicationContext(), "About", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent( homeViewActivity.this, AboutFRATS.class );
+            startActivity(intent);
             return true;
         }
         else

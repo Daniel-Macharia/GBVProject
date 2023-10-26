@@ -28,9 +28,4 @@
         android:title="FAQs"
         />
 
-    <item
-        android:id="@+id/about"
-        android:title="About Us"
-        />
-
 </menu>

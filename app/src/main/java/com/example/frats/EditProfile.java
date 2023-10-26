@@ -13,12 +13,12 @@ public class EditProfile extends AppCompatActivity {
     EditText username, phone, password, confirm;
 
     Button save;
+
     @Override
-    protected void onCreate( Bundle SavedInstanceState )
-    {
-        try{
-            super.onCreate( SavedInstanceState );
-            setContentView( R.layout.edit_profile );
+    protected void onCreate(Bundle SavedInstanceState) {
+        try {
+            super.onCreate(SavedInstanceState);
+            setContentView(R.layout.edit_profile);
 
             username = findViewById(R.id.username);
             phone = findViewById(R.id.phone);
@@ -37,54 +37,59 @@ public class EditProfile extends AppCompatActivity {
             currentPhone = data[2];
 
             username.setHint(currentUsername);
-            phone.setHint(currentPhone);
+            phone.setHint( "0" + currentPhone.substring( currentPhone.length() - 9 ));
 
             save.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String name, contact, pass, confirmPass;
-                    name = username.getText().toString();
-                    contact = phone.getText().toString();
-                    pass = password.getText().toString();
-                    confirmPass = confirm.getText().toString();
+                    try{
+                        String name = "", contact = "", pass = "", confirmPass = "";
+                        name = username.getText().toString();
+                        contact = phone.getText().toString();
+                        pass = password.getText().toString();
+                        confirmPass = confirm.getText().toString();
 
-                    Toast.makeText(EditProfile.this, "Saved: \n" +
-                            "name : " + name + "\nContact: " + contact + "\nPassword: " +
-                            pass + "\nConfirmed Password: " + confirmPass, Toast.LENGTH_SHORT).show();
+                        if( MyFirebaseUtilityClass.validatePhone( EditProfile.this, contact ) )
+                            Toast.makeText(EditProfile.this, "Saved: \n" +
+                                    "name : " + name + "\nContact: " + contact + "\nPassword: " +
+                                    pass + "\nConfirmed Password: " + confirmPass, Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(EditProfile.this, "Invalid Phone", Toast.LENGTH_SHORT).show();
 
-                    if( pass.equals( confirmPass ) )
+                        if (pass.equals(confirmPass)) {
+                            updateDatabase(name, contact, pass);
+                        } else {
+                            Toast.makeText(EditProfile.this, "Password and the confirm password do not match\n", Toast.LENGTH_SHORT).show();
+                            password.setText("");
+                            confirm.setText("");
+                            return;
+                        }
+
+                        resetAllFields();
+                    }catch( Exception e )
                     {
-                        updateDatabase(name, contact, pass);
+                        Toast.makeText(EditProfile.this, e.toString(), Toast.LENGTH_SHORT).show();
                     }
-                    else {
-                        Toast.makeText(EditProfile.this, "Password and the confirm password do not match\n", Toast.LENGTH_SHORT).show();
-                        password.setText("");
-                        confirm.setText("");
-                        return;
-                    }
-
-                    resetAllFields();
                 }
             });
-        }catch( Exception e )
-        {
+        } catch (Exception e) {
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
     }
 
-    private void resetAllFields()
-    {
+    private void resetAllFields() {
         username.setText("");
         phone.setText("");
         password.setText("");
         confirm.setText("");
     }
 
-    private void updateDatabase(String username, String phone, String password)
-    {
+    private void updateDatabase(String username, String phone, String password) {
         user u = new user(this);
+        u.open();
         String[] data = u.readData();
         u.close();
     }
+
 }

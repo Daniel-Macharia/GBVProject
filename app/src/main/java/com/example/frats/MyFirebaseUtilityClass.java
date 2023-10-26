@@ -1065,4 +1065,30 @@ public class MyFirebaseUtilityClass {
         }
     }
 
+
+    public static boolean validatePhone(Context context, String phone)
+    {
+        if( phone.length() == 10 )
+        {
+            if( phone.startsWith("07") || phone.startsWith("01") )
+            {
+                try{
+                    int number = Integer.parseInt( phone );
+
+                }catch( NumberFormatException e )
+                {
+                    return false;
+                }catch( Exception e )
+                {
+                    Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+                }
+
+                return true;
+            }
+        }
+
+
+        return false;
+    }
+
 }
