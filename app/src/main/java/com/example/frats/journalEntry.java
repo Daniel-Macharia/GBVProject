@@ -87,6 +87,29 @@ public class journalEntry {
         return journaldb.insert( tableName, null, c);
     }
 
+    public void updateEntry( String dateOfUpdate, String timeOfUpdate, String newEntry, String oldDate, String oldTime, String oldEntry)
+    {
+        try{
+            String getEntryId = " SELECT " + entryNumber + " FROM " + tableName +
+                    " WHERE " + date + " = " + oldDate + " AND " +
+                    time + " = " + oldTime + " AND " +
+                    entry + " = " + oldEntry + ";";
+
+            Cursor c = journaldb.rawQuery( getEntryId, null );
+
+            int IdIndex = c.getColumnIndex(entryNumber);
+            int thisEntryNumber = c.getInt( IdIndex );
+
+            String update = dateOfUpdate + " / " + timeOfUpdate +"\n\n\n" + newEntry;
+            String sqlUpdateQuery = " UPDATE TABLE " + tableName +
+                    " SET " + entry + " = " + update +
+                    " WHERE " + entryNumber + " = " + thisEntryNumber + " ; ";
+        }catch( Exception e  )
+        {
+            Toast.makeText(thisContext, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     public ArrayList<String[]> getEntries()
     {
         String columns[] = new String[]{date,time,entry};

@@ -1002,7 +1002,7 @@ public class MyFirebaseUtilityClass {
             groupRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    postNotification(context, "new group messages", "check application to see group messages");
+                    postNotification(context, 10,"new group messages", "check application to see group messages");
                 }
 
                 @Override
@@ -1026,7 +1026,7 @@ public class MyFirebaseUtilityClass {
             chatRef.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    postNotification(context, "New chat Messages", "check application to see chats");
+                    postNotification(context, 20,"New chat Messages", "check application to see chats");
                 }
 
                 @Override
@@ -1040,26 +1040,27 @@ public class MyFirebaseUtilityClass {
         }
     }
 
-    public static void postNotification( Context context, String title, String text)
+    public static void postNotification( Context context, int id, String title, String text)
     {
-
+        String channelId = "thisChannelId";
+        String channelName = "thisChannelName";
         NotificationManager manager = (NotificationManager) context.getSystemService( Context.NOTIFICATION_SERVICE );
 
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O )
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
-            NotificationChannel channel = new NotificationChannel("id", "name", NotificationManager.IMPORTANCE_DEFAULT );
+            NotificationChannel channel = new NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT );
             manager.createNotificationChannel(channel);
         }
 
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder( context, "worker")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder( context, channelId)
                 .setContentTitle(title)
                 .setContentText(text)
                 .setSmallIcon( R.mipmap.icon );
 
         if(ActivityCompat.checkSelfPermission( context, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED )
         {
-            manager.notify(1, builder.build() );
+            manager.notify(id, builder.build() );
         }else{
            // ActivityCompat.requestPermissions( context, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1 );
         }

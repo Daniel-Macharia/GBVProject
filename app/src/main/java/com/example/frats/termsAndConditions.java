@@ -113,7 +113,7 @@ public class termsAndConditions extends AppCompatActivity {
 
                             if( workInfo.getState() != null )
                             {
-                                MyFirebaseUtilityClass.postNotification(getApplicationContext(),"Work Request State", workInfo.getState().name());
+                                MyFirebaseUtilityClass.postNotification(getApplicationContext(),5,"Work Request State", workInfo.getState().name());
                                 Toast.makeText(termsAndConditions.this, "Status changed " + workInfo.getState().name(), Toast.LENGTH_SHORT).show();
 
                             }

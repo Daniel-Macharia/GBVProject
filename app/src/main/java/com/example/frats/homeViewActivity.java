@@ -14,6 +14,7 @@ import androidx.work.Constraints;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.OneTimeWorkRequest;
+import androidx.work.OutOfQuotaPolicy;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
@@ -45,6 +46,7 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
            Intent intent = getIntent();
            String userOrAssistant = intent.getStringExtra("isUser");
 
+           assert userOrAssistant != null;
            if( userOrAssistant.equals("assistant") )
                isUser = false;
            else
@@ -53,7 +55,19 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
            anime worker = new anime(tv, text);
            worker.start();
 
+          // MyFirebaseUtilityClass.postNotification( getApplicationContext(), 3,"Before Making Request", "Notifying you that" +
+            //       " I'm making a work request");
            //makeFirebaseWorkRequest();
+
+           Constraints constraints = new Constraints.Builder()
+                   .setRequiredNetworkType(NetworkType.CONNECTED)
+                   .build();
+
+           PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( MyNewWorker.class, 15, TimeUnit.MINUTES )
+                   .setConstraints(constraints)
+                   .build();
+
+           WorkManager.getInstance( getApplicationContext() ).enqueue(request);
 
        }catch( Exception e )
        {
@@ -87,6 +101,12 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
             MenuItem m = popUp.getMenu().findItem(R.id.assistant);
             m.setTitle("My Survivors");
         }
+
+       // PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( MyNewWorker.class, 15, TimeUnit.MINUTES )
+                //.setExpedited(OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
+              //  .build();
+
+       // WorkManager.getInstance(getApplicationContext()).enqueue(request);
 
     }
 
@@ -160,22 +180,22 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
                     .setRequiredNetworkType( NetworkType.CONNECTED )
                     .build();
 
-            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder( FirebaseWorker.class )
-                  .build();
-            //PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( FirebaseWorker.class, 15, TimeUnit.MINUTES)
-             //       .build();
+           // OneTimeWorkRequest request = new OneTimeWorkRequest.Builder( FirebaseWorker.class )
+             //     .build();
+            PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( FirebaseWorker.class, 15, TimeUnit.MINUTES)
+                    .build();
 
            // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork( "SyncWithFirebase", ExistingPeriodicWorkPolicy.KEEP, request );
-            WorkManager.getInstance(getApplicationContext()).enqueue(request);
+            WorkManager.getInstance(this).enqueue(request);
 
-            WorkManager.getInstance(getApplicationContext()).getWorkInfoByIdLiveData( request.getId())
+            WorkManager.getInstance(this).getWorkInfoByIdLiveData( request.getId())
                     .observe(this, new Observer<WorkInfo>() {
                         @Override
                         public void onChanged(WorkInfo workInfo) {
 
                             if( workInfo.getState() != null )
                             {
-                                MyFirebaseUtilityClass.postNotification(getApplicationContext(),"Work Request State", new String( workInfo.getState().name() ) );
+                                MyFirebaseUtilityClass.postNotification( homeViewActivity.this,4,"Work Request State", new String( workInfo.getState().name() ) );
                                 Toast.makeText(getApplicationContext(), "Status changed " + workInfo.getState().name(), Toast.LENGTH_SHORT).show();
 
                             }

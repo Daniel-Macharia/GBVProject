@@ -17,12 +17,17 @@ public class FirebaseWorker extends Worker {
     @Override
     public Result doWork() {
 
-        Context c = getApplicationContext();
-        Toast.makeText(c, "Doing work" , Toast.LENGTH_SHORT).show();
+        try{
+            Context c = getApplicationContext();
+            Toast.makeText(c, "Doing work" , Toast.LENGTH_SHORT).show();
 
-        MyFirebaseUtilityClass.postNotification(c, "working " , "doWork() executing");
+            MyFirebaseUtilityClass.postNotification(getApplicationContext(), 2,"working " , "doWork() executing");
 
-        Toast.makeText(getApplicationContext(), "Finished doing work" , Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Finished doing work" , Toast.LENGTH_SHORT).show();
+        }catch( Exception e )
+        {
+            Toast.makeText(getApplicationContext(), "Error in doWork(): " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
 
         return Result.success();
     }

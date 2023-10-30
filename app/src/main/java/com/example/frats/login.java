@@ -91,6 +91,10 @@ public class login extends AppCompatActivity {
                                   intent.putExtra("phone", phone);
                                   intent.putExtra("isUser", isUserOrAssistant.equals("assistant") ? false : true );
                                   startActivity(intent);
+                                  return;
+                              }
+                              else{
+                                  return;
                               }
                           }
 
@@ -186,18 +190,26 @@ public class login extends AppCompatActivity {
 
     private boolean userExists( Pair<String, String> value)
     {
-        if(!userList.isEmpty() )
-            Toast.makeText(this, "User List has values", Toast.LENGTH_SHORT).show();
-        if( !assistantList.isEmpty() )
-            Toast.makeText(this, "Assistant List has values", Toast.LENGTH_SHORT).show();
-
-
         for( Pair<String, String> current : assistantList )
         {
             if( current.first.equals( value.first) && current.second.equals( value.second ) )
             {
                 isUserOrAssistant = "assistant";
                 return true;
+            }
+            else
+            {
+                if( !current.first.equals(( value.first)) && current.second.equals( value.second) )
+                {
+                    Toast.makeText(this, "Invalid Username", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                else
+                if( current.first.equals(( value.first)) && !current.second.equals( value.second) )
+                {
+                    Toast.makeText(this, "Invalid Phone", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
             }
         }
 
@@ -207,6 +219,20 @@ public class login extends AppCompatActivity {
             {
                 isUserOrAssistant = "users";
                 return true;
+            }
+            else
+            {
+                if( !current.first.equals(( value.first)) && current.second.equals( value.second) )
+                {
+                    Toast.makeText(this, "Invalid Username", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+                else
+                if( current.first.equals(( value.first)) && !current.second.equals( value.second) )
+                {
+                    Toast.makeText(this, "Invalid Phone", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
             }
         }
 
