@@ -110,20 +110,68 @@ public class user {
 
         int nameIndex = c.getColumnIndex( userName);
         int phoneIndex = c.getColumnIndex( phoneNumber );
+        //int userIds = c.getColumnIndex( userID );
         int imageURIIndex = c.getColumnIndex( imageURI );
 
         ArrayList<String[]> result = new ArrayList<>(10);
+        //String ids = "";
 
         for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext() )
         {
             result.add( new String[]{ new String( c.getString(nameIndex)),
                     new String(c.getString(phoneIndex))} );
+            //ids += "\n" + c.getInt( userIds );
             //Toast.makeText( thisContext, "read user: " + c.getString( nameIndex ) +
              //       " ~ " + c.getString( phoneIndex ), Toast.LENGTH_SHORT ).show();
         }
 
+        //Toast.makeText(thisContext, "IDs are :\n" + ids, Toast.LENGTH_SHORT).show();
         return result;
     }
+
+    public void updateUserName(String name)
+    {
+        try{
+            ContentValues cv = new ContentValues();
+            String whereClause = thisUser + " = " + 1;
+
+            cv.put(userName, name);
+
+            userdb.update( tableName, cv, whereClause, null);
+        }catch( Exception e )
+        {
+            Toast.makeText( thisContext, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+    public void updateUserPhone(String contact)
+    {
+       try{
+           ContentValues cv = new ContentValues();
+           String whereClause = thisUser + " = " + 1;
+
+           cv.put(phoneNumber, contact);
+
+           userdb.update( tableName, cv, whereClause, null);
+       }catch( Exception e )
+       {
+           Toast.makeText(thisContext, e.toString(), Toast.LENGTH_SHORT).show();
+       }
+    }
+    public void updateUserPassword(String pass)
+    {
+       try{
+           ContentValues cv = new ContentValues();
+           String whereClause = thisUser + " = " + 1;
+
+           cv.put(passWord, pass);
+
+           userdb.update( tableName, cv, whereClause, null);
+       }catch( Exception e )
+       {
+           Toast.makeText( thisContext, e.toString(), Toast.LENGTH_SHORT).show();
+       }
+    }
+
     public String[] readData()
     {
         String userInfo[] = new String[4];

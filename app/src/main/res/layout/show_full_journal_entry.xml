@@ -16,24 +16,44 @@
         android:textSize="24sp"
         android:textColor="@color/blue"
         />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="end"
-        android:background="@color/cream2"
+        android:orientation="horizontal"
         >
 
-        <Button
-            android:id="@+id/edit"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="EDIT"
-            android:textSize="24sp"
-            android:textColor="@color/blue"
-            android:background="@drawable/input_rectangle"
-            android:backgroundTint="@color/green"
+        <TextView
+            android:id="@+id/lastEditedOn"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="3"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            android:background="@color/cream2"
             />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="end"
+            android:background="@color/cream2"
+            >
+
+            <Button
+                android:id="@+id/edit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="EDIT"
+                android:textSize="24sp"
+                android:textColor="@color/blue"
+                android:background="@drawable/input_rectangle"
+                android:backgroundTint="@color/green"
+                />
+
+        </LinearLayout>
 
     </LinearLayout>
 
@@ -44,28 +64,14 @@
         android:background="@color/cream2"
         >
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/fullEntry"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
-            <TextView
-                android:id="@+id/fullEntry"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:textColor="@color/blue"
-                android:textAlignment="textStart"
-                />
-            <EditText
-                android:id="@+id/fullEntryEdit"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:textSize="24sp"
-                android:textColor="@color/blue"
-                android:inputType="textAutoCorrect"
-                />
-        </LinearLayout>
+            android:textSize="24sp"
+            android:textColor="@color/blue"
+            android:textAlignment="textStart"
+            />
 
     </ScrollView>
 
