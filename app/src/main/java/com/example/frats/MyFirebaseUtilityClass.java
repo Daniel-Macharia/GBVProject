@@ -43,7 +43,7 @@ public class MyFirebaseUtilityClass {
 
         if( networkInfo == null )
         {
-            Toast.makeText(context, "Not Connected to Network", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Not Connected to Network", Toast.LENGTH_SHORT).show();
         }
         else if( networkInfo.isAvailable() )
         {
@@ -1090,6 +1090,428 @@ public class MyFirebaseUtilityClass {
 
 
         return false;
+    }
+
+    public static void updateUsername( Context context, String name , String phone )
+    {
+        try{
+            if( isConnectedToNetwork(context) )
+            {
+                if( isUser(context) )
+                {
+                    //update users
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference userRef = database.getReference("users");
+
+                    userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DataSnapshot> task) {
+                            DataSnapshot result = task.getResult();
+
+                            String key = "";
+
+                            if ( result.hasChildren() )
+                            {
+                                for( DataSnapshot user : result.getChildren() )
+                                {
+                                    String username = "", phoneNumber = "";
+
+                                    if( user.hasChild("username"))
+                                    {
+                                        username = user.child("username").getValue().toString();
+                                    }
+                                    if( user.hasChild("phone"))
+                                    {
+                                        phoneNumber = user.child("phone").getValue().toString();
+                                    }
+
+                                    if( username.equals("") )
+                                    {
+                                        continue;
+                                    }
+
+
+                                    if( username.equals(name) && phoneNumber.equals(phone) )
+                                    {
+                                        //updateGroupMessagesWhereSenderIs( null, phoneNumber, username);
+                                        key = user.getKey();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if( key.equals("") )
+                            {
+                                userRef.child(key).child("username").setValue(name);
+                            }
+
+                        }
+                    });
+                }
+                else
+                {
+                    //update assistants
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference assistantRef = database.getReference("users");
+
+                    assistantRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DataSnapshot> task) {
+                            DataSnapshot result = task.getResult();
+
+                            String key = "";
+
+                            if ( result.hasChildren() )
+                            {
+                                for( DataSnapshot assistant : result.getChildren() )
+                                {
+                                    String username = "", phoneNumber = "";
+
+                                    if( assistant.hasChild("username"))
+                                    {
+                                        username = assistant.child("username").getValue().toString();
+                                    }
+                                    if( assistant.hasChild("phone"))
+                                    {
+                                        phoneNumber = assistant.child("phone").getValue().toString();
+                                    }
+
+                                    if( username.equals("") )
+                                    {
+                                        continue;
+                                    }
+
+
+                                    if( username.equals(name) && phoneNumber.equals(phone) )
+                                    {
+                                        //  updateGroupMessagesWhereSenderIs(null, phoneNumber, username);
+                                        key = assistant.getKey();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if( key.equals("") )
+                            {
+                                assistantRef.child(key).child("username").setValue(name);
+                            }
+
+                        }
+                    });
+                }
+            }
+            else
+            {
+                //schedule job for some later time
+            }
+        }catch( Exception e )
+        {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static void updatePhone( Context context, String contact)
+    {
+        try{
+            if( isConnectedToNetwork(context) )
+            {
+                if( isUser(context) )
+                {
+                    //update users
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference userRef = database.getReference("users");
+
+                    userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DataSnapshot> task) {
+                            DataSnapshot result = task.getResult();
+
+                            String key = "";
+
+                            if ( result.hasChildren() )
+                            {
+                                for( DataSnapshot user : result.getChildren() )
+                                {
+                                    String phoneNumber = "";
+
+                                    if( user.hasChild("phone"))
+                                    {
+                                        phoneNumber = user.child("phone").getValue().toString();
+                                    }
+
+                                    if( phoneNumber.equals(contact) )
+                                    {
+                                        //updateGroupMessagesWhereSenderIs(null, contact, username);
+                                        key = user.getKey();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if( key.equals("") )
+                            {
+                                userRef.child(key).child("phone").setValue(contact);
+                                // updateGroupMessagesWhereSenderIs(contact);
+                                // updateContactToAllMyChats(contact);
+                            }
+
+                        }
+                    });
+                }
+                else
+                {
+                    //update assistants
+                    FirebaseDatabase database = FirebaseDatabase.getInstance();
+                    DatabaseReference assistantRef = database.getReference("users");
+
+                    assistantRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<DataSnapshot> task) {
+                            DataSnapshot result = task.getResult();
+
+                            String key = "";
+
+                            if ( result.hasChildren() )
+                            {
+                                for( DataSnapshot assistant : result.getChildren() )
+                                {
+                                    String phoneNumber = "";
+
+                                    if( assistant.hasChild("phone"))
+                                    {
+                                        phoneNumber = assistant.child("phone").getValue().toString();
+                                    }
+
+                                    if( phoneNumber.equals(contact) )
+                                    {
+                                        //updateGroupMessagesWhereSenderIs(null, contact, username);
+                                        key = assistant.getKey();
+                                        break;
+                                    }
+                                }
+                            }
+
+                            if( key.equals("") )
+                            {
+                                assistantRef.child(key).child("contact").setValue(contact);
+                                //updateGroupMessagesWhereSenderIs(contact);
+                                //updateContactToAllMyChats(contact);
+                            }
+
+                        }
+                    });
+                }
+            }
+            else
+            {
+                //schedule job for some later time
+            }
+        }catch( Exception e )
+        {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private static boolean isUser( Context context )
+    {
+        user u = new user( context );
+        u.open();
+        String[] data = u.readData();
+        u.close();
+
+        if( data[4].equals("assistant") )
+            return false;
+
+        return true;
+    }
+
+    public static void updateGroupMessagesWhereSenderIs( Context context, String oldContact, String sender, String name )
+    {
+        try{
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+
+            DatabaseReference groupRef = database.getReference("group");
+
+            groupRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                    DataSnapshot result = task.getResult();
+
+                    if( result.hasChildren() )
+                    {
+                        for( DataSnapshot group : result.getChildren() )
+                        {
+                            if( group.hasChild("member") )
+                            {
+                                if( group.child("member").hasChildren() )
+                                {
+                                    for( DataSnapshot member : group.child( "member" ).getChildren() )
+                                    {
+                                        String username = "", phone= "";
+
+                                        if( member.hasChild("username") )
+                                        {
+                                            username = member.child("username").getValue().toString();
+                                        }
+                                        if( member.hasChild("phone") )
+                                        {
+                                            phone = member.child("phone").getValue().toString();
+                                        }
+
+
+                                        if( oldContact == null )
+                                        {
+                                            if( username.equals(name) && phone.equals(sender) )
+                                            {
+                                                member.getRef().child("username").setValue(name);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if( phone.equals( oldContact) )
+                                            {
+                                                DatabaseReference ref = member.getRef();
+                                                ref.child("phone").setValue(sender);
+                                                ref.child("username").setValue(name);
+                                                if( group.hasChild("message") )
+                                                    updateGroupMessages( context,group.child("message").getRef(), oldContact, sender);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }catch( Exception e )
+        {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static void updateContactToAllMyChats( Context context, String oldContact, String newContact )
+    {
+       try{
+           FirebaseDatabase database = FirebaseDatabase.getInstance();
+           DatabaseReference chatRoomRef = database.getReference("chat_room");
+
+           chatRoomRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+               @Override
+               public void onComplete(@NonNull Task<DataSnapshot> task) {
+                   DataSnapshot result = task.getResult();
+
+                   if( result.hasChildren() )
+                   {
+                       for( DataSnapshot room : result.getChildren() )
+                       {
+                           if( room.hasChild("participants") )
+                           {
+                               String p1 = "", p2 ="";
+
+                               if( room.child("participants").hasChild("p1") )
+                               {
+                                   p1 = room.child("participants").child("p1").getValue().toString();
+                               }
+
+                               if( room.child("participants").hasChild("p2") )
+                               {
+                                   p2 = room.child("participants").child("p2").getValue().toString();
+                               }
+
+                               if( p1.equals(oldContact))
+                               {
+                                   room.child("participants").child("p1").getRef().setValue(newContact);
+                                   if( room.hasChild("message") )
+                                       updateChatMessages( context, room.child("messages").getRef(), oldContact, newContact );
+                               }
+                               else if( p2.equals(oldContact) )
+                               {
+                                   room.child("participants").child("p2").getRef().setValue(newContact);
+                                   if( room.hasChild("message") )
+                                       updateChatMessages( context, room.child("messages").getRef(), oldContact, newContact );
+                               }
+
+                           }
+                       }
+                   }
+               }
+           });
+       }catch( Exception e )
+       {
+           Toast.makeText( context, e.toString(), Toast.LENGTH_SHORT).show();
+       }
+    }
+
+    private static void updateChatMessages( Context context, DatabaseReference messages, String oldContact, String newContact )
+    {
+       try{
+           messages.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+               @Override
+               public void onComplete(@NonNull Task<DataSnapshot> task) {
+                   DataSnapshot result = task.getResult();
+                   if( result.hasChildren() )
+                   {
+                       for( DataSnapshot message : result.getChildren() )
+                       {
+                           String sender = "", recipient = "";
+                           if( message.hasChild("sender") )
+                           {
+                               sender = message.child("sender").getValue().toString();
+                           }
+                           if( message.hasChild("recipient") )
+                           {
+                               recipient = message.child("recipient").getValue().toString();
+                           }
+
+                           if( sender.equals( oldContact ) )
+                           {
+                               message.child("sender").getRef().setValue(newContact);
+                           }
+                           if( recipient.equals( oldContact ) )
+                           {
+                               message.child("recipient").getRef().setValue(newContact);
+                           }
+                       }
+                   }
+               }
+           });
+       }catch( Exception e )
+       {
+           Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+       }
+    }
+
+    private static void updateGroupMessages( Context context, DatabaseReference messages, String oldContact, String newContact )
+    {
+       try{
+           messages.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+               @Override
+               public void onComplete(@NonNull Task<DataSnapshot> task) {
+                   DataSnapshot result = task.getResult();
+                   if( result.hasChildren() )
+                   {
+                       for( DataSnapshot message : result.getChildren() )
+                       {
+                           String sender = "";
+                           if( message.hasChild("sender") )
+                           {
+                               sender = message.child("sender").getValue().toString();
+                           }
+
+                           if( sender.equals( oldContact ) )
+                           {
+                               message.child("sender").getRef().setValue(newContact);
+                           }
+                       }
+                   }
+               }
+           });
+       }catch( Exception e )
+       {
+           Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+       }
     }
 
 }
