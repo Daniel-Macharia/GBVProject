@@ -20,8 +20,4 @@ public class entryLayout extends AppCompatActivity {
 
     }
 
-    public void clicked(View v)
-    {
-
-    }
 }

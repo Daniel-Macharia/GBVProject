@@ -38,6 +38,7 @@
         <activity android:name=".CreateNewPassword"></activity>
         <activity android:name=".EditProfile"></activity>
         <activity android:name=".AboutFRATS"></activity>
+        <activity android:name=".WriteStatement"></activity>
         <activity
             android:name=".MainActivity"
             android:exported="true">

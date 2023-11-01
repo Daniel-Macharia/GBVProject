@@ -25,8 +25,8 @@ import java.util.Scanner;
 
 public class report extends AppCompatActivity {
 
-    Button call,callHotline , sendStatement;
-    EditText num,statement;
+    Button call,callHotline , writeStatement;
+    EditText num;
     static  final int permitPhoneCall = 1;
     TelephonyManager t = null;
 
@@ -38,15 +38,12 @@ public class report extends AppCompatActivity {
 
         call = findViewById(R.id.call);
         callHotline = findViewById(R.id.hotline);
-        sendStatement = findViewById(R.id.send);
-        statement = findViewById(R.id.statementMessage);
+        writeStatement = findViewById(R.id.writeStatement);
         num = findViewById(R.id.num);
-       // num.setInputType(InputType.TYPE_CLASS_TEXT);
 
         call.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // String number = policeLine( num.getText().toString() );
                 String number = num.getText().toString();
                 num.setText(number);
                 Intent callIntent = new Intent(Intent.ACTION_CALL);
@@ -83,12 +80,11 @@ public class report extends AppCompatActivity {
             }
         });
 
-        sendStatement.setOnClickListener(new View.OnClickListener() {
+         writeStatement.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String msg = statement.getText().toString();
-                Toast.makeText(report.this, msg, Toast.LENGTH_SHORT).show();
-                statement.setText("");
+                Intent statementIntent = new Intent( report.this, WriteStatement.class );
+                startActivity( statementIntent );
             }
         });
 

@@ -42,7 +42,7 @@ public class EditProfile extends AppCompatActivity {
             save.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    try{
+                    /* try{
                         //String name = "", contact = "", pass = "", confirmPass = "";
                         String name = username.getText().toString();
                         String contact = phone.getText().toString();
@@ -55,7 +55,7 @@ public class EditProfile extends AppCompatActivity {
                     }catch( Exception e )
                     {
                         Toast.makeText(EditProfile.this, e.toString(), Toast.LENGTH_SHORT).show();
-                    }
+                    } */
                 }
             });
         } catch (Exception e) {
@@ -85,7 +85,7 @@ public class EditProfile extends AppCompatActivity {
 
                         if( data[2].equals("") )
                             return;
-                        MyFirebaseUtilityClass.updateUsername( EditProfile.this, name, data[2] );
+                        MyFirebaseUtilityClass.updateUsername( EditProfile.this, data[2], name );
                         MyFirebaseUtilityClass.updateGroupMessagesWhereSenderIs( EditProfile.this,  null, data[2], name);
                         Toast.makeText(EditProfile.this, "updated username", Toast.LENGTH_SHORT).show();
                     }

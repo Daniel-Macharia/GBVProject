@@ -15,6 +15,8 @@ import java.util.ArrayList;
 
 public class journalEntriesList extends AppCompatActivity {
     ListView l;
+
+    ArrayList<String[]> data = new ArrayList<>(10);
     @Override
     protected  void onCreate(  Bundle savedInstanceState)
     {
@@ -24,7 +26,7 @@ public class journalEntriesList extends AppCompatActivity {
         l = findViewById(R.id.entriesID);
 
         try {
-             ArrayList<String[]> data = setListItems();
+              setListItems();
             l.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
@@ -63,11 +65,11 @@ public class journalEntriesList extends AppCompatActivity {
 
     }
 
-    private ArrayList<String[]> setListItems()
+    private void setListItems()
     {
         journalEntry e = new journalEntry(journalEntriesList.this);
         e.open();
-        ArrayList<String[]> data = e.getEntries();
+        data = e.getEntries();
         e.close();
 
         final int s = data.size();
@@ -82,8 +84,6 @@ public class journalEntriesList extends AppCompatActivity {
 
         ArrayAdapter<String> arrAdapt = new ArrayAdapter<String>(journalEntriesList.this,R.layout.entry_layout,R.id.entry, arr);
         l.setAdapter(arrAdapt);
-
-        return data;
     }
 
     @Override

@@ -1125,22 +1125,17 @@ public class MyFirebaseUtilityClass {
                                         phoneNumber = user.child("phone").getValue().toString();
                                     }
 
-                                    if( username.equals("") )
-                                    {
-                                        continue;
-                                    }
-
-
                                     if( username.equals(name) && phoneNumber.equals(phone) )
                                     {
                                         //updateGroupMessagesWhereSenderIs( null, phoneNumber, username);
+                                        //if( user.hasChild("username") )
                                         key = user.getKey();
                                         break;
                                     }
                                 }
                             }
 
-                            if( key.equals("") )
+                            if( !key.equals("") )
                             {
                                 userRef.child(key).child("username").setValue(name);
                             }
@@ -1176,22 +1171,17 @@ public class MyFirebaseUtilityClass {
                                         phoneNumber = assistant.child("phone").getValue().toString();
                                     }
 
-                                    if( username.equals("") )
-                                    {
-                                        continue;
-                                    }
-
-
                                     if( username.equals(name) && phoneNumber.equals(phone) )
                                     {
                                         //  updateGroupMessagesWhereSenderIs(null, phoneNumber, username);
+                                        //if( assistant.hasChild("username"))
                                         key = assistant.getKey();
                                         break;
                                     }
                                 }
                             }
 
-                            if( key.equals("") )
+                            if( !key.equals("") )
                             {
                                 assistantRef.child(key).child("username").setValue(name);
                             }
@@ -1248,7 +1238,7 @@ public class MyFirebaseUtilityClass {
                                 }
                             }
 
-                            if( key.equals("") )
+                            if( !key.equals("") )
                             {
                                 userRef.child(key).child("phone").setValue(contact);
                                 // updateGroupMessagesWhereSenderIs(contact);
@@ -1291,7 +1281,7 @@ public class MyFirebaseUtilityClass {
                                 }
                             }
 
-                            if( key.equals("") )
+                            if( !key.equals("") )
                             {
                                 assistantRef.child(key).child("contact").setValue(contact);
                                 //updateGroupMessagesWhereSenderIs(contact);
@@ -1319,7 +1309,7 @@ public class MyFirebaseUtilityClass {
         String[] data = u.readData();
         u.close();
 
-        if( data[4].equals("assistant") )
+        if( data[3].equals("assistant") )
             return false;
 
         return true;

@@ -154,7 +154,9 @@ public class journalEntry {
             for( c.moveToFirst(); !c.isAfterLast(); c.moveToNext() )
             {
                 edited = c.getString(editIndex);
-                result.add(new String[]{ c.getString(dateIndex), c.getString(timeIndex), c.getString(entryIndex), c.getString(idIndex), edited == null ? "" : new String(edited) });
+                result.add(new String[]{ c.getString(dateIndex), c.getString(timeIndex),
+                        c.getString(entryIndex), c.getString(idIndex),
+                        edited == null ? "" : new String(edited) });
 
             }
         }catch( Exception e )
