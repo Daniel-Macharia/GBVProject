@@ -25,7 +25,7 @@ import java.util.Scanner;
 
 public class report extends AppCompatActivity {
 
-    Button call,callHotline , writeStatement;
+    Button call,callHotline , writeStatement, recordStatement;
     EditText num;
     static  final int permitPhoneCall = 1;
     TelephonyManager t = null;
@@ -39,6 +39,7 @@ public class report extends AppCompatActivity {
         call = findViewById(R.id.call);
         callHotline = findViewById(R.id.hotline);
         writeStatement = findViewById(R.id.writeStatement);
+        recordStatement = findViewById( R.id.recordStatement);
         num = findViewById(R.id.num);
 
         call.setOnClickListener(new View.OnClickListener() {
@@ -84,6 +85,14 @@ public class report extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent statementIntent = new Intent( report.this, WriteStatement.class );
+                startActivity( statementIntent );
+            }
+        });
+
+        recordStatement.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent statementIntent = new Intent( report.this, RecordStatement.class );
                 startActivity( statementIntent );
             }
         });
