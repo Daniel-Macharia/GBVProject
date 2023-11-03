@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.Telephony;
 import android.telephony.SmsManager;
 import android.view.View;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import java.io.File;
 import java.util.Calendar;
 
 public class RecordStatement extends AppCompatActivity {
@@ -39,26 +41,23 @@ public class RecordStatement extends AppCompatActivity {
             play = findViewById( R.id.play);
             send = findViewById( R.id.sendStatement );
             recipient = findViewById(R.id.recipient);
-           // String name = "frats_recording_audio_statement";
-            String name = Calendar.getInstance().getTimeInMillis() + "_" + Calendar.getInstance().get(Calendar.DATE)
-                    + "_" + Calendar.getInstance().get(Calendar.MONTH) + "_" + Calendar.getInstance().get(Calendar.YEAR);
-            filename = getExternalCacheDir().getAbsolutePath();
-            filename += "/frats_statement_" + name + ".3gp";
 
-            if(ActivityCompat.checkSelfPermission( this, Manifest.permission.RECORD_AUDIO )
-            != PackageManager.PERMISSION_GRANTED )
+            requestPermissions();
+
+            String s = createNewFile();
+            if( s == null )
             {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 0);
+                Toast.makeText(this, "failed to create file!", Toast.LENGTH_SHORT).show();
+                return;
             }
-
 
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String locationURL = recipient.getText().toString();
-                    if( MyFirebaseUtilityClass.validatePhone(RecordStatement.this, locationURL ) )
+                    String recipientAddress = recipient.getText().toString();
+                    if( MyFirebaseUtilityClass.validatePhone(RecordStatement.this, recipientAddress ) )
                     {
-                        sendAudioMessage( Uri.parse(filename), locationURL);
+                        sendAudioMessage( filename, recipientAddress);
                         Toast.makeText(RecordStatement.this, "Sending Record", Toast.LENGTH_SHORT).show();
                     }
                     else
@@ -115,12 +114,17 @@ public class RecordStatement extends AppCompatActivity {
     private void startRecording()
     {
        try{
+           if( isPlaying )
+           {
+               stopPlaying();
+               play.setText("Play");
+           }
            recorder = new MediaRecorder();
 
            recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-           recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+           recorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
            recorder.setOutputFile(filename);
-           recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+           recorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
            recorder.prepare();
            recorder.start();
            isRecording = true;
@@ -147,6 +151,11 @@ public class RecordStatement extends AppCompatActivity {
     {
         player = new MediaPlayer();
         try{
+            if( isRecording )
+            {
+                stopRecording();
+                record.setText("Record");
+            }
             player.setDataSource(filename);
             player.prepare();
             player.start();
@@ -156,6 +165,8 @@ public class RecordStatement extends AppCompatActivity {
                 public void onCompletion(MediaPlayer mediaPlayer) {
                     player.release();
                     player = null;
+                    isPlaying = false;
+                    play.setText("Play");
                 }
             });
         }catch( Exception e )
@@ -179,7 +190,7 @@ public class RecordStatement extends AppCompatActivity {
         }
     }
 
-    private void sendAudioMessage(Uri path, String recipient)
+    private void sendAudioMessage(String path, String recipient)
     {
         try{
             //SmsManager smsManager = SmsManager.getSmsManagerForSubscriptionId( SmsManager.getDefaultSmsSubscriptionId() );
@@ -188,12 +199,45 @@ public class RecordStatement extends AppCompatActivity {
             Intent sendIntent = new Intent( Intent.ACTION_SEND );
             sendIntent.putExtra(Intent.EXTRA_PHONE_NUMBER, recipient);
             sendIntent.putExtra("address", Integer.parseInt(recipient));
-            sendIntent.putExtra(Intent.EXTRA_STREAM, path);
-            sendIntent.setType("audio/3gp");
+            sendIntent.setType("audio/*");
+            sendIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse( path ) );
+
             startActivity( Intent.createChooser( sendIntent, "Send") );
         }catch( Exception e )
         {
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void requestPermissions()
+    {
+        if(ActivityCompat.checkSelfPermission( this, Manifest.permission.RECORD_AUDIO )
+                != PackageManager.PERMISSION_GRANTED )
+        {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, 0);
+        }
+
+    }
+
+    private String createNewFile()
+    {
+        String p = null;
+
+        try{
+            // String name = "frats_recording_audio_statement";
+            String name = Calendar.getInstance().getTimeInMillis() + "_" + Calendar.getInstance().get(Calendar.DATE)
+                    + "_" + Calendar.getInstance().get(Calendar.MONTH) + "_" + Calendar.getInstance().get(Calendar.YEAR);
+            filename = getExternalCacheDir().getAbsolutePath();
+            //filename = Environment.getExternalStorageDirectory().getAbsolutePath();
+            filename += "/frats_statement_" + name + ".mp3";
+            File f = new File(filename);
+
+            p = f.getAbsolutePath();
+        }catch ( Exception e )
+        {
+            Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
+        }
+
+        return p;
     }
 }
