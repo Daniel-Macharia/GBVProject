@@ -16,14 +16,8 @@ public class MyNewWorker extends Worker {
     @Override
     public Result doWork() {
 
-        //MyFirebaseUtilityClass.postNotification( getApplicationContext(), 1,"Hello I'm the new Worker", " just " +
-       //         "doing my job");
         MyFirebaseUtilityClass.updateAllGroups( getApplicationContext() );
         MyFirebaseUtilityClass.updateAllChats( getApplicationContext() );
-
-       // MyFirebaseUtilityClass.postNotification( getApplicationContext(), 101,"Hello I'm the new Worker", " just " +
-           //     "doing my job" +
-          //      "After Updating All Chats");
 
         return Result.success();
     }

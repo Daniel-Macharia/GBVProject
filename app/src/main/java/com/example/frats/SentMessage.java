@@ -13,9 +13,10 @@ public class SentMessage extends BroadcastReceiver {
 
         if( getResultCode() == Activity.RESULT_OK )
         {
+            String recipient = "" + intent.getStringExtra("recipient");
            // Toast.makeText(context, "Send Result Okay", Toast.LENGTH_SHORT).show();
             MyFirebaseUtilityClass.postNotification(context.getApplicationContext(),
-                    100, "sent", "Your Statement has been sent");
+                    100, "sent to " + recipient, "Your Statement has been sent");
         }else
         {
             //Toast.makeText(context, "Send Failed!", Toast.LENGTH_SHORT).show();

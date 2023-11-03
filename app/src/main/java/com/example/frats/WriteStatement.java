@@ -86,8 +86,12 @@ public class WriteStatement extends AppCompatActivity {
                 ActivityCompat.requestPermissions( WriteStatement.this, new String[]{Manifest.permission.SEND_SMS}, 0);
             }
 
-            PendingIntent sentIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_SENT"), 0);
-            PendingIntent deliveredIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, new Intent("SMS_DELIVERED"), 0);
+            Intent s = new Intent("SMS_SENT");
+            s.putExtra("recipient", recipient);
+            Intent d = new Intent("SMS_DELIVERED");
+            d.putExtra("recipient", recipient);
+            PendingIntent sentIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, s, 0);
+            PendingIntent deliveredIntent = PendingIntent.getBroadcast(getApplicationContext(), 0, d, 0);
             SmsManager smsManager = SmsManager.getDefault();
             smsManager.sendTextMessage(recipient, null, textMessage, sentIntent, deliveredIntent);
 

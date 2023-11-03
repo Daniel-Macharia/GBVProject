@@ -12,14 +12,15 @@ public class DeliveredMessage extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        long id = intent.getLongExtra( EXTRA_ID, -1);
-        //long protocal_id = intent.getLongExtra(EXTRA_PROTOCAL, -1);
+        //long id = intent.getLongExtra( EXTRA_ID, -1);
+        //long protocal_id = intent.getLongExtra(EXTRA_PROTOCAL, -1)
 
         if( getResultCode() == Activity.RESULT_OK )
         {
+            String recipient = "" + intent.getStringExtra("recipient");
             //Toast.makeText(context, "Delivered Result Ok", Toast.LENGTH_SHORT).show();
             MyFirebaseUtilityClass.postNotification(context.getApplicationContext(),
-                    110, "Delivered", "Your Statement has been delivered");
+                    110, "Delivered to " + recipient, "Your Statement has been delivered");
         }else {
             //Toast.makeText(context, "Delivered Result not okay", Toast.LENGTH_SHORT).show();
             MyFirebaseUtilityClass.postNotification(context.getApplicationContext(),
