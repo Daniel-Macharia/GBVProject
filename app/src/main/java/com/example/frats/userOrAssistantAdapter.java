@@ -114,7 +114,7 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
         String nameStr = n.getText().toString();
         String phoneStr = p.getText().toString();
 
-        Toast.makeText(view.getContext(), "Clicked on user contact: " + nameStr + " ~ " + phoneStr, Toast.LENGTH_SHORT).show();
+       // Toast.makeText(view.getContext(), "Clicked on user contact: " + nameStr + " ~ " + phoneStr, Toast.LENGTH_SHORT).show();
 
         Intent chatIntent = new Intent( view.getContext(), chat.class);
         chatIntent.putExtra("recipient",phoneStr);

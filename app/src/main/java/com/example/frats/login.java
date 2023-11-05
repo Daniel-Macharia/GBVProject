@@ -2,6 +2,7 @@ package com.example.frats;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Pair;
@@ -141,6 +142,8 @@ public class login extends AppCompatActivity {
                                 Dialog d = new Dialog(login.this);
                                 d.setTitle("Login Successful!");
                                 TextView tv = new TextView(login.this);
+                                tv.setBackgroundColor(Color.WHITE);
+                                tv.setTextColor(Color.BLUE);
                                 tv.setText("Login Successful!");
                                 d.setContentView(tv);
                                 d.show();

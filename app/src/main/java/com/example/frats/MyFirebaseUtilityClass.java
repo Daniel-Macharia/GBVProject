@@ -297,7 +297,7 @@ public class MyFirebaseUtilityClass {
                                             }
                                         }); */
 
-                                        //get this message since I`m among the participants
+                                        //get this message since user is among the participants
                                         if( roomSnapShot.hasChild("messages") )
                                         {
                                             if( roomSnapShot.child( "messages").hasChildren() )
@@ -645,7 +645,6 @@ public class MyFirebaseUtilityClass {
     {
 
         ArrayList<chatMessage> result = new ArrayList<>(10);
-        //String myPhone = new String("0712696965");
 
         messages m = new messages( context);
         m.open();
@@ -677,7 +676,10 @@ public class MyFirebaseUtilityClass {
                 {
                     for( DataSnapshot group : snapshot.getChildren() )
                     {
+                        Toast.makeText(context, "New Group", Toast.LENGTH_SHORT).show();
+                        //int newMessageCount = 0;
                         String groupKey = group.getKey();
+                        ArrayList<chatMessage> result = getGroupMessagesFromLocalDb( context, groupKey, myPhone);
 
                         if( group.hasChild("message") )
                         {
@@ -685,30 +687,33 @@ public class MyFirebaseUtilityClass {
                             {
                                 for( DataSnapshot message : group.child("message").getChildren() )
                                 {
-                                    ArrayList<chatMessage> result = getGroupMessagesFromLocalDb( context, groupKey, myPhone);
+                                    //Toast.makeText(context, "new message", Toast.LENGTH_SHORT).show();
 
-                                    if( snapshot.hasChildren() )
-                                    {
+                                   // if( message.hasChildren() )
+                                   // {
 
-                                        for( DataSnapshot data : snapshot.getChildren() )
-                                        {
+                                      //  for( DataSnapshot data : message.getChildren() )
+                                      //  {
                                             String content = new String( "" );
                                             String sender = new String( "" );
                                             String time = new String( "" );
                                             int g ;
 
-                                            if( data.hasChild( "content" ) )
+                                            if( message.hasChild( "content" ) )
                                             {
-                                                content = data.child( "content" ).getValue().toString();
+                                                content = message.child( "content" ).getValue().toString();
                                             }
-                                            if( data.hasChild( "sender" ) )
+                                            if( message.hasChild( "sender" ) )
                                             {
-                                                sender = data.child( "sender" ).getValue().toString();
+                                                sender = message.child( "sender" ).getValue().toString();
                                             }
-                                            if( data.hasChild( "time" ) )
+                                            if( message.hasChild( "time" ) )
                                             {
-                                                time = data.child( "time" ).getValue().toString();
+                                                time = message.child( "time" ).getValue().toString();
                                             }
+
+                                            if( sender.equals("") || content.equals("") || time.equals("") )
+                                                continue;
 
                                             if( sender.equals(myPhone) )
                                                 g = Gravity.END;
@@ -720,14 +725,18 @@ public class MyFirebaseUtilityClass {
                                             if( !containsMessage( result, m ) )
                                             {
                                                 result.add( new chatMessage( new String(content), new String(time), g) );
+                                                //newMessageCount++;
                                                 //insert into the local db
                                                 messages messo = new messages( context );
                                                 messo.open();
                                                 messo.addNewMessage( new String(sender), new String(groupKey), new String(content), new String(time) );
                                                 messo.close();
+                                                updateMessageCount(context, groupKey, 1);
+                                                Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
+                                               // Toast.makeText(context, "new group Message to " + groupKey, Toast.LENGTH_SHORT).show();
                                             }
-                                        }
-                                    }
+                                       // }
+                                    //}
 
                                     //chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, result);
                                     //chatList.setAdapter( adapter );
@@ -737,6 +746,8 @@ public class MyFirebaseUtilityClass {
                                 }
                             }
                         }
+
+                        //updateMessageCount(context, groupKey, newMessageCount);
                     }
                 }
             }
@@ -747,6 +758,27 @@ public class MyFirebaseUtilityClass {
             }
         });
 
+    }
+
+    private static void updateMessageCount( Context context, String chatID, int newMessageCount)
+    {
+        try{
+            NewMessageCounter nmc = new NewMessageCounter( context );
+            nmc.open();
+            int current = nmc.getCount( chatID );
+            if( current == -1 )
+                nmc.addChat(chatID);
+
+            nmc.setCount( chatID, current + newMessageCount);
+            postNotification( context, 2, chatID,current + newMessageCount + " New Messages From " + chatID);
+
+
+            nmc.close();
+
+        }catch ( Exception e )
+        {
+            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 
     public static void checkIfUserExists(Context context, String username, String phone)

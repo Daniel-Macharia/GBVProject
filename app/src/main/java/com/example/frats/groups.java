@@ -41,6 +41,7 @@ public class groups extends AppCompatActivity {
 
             initGroupNames();
             initMyPhone();
+            getNewMessageCount();
 
             ArrayAdapter<String> arr = new ArrayAdapter<>(groups.this, R.layout.group_item, R.id.groupName, groupNames);
             groupList.setAdapter(arr);
@@ -191,6 +192,21 @@ public class groups extends AppCompatActivity {
             groupNames.add( new String( val.second ) );
         }
 
+    }
+
+    private void getNewMessageCount()
+    {
+        String r = "";
+
+        NewMessageCounter nmc = new NewMessageCounter(this);
+        nmc.open();
+        for( Pair<String, String> val : group )
+        {
+            r += val.first + nmc.getCount( val.first ) + "\n";
+        }
+        nmc.close();
+
+        Toast.makeText(this, "New Messages Are: " + r, Toast.LENGTH_SHORT).show();
     }
 
 }

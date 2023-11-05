@@ -65,7 +65,7 @@ public class chat extends AppCompatActivity {
 
         title = findViewById(R.id.chat_name);
 
-        notifyOfMessage();
+        //notifyOfMessage();
 
         Intent in = getIntent();
 

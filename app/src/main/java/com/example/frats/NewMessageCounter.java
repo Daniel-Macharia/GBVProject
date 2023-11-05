@@ -19,11 +19,11 @@ public class NewMessageCounter {
 
     private static final int version = 1;
 
-    private Context thisContext;
+    private final Context thisContext;
     private DbHelper newMessageCountHelper;
     SQLiteDatabase newMessageCountDB;
 
-    private class DbHelper extends SQLiteOpenHelper
+    private static class DbHelper extends SQLiteOpenHelper
     {
         public DbHelper(Context context)
         {
@@ -66,6 +66,7 @@ public class NewMessageCounter {
         ContentValues cv = new ContentValues();
         cv.put(chatKey,chatID);
         cv.put(number, 0);
+        Toast.makeText(thisContext, "adding chat " + chatID, Toast.LENGTH_SHORT).show();
         return newMessageCountDB.insert(tableName, null, cv);
     }
 
@@ -75,9 +76,10 @@ public class NewMessageCounter {
             ContentValues cv = new ContentValues();
             cv.put(number, count);
 
-            String whereClause = chatKey + " = " + chatID;
+            String whereClause = chatKey + " LIKE ('%" + chatID + "%')";
 
             newMessageCountDB.update(tableName, cv, whereClause, null);
+           // Toast.makeText(thisContext, "Setting Count of " + chatID + " to " + count, Toast.LENGTH_SHORT).show();
         }catch ( Exception e )
         {
             Toast.makeText(thisContext, e.toString(), Toast.LENGTH_SHORT).show();
@@ -97,8 +99,11 @@ public class NewMessageCounter {
 
             int countIndex = c.getColumnIndex(number);
 
-            c.moveToFirst();
-            count = c.getInt( countIndex );
+            if( c.getCount() > 0)
+            {
+                c.moveToFirst();
+                count = c.getInt( countIndex );
+            }
 
             c.close();
 
