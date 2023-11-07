@@ -61,7 +61,7 @@ public class groupChat extends AppCompatActivity {
             send = findViewById( R.id.send );
             chatList = findViewById( R.id.messageList );
 
-            notifyOfMessage();
+            //notifyOfMessage();
 
             Intent intent = getIntent();
             int index = intent.getIntExtra("index", 0);
@@ -292,7 +292,7 @@ public class groupChat extends AppCompatActivity {
                         //chatMessageAdapter adapter = new chatMessageAdapter(groupChat.this, result);
                         //chatList.setAdapter( adapter );
 
-                        notifyOfMessage();
+                        //notifyOfMessage();
                         loadFromLocalDb();
                     }
 

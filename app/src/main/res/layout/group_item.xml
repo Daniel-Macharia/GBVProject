@@ -2,19 +2,34 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-
     >
 
-    <TextView
-        android:id="@+id/groupName"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="100dp"
+        android:orientation="horizontal"
         android:background="@drawable/input_rectangle"
         android:backgroundTint="@color/cream2"
-        android:textColor="@color/blue"
-        android:textSize="24sp"
-        android:gravity="start|center"
-        android:paddingStart="20dp"
-        />
+        >
+        <TextView
+            android:id="@+id/groupName"
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_weight="4"
+            android:textColor="@color/blue"
+            android:textSize="24sp"
+            android:gravity="start|center"
+            android:paddingStart="20dp"
+            />
+
+        <TextView
+            android:id="@+id/count"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:textSize="16sp"
+            android:textColor="@color/green"
+            />
+    </LinearLayout>
 
 </LinearLayout>

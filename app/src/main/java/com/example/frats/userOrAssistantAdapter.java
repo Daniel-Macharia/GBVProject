@@ -51,17 +51,26 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
 
         userOrAssistant currentUserOrAssistant = getItem( position );
 
-        TextView username, phone;
+        TextView username, phone, count;
         LinearLayout  l = currentView.findViewById( R.id.loadChat );
         ImageView more = currentView.findViewById( R.id.more );
 
         username = currentView.findViewById(R.id.name);
         phone = currentView.findViewById( R.id.phone );
+        count = currentView.findViewById(R.id.count);
 
         assert currentUserOrAssistant != null;
 
         phone.setText( currentUserOrAssistant.getPhone() );
         username.setText( currentUserOrAssistant.getUserName() );
+
+        int c = 0;
+        NewMessageCounter nmc = new NewMessageCounter(getContext());
+        nmc.open();
+        c = nmc.getCount( currentUserOrAssistant.getPhone() );
+        nmc.close();
+
+        count.setText( ((c < 1 ) ? "" : "" + c));
         /* l.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -111,6 +120,12 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
     {
         TextView n = view.findViewById(R.id.name);
         TextView p = view.findViewById(R.id.phone);
+
+        NewMessageCounter nmc = new NewMessageCounter(getContext());
+        nmc.open();
+        nmc.setCount( p.getText().toString(), 0);
+        nmc.close();
+
         String nameStr = n.getText().toString();
         String phoneStr = p.getText().toString();
 
@@ -124,7 +139,7 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
 
     public void showMore(View view, String username, String phone)
     {
-        Toast.makeText(view.getContext(), "Clicked on more", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(view.getContext(), "Clicked on more", Toast.LENGTH_SHORT).show();
         PopupMenu popup = new PopupMenu( view.getContext(), view);
         popup.getMenu().add("Add To");
 
@@ -132,7 +147,7 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
             @Override
             public boolean onMenuItemClick(MenuItem menuItem) {
 
-                Toast.makeText(context, "clicked " + menuItem.getItemId(), Toast.LENGTH_SHORT).show();
+              //  Toast.makeText(context, "clicked " + menuItem.getItemId(), Toast.LENGTH_SHORT).show();
                 PopupMenu subPopup = new PopupMenu( view.getContext(), view);
                 subPopup.inflate( R.menu.group_options);
 
@@ -141,7 +156,7 @@ public class userOrAssistantAdapter extends ArrayAdapter<userOrAssistant> {
                     public boolean onMenuItemClick(MenuItem menuItem) {
                         String titleCondensed = menuItem.getTitleCondensed().toString();
 
-                        Toast.makeText(context, "Clicked " + titleCondensed, Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(context, "Clicked " + titleCondensed, Toast.LENGTH_SHORT).show();
                         //add this contact or user to the group as a member
                         MyFirebaseUtilityClass.addUserToGroup(titleCondensed, username, phone);
 

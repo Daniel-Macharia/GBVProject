@@ -31,12 +31,13 @@
                 android:textSize="24sp"
             />
             <TextView
-                android:id="@+id/num"
+                android:id="@+id/count"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:textSize="24sp"
+                android:textColor="@color/green"
+                android:textSize="16sp"
                 />
 
         </LinearLayout>

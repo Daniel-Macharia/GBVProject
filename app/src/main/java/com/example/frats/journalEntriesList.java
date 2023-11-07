@@ -17,6 +17,7 @@ public class journalEntriesList extends AppCompatActivity {
     ListView l;
 
     ArrayList<String[]> data = new ArrayList<>(10);
+    ArrayAdapter<String> arrAdapt;
     @Override
     protected  void onCreate(  Bundle savedInstanceState)
     {
@@ -82,13 +83,13 @@ public class journalEntriesList extends AppCompatActivity {
             arr[j] = data.get(i)[2];
         }
 
-        ArrayAdapter<String> arrAdapt = new ArrayAdapter<String>(journalEntriesList.this,R.layout.entry_layout,R.id.entry, arr);
+        arrAdapt = new ArrayAdapter<String>(journalEntriesList.this,R.layout.entry_layout,R.id.entry, arr);
         l.setAdapter(arrAdapt);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        setListItems();
+        arrAdapt.notifyDataSetChanged();
     }
 }

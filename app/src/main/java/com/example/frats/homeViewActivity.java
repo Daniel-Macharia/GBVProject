@@ -169,52 +169,6 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
         startActivity(intent);
     }
 
-
-    public void makeFirebaseWorkRequest()
-    {
-
-        try{
-            Toast.makeText(getApplicationContext(), "Setting work request" , Toast.LENGTH_SHORT).show();
-
-            Constraints c = new Constraints.Builder()
-                    .setRequiredNetworkType( NetworkType.CONNECTED )
-                    .build();
-
-           // OneTimeWorkRequest request = new OneTimeWorkRequest.Builder( FirebaseWorker.class )
-             //     .build();
-            PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( FirebaseWorker.class, 15, TimeUnit.MINUTES)
-                    .build();
-
-           // WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork( "SyncWithFirebase", ExistingPeriodicWorkPolicy.KEEP, request );
-            WorkManager.getInstance(this).enqueue(request);
-
-            WorkManager.getInstance(this).getWorkInfoByIdLiveData( request.getId())
-                    .observe(this, new Observer<WorkInfo>() {
-                        @Override
-                        public void onChanged(WorkInfo workInfo) {
-
-                            if( workInfo.getState() != null )
-                            {
-                                MyFirebaseUtilityClass.postNotification( homeViewActivity.this,4,"Work Request State", new String( workInfo.getState().name() ) );
-                                Toast.makeText(getApplicationContext(), "Status changed " + workInfo.getState().name(), Toast.LENGTH_SHORT).show();
-
-                            }
-
-                            //if( workInfo.getState().isFinished() )
-                            //  WorkManager.getInstance(getApplicationContext()).enqueue(request);
-                        }
-                    });
-            Toast.makeText(getApplicationContext(), "After setting work request" , Toast.LENGTH_SHORT).show();
-
-
-
-        }catch( Exception e )
-        {
-            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
 }
 
 class anime extends Thread{

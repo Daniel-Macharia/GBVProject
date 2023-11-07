@@ -78,6 +78,16 @@ public class termsAndConditions extends AppCompatActivity {
                      {
                          MyFirebaseUtilityClass.addToListOfParticipantsOfAllGroups("group", termsAndConditions.this, username, phone);
                      }
+                     //set work request for checking new chat and group messages
+                    Constraints constraints = new Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .build();
+
+                    PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( MyNewWorker.class, 15, TimeUnit.MINUTES )
+                            .setConstraints(constraints)
+                            .build();
+
+                    WorkManager.getInstance( getApplicationContext() ).enqueue(request);
 
                     loadWelcomeView();
                 }catch(Exception e )
@@ -87,52 +97,6 @@ public class termsAndConditions extends AppCompatActivity {
             }
         });
     }
-
-    public void makeFirebaseWorkRequest()
-    {
-
-        try{
-            Toast.makeText(termsAndConditions.this, "Setting work request" , Toast.LENGTH_SHORT).show();
-
-            Constraints c = new Constraints.Builder()
-                    .setRequiredNetworkType( NetworkType.CONNECTED )
-                    .build();
-
-            //OneTimeWorkRequest request = new OneTimeWorkRequest.Builder( FirebaseWorker.class )
-              //      .build();
-            PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( FirebaseWorker.class, 15, TimeUnit.MINUTES)
-                    .build();
-
-            //WorkManager.getInstance(getApplicationContext()).enqueueUniquePeriodicWork( "SyncWithFirebase", ExistingPeriodicWorkPolicy.KEEP, request );
-            WorkManager.getInstance(getApplicationContext()).enqueue(request);
-
-            WorkManager.getInstance(getApplicationContext()).getWorkInfoByIdLiveData( request.getId())
-                    .observe(this, new Observer<WorkInfo>() {
-                        @Override
-                        public void onChanged(WorkInfo workInfo) {
-
-                            if( workInfo.getState() != null )
-                            {
-                                MyFirebaseUtilityClass.postNotification(getApplicationContext(),5,"Work Request State", workInfo.getState().name());
-                                Toast.makeText(termsAndConditions.this, "Status changed " + workInfo.getState().name(), Toast.LENGTH_SHORT).show();
-
-                            }
-
-                            //if( workInfo.getState().isFinished() )
-                              //  WorkManager.getInstance(getApplicationContext()).enqueue(request);
-                        }
-                    });
-            Toast.makeText(termsAndConditions.this, "After setting work request" , Toast.LENGTH_SHORT).show();
-
-
-
-        }catch( Exception e )
-        {
-            Toast.makeText(getApplicationContext(), e.toString(), Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
 
     public void loadWelcomeView()
     {

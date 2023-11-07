@@ -16,8 +16,8 @@ public class MyNewWorker extends Worker {
     @Override
     public Result doWork() {
 
-        //MyFirebaseUtilityClass.updateAllGroups( getApplicationContext() );
-       // MyFirebaseUtilityClass.updateAllChats( getApplicationContext() );
+        MyFirebaseUtilityClass.updateAllGroups( getApplicationContext() );
+        MyFirebaseUtilityClass.updateAllChats( getApplicationContext() );
 
         return Result.success();
     }

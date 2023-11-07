@@ -8,6 +8,12 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import java.util.concurrent.TimeUnit;
 
 public class CreateNewPassword extends AppCompatActivity  {
 
@@ -60,6 +66,18 @@ public class CreateNewPassword extends AppCompatActivity  {
                         startActivity(intent);
                         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                         initData(phone, isUser ? "assistant" : "users");
+
+                        //set work request for checking new chat and group messages
+                        Constraints constraints = new Constraints.Builder()
+                                .setRequiredNetworkType(NetworkType.CONNECTED)
+                                .build();
+
+                        PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( MyNewWorker.class, 15, TimeUnit.MINUTES )
+                                .setConstraints(constraints)
+                                .build();
+
+                        WorkManager.getInstance( getApplicationContext() ).enqueue(request);
+
                         //finish();
                     }
 

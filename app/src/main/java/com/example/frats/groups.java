@@ -28,6 +28,7 @@ public class groups extends AppCompatActivity {
     String myPhone = new String("");
 
     ArrayList<String> groupNames = new ArrayList<>(10);
+    GroupItemAdapter adapter;
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -41,10 +42,12 @@ public class groups extends AppCompatActivity {
 
             initGroupNames();
             initMyPhone();
-            getNewMessageCount();
+            //getNewMessageCount();
 
-            ArrayAdapter<String> arr = new ArrayAdapter<>(groups.this, R.layout.group_item, R.id.groupName, groupNames);
-            groupList.setAdapter(arr);
+            //ArrayAdapter<String> arr = new ArrayAdapter<>(groups.this, R.layout.group_item, R.id.groupName, groupNames);
+            //groupList.setAdapter(arr);
+            adapter = new GroupItemAdapter(this, group);
+            groupList.setAdapter(adapter);
 
             groupList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -67,6 +70,10 @@ public class groups extends AppCompatActivity {
                     Intent groupChatRoomIntent = new Intent( groups.this, groupChat.class );
                     groupChatRoomIntent.putExtra("index", i );
                     startActivity( groupChatRoomIntent );
+                    NewMessageCounter nmc = new NewMessageCounter(getApplicationContext());
+                    nmc.open();
+                    nmc.setCount( group.get(i).first, 0);
+                    nmc.close();
 
                 }
             });
@@ -76,6 +83,13 @@ public class groups extends AppCompatActivity {
             Toast.makeText(this, e.toString(), Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        adapter.notifyDataSetChanged();
     }
 
     private void initMyPhone()

@@ -26,10 +26,11 @@ import java.util.Scanner;
 
 public class assistantsClass extends AppCompatActivity {
     private ListView l;
-    private TextView title;
+    private TextView title, totalNew;
     private String[] userOrAssistant = new String[4];
     private ArrayList<String> list = new ArrayList<>(10);
     private ArrayList<userOrAssistant> newList = new ArrayList<>(10);
+    private userOrAssistantAdapter arr;
     @Override
     protected void onCreate( Bundle savedInstanceState)
     {
@@ -37,6 +38,10 @@ public class assistantsClass extends AppCompatActivity {
         setContentView(R.layout.assistants);
         l = findViewById(R.id.assistants_list);
         title = findViewById(R.id.title);
+        totalNew = findViewById( R.id.totalNew);
+
+        Thread getTotal = new Thread( new totalTask() );
+        getTotal.start();
 
         //loadUserFromLocalDb();
        // list = getUsersFromLocalDB();
@@ -60,7 +65,7 @@ public class assistantsClass extends AppCompatActivity {
                 uOa =  "assistant" ;
 
                 //ArrayAdapter<String> arr = new ArrayAdapter<>(assistantsClass.this,R.layout.assistant_contact,R.id.name,list);
-                userOrAssistantAdapter arr = new userOrAssistantAdapter( this, newList);
+                arr = new userOrAssistantAdapter( this, newList);
                 l.setAdapter(arr);
 
             }
@@ -70,7 +75,7 @@ public class assistantsClass extends AppCompatActivity {
                 title.setText("My Survivors");
                 //loadChats();
 
-                userOrAssistantAdapter arr = new userOrAssistantAdapter( this, newList);
+                arr = new userOrAssistantAdapter( this, newList);
                 l.setAdapter(arr);
             }
 
@@ -82,6 +87,13 @@ public class assistantsClass extends AppCompatActivity {
 
 
 
+    }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        arr.notifyDataSetChanged();
     }
     private boolean contains(ArrayList<String> list, String value)
     {
@@ -281,4 +293,21 @@ public class assistantsClass extends AppCompatActivity {
         //return result;
     }
 
+    class totalTask implements Runnable
+    {
+        @Override
+        public void run()
+        {
+            int total = 0;
+            NewMessageCounter nmc = new NewMessageCounter(assistantsClass.this);
+            nmc.open();
+            total = nmc.getTotalNewUserMessage();
+            nmc.close();
+
+            totalNew.setText( ((total < 1 ) ? "" : "" + total) );
+        }
+    }
+
 }
+
+

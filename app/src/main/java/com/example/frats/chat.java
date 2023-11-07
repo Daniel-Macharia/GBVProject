@@ -95,6 +95,13 @@ public class chat extends AppCompatActivity {
             Thread t = new Thread(readTask);
             t.start();
 
+            int count = 0;
+            NewMessageCounter nmc = new NewMessageCounter(this);
+            nmc.open();
+            count = nmc.getCount(myRecipient);
+            nmc.close();
+            Toast.makeText(this, ((count < 1 ) ? 0 : count) + " New Mesages from this chat", Toast.LENGTH_SHORT).show();
+
             send.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {

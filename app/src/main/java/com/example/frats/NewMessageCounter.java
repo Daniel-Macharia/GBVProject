@@ -8,10 +8,13 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.widget.Toast;
 
+import java.util.ArrayList;
+
 public class NewMessageCounter {
 
     private static final String chatKey = "chatKey";
     private static final String number = "numberOfNewMessages";
+    private static final String chatNotificationID = "chatNewMessageNotificationId";
 
     private static final String tableName = "newMessageCountTable";
 
@@ -113,6 +116,30 @@ public class NewMessageCounter {
         }
 
         return count;
+    }
+
+    public int getTotalNewUserMessage()
+    {
+        int total = 0;
+
+        try{
+            ArrayList<String[]> data = new ArrayList<>(10);
+            user u = new user(thisContext);
+            u.open();
+            data = u.getUsers();
+            u.close();
+
+            for( String[] userData : data )
+            {
+                int count = getCount( userData[1] );
+                total += (( count == -1) ? 0 : count );
+            }
+
+        }catch( Exception e )
+        {
+            Toast.makeText(thisContext, "Error getting total: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+        return total;
     }
 
 }

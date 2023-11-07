@@ -34,7 +34,7 @@ public class userProfile extends AppCompatActivity {
         userName.setText(userData[0]);
         phoneNumber.setText(userData[2]);
 
-        edit.setOnClickListener(new View.OnClickListener() {
+         edit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent editIntent = new Intent( userProfile.this, EditProfile.class );

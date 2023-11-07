@@ -676,8 +676,8 @@ public class MyFirebaseUtilityClass {
                 {
                     for( DataSnapshot group : snapshot.getChildren() )
                     {
-                        Toast.makeText(context, "New Group", Toast.LENGTH_SHORT).show();
-                        //int newMessageCount = 0;
+                       // Toast.makeText(context, "New Group", Toast.LENGTH_SHORT).show();
+                        int newMessageCount = 0;
                         String groupKey = group.getKey();
                         ArrayList<chatMessage> result = getGroupMessagesFromLocalDb( context, groupKey, myPhone);
 
@@ -725,14 +725,14 @@ public class MyFirebaseUtilityClass {
                                             if( !containsMessage( result, m ) )
                                             {
                                                 result.add( new chatMessage( new String(content), new String(time), g) );
-                                                //newMessageCount++;
+                                                newMessageCount++;
                                                 //insert into the local db
                                                 messages messo = new messages( context );
                                                 messo.open();
                                                 messo.addNewMessage( new String(sender), new String(groupKey), new String(content), new String(time) );
                                                 messo.close();
-                                                updateMessageCount(context, groupKey, 1);
-                                                Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
+                                                //updateMessageCount(context, groupKey, 1);
+                                               // Toast.makeText(context, content, Toast.LENGTH_SHORT).show();
                                                // Toast.makeText(context, "new group Message to " + groupKey, Toast.LENGTH_SHORT).show();
                                             }
                                        // }
@@ -747,7 +747,8 @@ public class MyFirebaseUtilityClass {
                             }
                         }
 
-                        //updateMessageCount(context, groupKey, newMessageCount);
+                        if( newMessageCount > 0 )
+                            updateMessageCount(context, groupKey, newMessageCount);
                     }
                 }
             }
@@ -770,7 +771,7 @@ public class MyFirebaseUtilityClass {
                 nmc.addChat(chatID);
 
             nmc.setCount( chatID, current + newMessageCount);
-            postNotification( context, 2, chatID,current + newMessageCount + " New Messages From " + chatID);
+            postNotification( context,  getNotificationID(chatID), chatID,current + newMessageCount + " New Messages From " + chatID);
 
 
             nmc.close();
@@ -780,6 +781,25 @@ public class MyFirebaseUtilityClass {
             Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
         }
     }
+
+    private static int getNotificationID( String chatID )
+    {
+        int id = 1000;
+
+        try{
+            int n = Integer.parseInt( chatID );
+            id += n;
+        }catch( NumberFormatException e )
+        {
+            //when it's a string
+            int n = chatID.length();
+            id += n;
+        }
+
+        return id;
+    }
+
+
 
     public static void checkIfUserExists(Context context, String username, String phone)
     {
@@ -1028,7 +1048,12 @@ public class MyFirebaseUtilityClass {
     {
 
         try{
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            user u = new user( context );
+            u.open();
+            String myPhone = u.readData()[2];
+            u.close();
+            loadGroupChats(context, myPhone);
+             /* FirebaseDatabase database = FirebaseDatabase.getInstance();
             DatabaseReference groupRef = database.getReference("group");
 
             groupRef.addValueEventListener(new ValueEventListener() {
@@ -1041,7 +1066,7 @@ public class MyFirebaseUtilityClass {
                 public void onCancelled(@NonNull DatabaseError error) {
 
                 }
-            });
+            }); */
         }catch( Exception e )
         {
             Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
@@ -1049,27 +1074,199 @@ public class MyFirebaseUtilityClass {
 
     }
 
+    private static ArrayList<chatMessage> loadChatMessage( Context context, String myPhone, String recipient)
+    {
+        ArrayList<chatMessage> result = new ArrayList<>(10);
+
+        ArrayList<msg> ms = new ArrayList<>(10);
+
+        messages messageDB = new messages(context);
+        messageDB.open();
+        ms = messageDB.getMessagesSentTo(recipient, myPhone);
+        messageDB.close();
+
+        for( msg message : ms )
+        {
+            int g = ( message.sender.equals( myPhone ) ? Gravity.END : Gravity.START );
+            result.add( new chatMessage( message.content, message.time, g) );
+        }
+
+        return result;
+    }
+
     public static void updateAllChats(Context context)
     {
         try{
-            FirebaseDatabase database = FirebaseDatabase.getInstance();
-            DatabaseReference chatRef = database.getReference("chat_room");
 
-            chatRef.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    postNotification(context, 20,"New chat Messages", "check application to see chats");
-                }
+            ArrayList<String[]> data = new ArrayList<>(10);
+            String[] thisUserData = new String[4];
+            user u = new user(context);
+            u.open();
+            data = u.getUsers();
+            thisUserData = u.readData();
+            u.close();
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+            for( String[] currentUser : data )
+            {
+                String recipient = currentUser[1];
+                String myPhone = thisUserData[2];
 
-                }
-            });
+                FirebaseDatabase database = FirebaseDatabase.getInstance();
+                DatabaseReference chatRef = database.getReference("chat_room");
+
+                chatRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DataSnapshot> task) {
+                        //Toast.makeText(context, "Getting chats", Toast.LENGTH_SHORT).show();
+                        DataSnapshot chatRooms = task.getResult();
+
+                        if( chatRooms.hasChildren() )
+                        {
+                            for( DataSnapshot room :chatRooms.getChildren() )
+                            {
+                                String roomRec = new String( recipient );
+
+                                if( room.hasChild("participants") )
+                                {
+                                    String p1 = "", p2 = "";
+                                    if( room.child("participants").hasChild("p1") )
+                                    {
+                                        p1 = room.child("participants").child("p1").getValue().toString();
+                                    }
+                                    if( room.child("participants").hasChild("p2") )
+                                    {
+                                        p2 = room.child("participants").child("p2").getValue().toString();
+                                    }
+
+                                    if( (p1.equals( myPhone ) && p2.equals(recipient) )
+                                    || ( p2.equals( myPhone ) && p1.equals(recipient) ) )
+                                    {
+                                        //this chat belongs to the above two participants
+                                        //if( room.hasChild("messages") )
+                                      //  {
+                                            //setListenerOnChat( room.child("messages").getRef(), context, myPhone, roomRec );
+                                        room.child("messages").getRef().addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                            ArrayList<chatMessage> result = loadChatMessage( context, myPhone, roomRec);
+                                            int count = 0;
+                                            if( snapshot.hasChildren() )
+                                            {
+                                                for( DataSnapshot message : snapshot.getChildren() )
+                                                {
+                                                    String content = "", sender = "", rec = "", time ="";
+
+                                                    if( message.hasChild("content") )
+                                                    {
+                                                        content = message.child("content").getValue().toString();
+                                                    }
+                                                    if( message.hasChild("time") )
+                                                    {
+                                                        time = message.child("time").getValue().toString();
+                                                    }
+                                                    if( message.hasChild("sender") )
+                                                    {
+                                                        sender = message.child("sender").getValue().toString();
+                                                    }
+
+                                                    int g = Gravity.START;
+
+                                                    if( sender.equals(myPhone) )
+                                                        g = Gravity.END;
+
+
+                                                    chatMessage meso = new chatMessage(content, time, g);
+                                                    if( !containsMessage( result, meso) )
+                                                    {
+                                                        //update message counter
+                                                        count++;
+
+                                                    }
+
+                                                }
+                                            }
+                                            if( count > 0)
+                                                updateMessageCount(context, roomRec, count);
+
+                                        }
+
+                                        @Override
+                                        public void onCancelled(@NonNull DatabaseError error) {
+
+                                        }
+                                    });
+                                    // }
+                                    }
+
+                                }
+
+
+                            }
+                        }
+                    }
+                });
+            }
+
         }catch( Exception e )
         {
             Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private static void setListenerOnChat( DatabaseReference chatRoomRef, Context context, String myPhone, String recipient)
+    {
+        chatRoomRef.addValueEventListener(new ValueEventListener() {
+        @Override
+        public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+            ArrayList<chatMessage> result = loadChatMessage( context, myPhone, recipient);
+            int count = 0;
+            if( snapshot.hasChildren() )
+            {
+                for( DataSnapshot message : snapshot.getChildren() )
+                {
+                    String content = "", sender = "", rec = "", time ="";
+
+                    if( message.hasChild("content") )
+                    {
+                        content = message.child("content").getValue().toString();
+                    }
+                    if( message.hasChild("time") )
+                    {
+                        time = message.child("time").getValue().toString();
+                    }
+                    if( message.hasChild("sender") )
+                    {
+                        sender = message.child("sender").getValue().toString();
+                    }
+
+                    int g = Gravity.START;
+
+                    if( sender.equals(myPhone) )
+                        g = Gravity.END;
+
+
+                    chatMessage meso = new chatMessage(content, time, g);
+                    if( !containsMessage( result, meso) )
+                    {
+                        //update message counter
+                        count++;
+
+                    }
+
+                }
+            }
+            if( count > 0)
+                updateMessageCount(context, recipient, count);
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     public static void postNotification( Context context, int id, String title, String text)
@@ -1179,7 +1376,7 @@ public class MyFirebaseUtilityClass {
                 {
                     //update assistants
                     FirebaseDatabase database = FirebaseDatabase.getInstance();
-                    DatabaseReference assistantRef = database.getReference("users");
+                    DatabaseReference assistantRef = database.getReference("assistant");
 
                     assistantRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
                         @Override
@@ -1232,7 +1429,7 @@ public class MyFirebaseUtilityClass {
         }
     }
 
-    public static void updatePhone( Context context, String contact)
+    public static void updatePhone( Context context, String oldContact, String newContact)
     {
         try{
             if( isConnectedToNetwork(context) )
@@ -1261,7 +1458,7 @@ public class MyFirebaseUtilityClass {
                                         phoneNumber = user.child("phone").getValue().toString();
                                     }
 
-                                    if( phoneNumber.equals(contact) )
+                                    if( phoneNumber.equals(oldContact) )
                                     {
                                         //updateGroupMessagesWhereSenderIs(null, contact, username);
                                         key = user.getKey();
@@ -1272,7 +1469,7 @@ public class MyFirebaseUtilityClass {
 
                             if( !key.equals("") )
                             {
-                                userRef.child(key).child("phone").setValue(contact);
+                                userRef.child(key).child("phone").setValue(newContact);
                                 // updateGroupMessagesWhereSenderIs(contact);
                                 // updateContactToAllMyChats(contact);
                             }
@@ -1304,7 +1501,7 @@ public class MyFirebaseUtilityClass {
                                         phoneNumber = assistant.child("phone").getValue().toString();
                                     }
 
-                                    if( phoneNumber.equals(contact) )
+                                    if( phoneNumber.equals(oldContact) )
                                     {
                                         //updateGroupMessagesWhereSenderIs(null, contact, username);
                                         key = assistant.getKey();
@@ -1315,7 +1512,7 @@ public class MyFirebaseUtilityClass {
 
                             if( !key.equals("") )
                             {
-                                assistantRef.child(key).child("contact").setValue(contact);
+                                assistantRef.child(key).child("contact").setValue(newContact);
                                 //updateGroupMessagesWhereSenderIs(contact);
                                 //updateContactToAllMyChats(contact);
                             }

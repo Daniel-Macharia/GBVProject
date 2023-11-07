@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class EditProfile extends AppCompatActivity {
 
-    EditText username, phone, password, confirm;
+    EditText /* username, phone, */ password, confirm;
 
     Button save;
 
@@ -20,8 +20,8 @@ public class EditProfile extends AppCompatActivity {
             super.onCreate(SavedInstanceState);
             setContentView(R.layout.edit_profile);
 
-            username = findViewById(R.id.username);
-            phone = findViewById(R.id.phone);
+            //username = findViewById(R.id.username);
+            //phone = findViewById(R.id.phone);
             password = findViewById(R.id.password);
             confirm = findViewById(R.id.confirm);
 
@@ -36,26 +36,26 @@ public class EditProfile extends AppCompatActivity {
             currentUsername = data[0];
             currentPhone = data[2];
 
-            username.setHint(currentUsername);
-            phone.setHint( "0" + currentPhone.substring( currentPhone.length() - 9 ));
+            //username.setHint(currentUsername);
+            //phone.setHint( "0" + currentPhone.substring( currentPhone.length() - 9 ));
 
             save.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    /* try{
+                     try{
                         //String name = "", contact = "", pass = "", confirmPass = "";
-                        String name = username.getText().toString();
-                        String contact = phone.getText().toString();
+                       // String name = username.getText().toString();
+                        //String contact = phone.getText().toString();
                         String pass = password.getText().toString();
                         String confirmPass = confirm.getText().toString();
 
-                        validateData(name, contact, pass, confirmPass);
+                        validateData(/*name, contact,*/ "","", pass, confirmPass);
 
                         resetAllFields();
                     }catch( Exception e )
                     {
                         Toast.makeText(EditProfile.this, e.toString(), Toast.LENGTH_SHORT).show();
-                    } */
+                    }
                 }
             });
         } catch (Exception e) {
@@ -67,11 +67,7 @@ public class EditProfile extends AppCompatActivity {
     private void validateData(String name, String contact, String pass, String confirmPass)
     {
         try{
-
-           // Thread t = new Thread(new Runnable() {
-           //     @Override
-              //  public void run() {
-                    if( name.isEmpty() )
+                   /* if( name.isEmpty() )
                     {
                         Toast.makeText(EditProfile.this, "Name is empty", Toast.LENGTH_SHORT).show();
                     }
@@ -103,7 +99,7 @@ public class EditProfile extends AppCompatActivity {
                             String[] data = u.readData();
                             u.close();
 
-                            MyFirebaseUtilityClass.updatePhone( EditProfile.this, contact);
+                            MyFirebaseUtilityClass.updatePhone( EditProfile.this, data[2], contact);
                             MyFirebaseUtilityClass.updateGroupMessagesWhereSenderIs( EditProfile.this, data[2], contact, data[0]);
                             MyFirebaseUtilityClass.updateContactToAllMyChats( EditProfile.this, data[2], contact);
                             Toast.makeText(EditProfile.this, "updated phone", Toast.LENGTH_SHORT).show();
@@ -114,11 +110,15 @@ public class EditProfile extends AppCompatActivity {
                             Toast.makeText(EditProfile.this, "Invalid Phone", Toast.LENGTH_SHORT).show();
                         }
 
-                    }
+                    } */
 
-                    if( pass.isEmpty() || confirmPass.isEmpty() )
+                    if( pass.isEmpty() )
                     {
-                        Toast.makeText(EditProfile.this, "Password or confirm password is blank", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(EditProfile.this, "Password cannot be blank blank! ", Toast.LENGTH_SHORT).show();
+                    }
+                    else if(  confirmPass.isEmpty() )
+                    {
+                        Toast.makeText(EditProfile.this, "Confirm Password cannot be blank blank! ", Toast.LENGTH_SHORT).show();
                     }
                     else
                     {
@@ -136,9 +136,6 @@ public class EditProfile extends AppCompatActivity {
                         }
                     }
 
-              //  }
-            //});
-            //t.start();
 
         }catch( Exception e )
         {
@@ -149,8 +146,8 @@ public class EditProfile extends AppCompatActivity {
     }
 
     private void resetAllFields() {
-        username.setText("");
-        phone.setText("");
+       // username.setText("");
+       // phone.setText("");
         password.setText("");
         confirm.setText("");
     }
