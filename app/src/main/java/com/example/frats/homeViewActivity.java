@@ -59,7 +59,7 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
             //       " I'm making a work request");
            //makeFirebaseWorkRequest();
 
-           Constraints constraints = new Constraints.Builder()
+          /* Constraints constraints = new Constraints.Builder()
                    .setRequiredNetworkType(NetworkType.CONNECTED)
                    .build();
 
@@ -67,7 +67,7 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
                    .setConstraints(constraints)
                    .build();
 
-           WorkManager.getInstance( getApplicationContext() ).enqueue(request);
+           WorkManager.getInstance( getApplicationContext() ).enqueue(request); */
 
        }catch( Exception e )
        {

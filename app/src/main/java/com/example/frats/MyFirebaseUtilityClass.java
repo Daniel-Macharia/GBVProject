@@ -1098,7 +1098,9 @@ public class MyFirebaseUtilityClass {
     {
         try{
 
-            ArrayList<String[]> data = new ArrayList<>(10);
+            ArrayList< Pair<String, DatabaseReference > > recipientChatRefPairList = new ArrayList<>(10);
+
+            ArrayList<String[]> data;
             String[] thisUserData = new String[4];
             user u = new user(context);
             u.open();
@@ -1106,25 +1108,25 @@ public class MyFirebaseUtilityClass {
             thisUserData = u.readData();
             u.close();
 
-            for( String[] currentUser : data )
-            {
-                String recipient = currentUser[1];
-                String myPhone = thisUserData[2];
+            FirebaseDatabase database = FirebaseDatabase.getInstance();
+            DatabaseReference chatRef = database.getReference("chat_room");
 
-                FirebaseDatabase database = FirebaseDatabase.getInstance();
-                DatabaseReference chatRef = database.getReference("chat_room");
+            String myPhone = new String( thisUserData[2] );
 
-                chatRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DataSnapshot> task) {
-                        //Toast.makeText(context, "Getting chats", Toast.LENGTH_SHORT).show();
-                        DataSnapshot chatRooms = task.getResult();
+            chatRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                    //Toast.makeText(context, "Getting chats", Toast.LENGTH_SHORT).show();
+                    DataSnapshot chatRooms = task.getResult();
 
+                    for( String[] currentUser : data )
+                    {
+                        String recipient = new String(currentUser[1]);
                         if( chatRooms.hasChildren() )
                         {
                             for( DataSnapshot room :chatRooms.getChildren() )
                             {
-                                String roomRec = new String( recipient );
+                                //String roomRec = new String( recipient );
 
                                 if( room.hasChild("participants") )
                                 {
@@ -1139,64 +1141,10 @@ public class MyFirebaseUtilityClass {
                                     }
 
                                     if( (p1.equals( myPhone ) && p2.equals(recipient) )
-                                    || ( p2.equals( myPhone ) && p1.equals(recipient) ) )
+                                            || ( p2.equals( myPhone ) && p1.equals(recipient) ) )
                                     {
-                                        //this chat belongs to the above two participants
-                                        //if( room.hasChild("messages") )
-                                      //  {
-                                            //setListenerOnChat( room.child("messages").getRef(), context, myPhone, roomRec );
-                                        room.child("messages").getRef().addValueEventListener(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot snapshot) {
+                                        recipientChatRefPairList.add( new Pair<>( new String( recipient ), room.child("messages").getRef() ) );
 
-                                            ArrayList<chatMessage> result = loadChatMessage( context, myPhone, roomRec);
-                                            int count = 0;
-                                            if( snapshot.hasChildren() )
-                                            {
-                                                for( DataSnapshot message : snapshot.getChildren() )
-                                                {
-                                                    String content = "", sender = "", rec = "", time ="";
-
-                                                    if( message.hasChild("content") )
-                                                    {
-                                                        content = message.child("content").getValue().toString();
-                                                    }
-                                                    if( message.hasChild("time") )
-                                                    {
-                                                        time = message.child("time").getValue().toString();
-                                                    }
-                                                    if( message.hasChild("sender") )
-                                                    {
-                                                        sender = message.child("sender").getValue().toString();
-                                                    }
-
-                                                    int g = Gravity.START;
-
-                                                    if( sender.equals(myPhone) )
-                                                        g = Gravity.END;
-
-
-                                                    chatMessage meso = new chatMessage(content, time, g);
-                                                    if( !containsMessage( result, meso) )
-                                                    {
-                                                        //update message counter
-                                                        count++;
-
-                                                    }
-
-                                                }
-                                            }
-                                            if( count > 0)
-                                                updateMessageCount(context, roomRec, count);
-
-                                        }
-
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError error) {
-
-                                        }
-                                    });
-                                    // }
                                     }
 
                                 }
@@ -1205,8 +1153,85 @@ public class MyFirebaseUtilityClass {
                             }
                         }
                     }
-                });
-            }
+                }
+            }).addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<DataSnapshot> task) {
+                     for( Pair< String, DatabaseReference > pair : recipientChatRefPairList )
+                     {
+                         pair.second.addValueEventListener(new ValueEventListener() {
+                             @Override
+                             public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                                 String newRecipient = new String(pair.first);
+                                 String newMyPhone = new String(myPhone);
+
+                                 ArrayList<chatMessage> result = loadChatMessage( context, newMyPhone, newRecipient);
+                                 int count = 0;
+                                 if( snapshot.hasChildren() )
+                                 {
+                                     for( DataSnapshot message : snapshot.getChildren() )
+                                     {
+                                         String content = "", sender = "", rec = "", time ="";
+
+                                         if( message.hasChild("content") )
+                                         {
+                                             content = message.child("content").getValue().toString();
+                                         }
+                                         if( message.hasChild("time") )
+                                         {
+                                             time = message.child("time").getValue().toString();
+                                         }
+                                         if( message.hasChild("sender") )
+                                         {
+                                             sender = message.child("sender").getValue().toString();
+                                         }
+                                         if( message.hasChild("recipient") )
+                                         {
+                                             rec = message.child("recipient").getValue().toString();
+                                         }
+
+                                         int g = Gravity.START;
+
+                                         if( sender.equals(newMyPhone) )
+                                             g = Gravity.END;
+
+                                         if( sender.equals("") || rec.equals("") )
+                                             continue;
+
+                                         chatMessage meso = new chatMessage( new String(content), new String(time), g);
+                                         if( !containsMessage( result, meso) )
+                                         {
+                                             //update message counter
+                                             count++;
+                                             //add this message to messages SQLite Database table
+                                             messages m = new messages( context );
+                                             m.open();
+                                             m.addNewMessage( sender, rec, content, time );
+                                             m.close();
+                                             Toast.makeText(context, "Adding Message: " +
+                                                     sender + " to " + rec + "\n" + content, Toast.LENGTH_SHORT).show();
+                                         }
+
+                                     }
+                                     if( count > 0)
+                                     {
+                                         updateMessageCount(context, newRecipient, count);
+                                     }
+
+                                 }
+
+                             }
+
+                             @Override
+                             public void onCancelled(@NonNull DatabaseError error) {
+
+                             }
+                         });
+                     }
+                }
+            });
+
 
         }catch( Exception e )
         {
@@ -1220,10 +1245,13 @@ public class MyFirebaseUtilityClass {
         @Override
         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-            ArrayList<chatMessage> result = loadChatMessage( context, myPhone, recipient);
-            int count = 0;
+            String newMyPhone = new String( myPhone );
+            String newRecipient = new String( recipient );
+            ArrayList<chatMessage> result = loadChatMessage( context, newMyPhone, newRecipient);
+
             if( snapshot.hasChildren() )
             {
+                int count = 0;
                 for( DataSnapshot message : snapshot.getChildren() )
                 {
                     String content = "", sender = "", rec = "", time ="";
@@ -1240,25 +1268,38 @@ public class MyFirebaseUtilityClass {
                     {
                         sender = message.child("sender").getValue().toString();
                     }
+                    if( message.hasChild("recipient") )
+                    {
+                        rec = message.child("recipient").getValue().toString();
+                    }
 
                     int g = Gravity.START;
-
-                    if( sender.equals(myPhone) )
+                    if( sender.equals(newMyPhone) )
                         g = Gravity.END;
 
+                    if( sender.equals("") || rec.equals("") )
+                        continue;
 
                     chatMessage meso = new chatMessage(content, time, g);
                     if( !containsMessage( result, meso) )
                     {
                         //update message counter
                         count++;
+                        messages m = new messages( context );
+                        m.open();
+                        m.addNewMessage( sender, rec, content, time);
+                        m.close();
 
                     }
 
                 }
+
+                if( count > 0)
+                {
+                    updateMessageCount(context, newRecipient, count);
+                }
+
             }
-            if( count > 0)
-                updateMessageCount(context, recipient, count);
 
             }
 

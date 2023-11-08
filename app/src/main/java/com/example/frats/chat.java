@@ -288,9 +288,9 @@ public class chat extends AppCompatActivity {
 
                                     }
 
-                                    if (mess.recipient.equals(data[2])) {
-                                        message.getRef().removeValue();
-                                    }
+                                   // if (mess.recipient.equals(data[2])) {
+                                       // message.getRef().removeValue();
+                                   // }
 
 
                                 }

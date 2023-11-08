@@ -86,15 +86,12 @@ public class MainActivity extends AppCompatActivity {
                 if( hasFinishedSearchingUser )
                 {
 
-                    if( userExists( phoneNumber ) )
-                    {
-                        Toast.makeText(MainActivity.this, "A user with this phone exists\nclick login to log in", Toast.LENGTH_SHORT).show();
+                    String u_name, u_pass, confirm;
+                    u_name = username.getText().toString();
+                    u_pass = password.getText().toString();
+                    confirm = confirmPassword.getText().toString();
 
-                    }else {
-                        Toast.makeText(MainActivity.this, "Creating New User...", Toast.LENGTH_SHORT).show();
-                        boolean isUser = true;
-                        createUserOrAssistant(phoneNumber, isUser);
-                    }
+                    createNewUser(phoneNumber, u_name, u_pass, confirm, false);
 
 
                 }else{
@@ -122,17 +119,14 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String phoneNumber = phone.getText().toString();
-                if( hasFinishedSearchingAssistant )
+                if( hasFinishedSearchingAssistant && hasFinishedSearchingUser)
                 {
-                    if( assistantExists(phoneNumber) )
-                    {
-                        Toast.makeText(MainActivity.this, "An assistant with this phone exists\nClick login to log in", Toast.LENGTH_SHORT).show();
-                    }
-                    else{
-                        Toast.makeText(MainActivity.this, "Creating New Assistant", Toast.LENGTH_SHORT).show();
-                        boolean isUser = false;
-                        createUserOrAssistant(phoneNumber, isUser);
-                    }
+                    String u_name, u_pass, confirm;
+                    u_name = username.getText().toString();
+                    u_pass = password.getText().toString();
+                    confirm = confirmPassword.getText().toString();
+
+                    createNewUser(phoneNumber, u_name, u_pass, confirm, false);
 
                 }else {
 
@@ -160,6 +154,29 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void createNewUser( String phoneNumber, String username, String password, String confirm, boolean userBtnClicked)
+    {
+        if( assistantExists(phoneNumber) )
+        {
+            Toast.makeText(MainActivity.this, "An assistant with this phone exists\nClick login to log in", Toast.LENGTH_SHORT).show();
+        }
+        else
+        if( userExists( phoneNumber ) )
+        {
+            Toast.makeText(MainActivity.this, "A user with this phone exists\nclick login to log in", Toast.LENGTH_SHORT).show();
+
+        }
+        else
+        if(userBtnClicked){
+            Toast.makeText(MainActivity.this, "Creating New User...", Toast.LENGTH_SHORT).show();
+            createUserOrAssistant(phoneNumber, username, password, confirm, userBtnClicked);
+        }
+        else{
+            Toast.makeText(MainActivity.this, "Creating New Assistant", Toast.LENGTH_SHORT).show();
+            createUserOrAssistant(phoneNumber,username, password, confirm, userBtnClicked);
+        }
     }
 
     private boolean assistantExists( String phone )
@@ -191,11 +208,8 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void createUserOrAssistant(String phoneNumber, boolean isUser) {
-        String u_name, u_pass, confirm;
-        u_name = username.getText().toString();
-        u_pass = password.getText().toString();
-        confirm = confirmPassword.getText().toString();
+    private void createUserOrAssistant(String phoneNumber, String u_name, String u_pass, String confirm, boolean isUser) {
+
 
         if( !MyFirebaseUtilityClass.validatePhone(this, phoneNumber ) )
         {

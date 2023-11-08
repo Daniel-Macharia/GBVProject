@@ -247,7 +247,7 @@ public class login extends AppCompatActivity {
         MyFirebaseUtilityClass.checkGroupsAllowed( login.this, phone );
         MyFirebaseUtilityClass.loadAssistantsOrUsers( login.this, isUorA, phone);
         MyFirebaseUtilityClass.loadGroupChats( login.this, phone );
-        MyFirebaseUtilityClass.updateAllChats(login.this);
+        //MyFirebaseUtilityClass.updateAllChats(login.this);
     }
 
     public void loadHomeView(String is_user_or_assistant)
