@@ -22,7 +22,7 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     Button user, assistant, loginButton;
-    EditText username, phone, password, confirmPassword;
+    EditText username, phone, password, confirmPassword, email;
 
     public static boolean hasFinishedSearchingUser, hasFinishedSearchingAssistant;
     public static boolean userFound, assistantFound;
@@ -77,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         username = findViewById(R.id.user_name);
         password = findViewById(R.id.pass);
         confirmPassword = findViewById(R.id.confirm);
+        email = findViewById( R.id.email );
 
         user.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -90,8 +91,10 @@ public class MainActivity extends AppCompatActivity {
                     u_name = username.getText().toString();
                     u_pass = password.getText().toString();
                     confirm = confirmPassword.getText().toString();
+                    String emailAddress = "";
+                    emailAddress = email.getText().toString();
 
-                    createNewUser(phoneNumber, u_name, u_pass, confirm, false);
+                    createNewUser(phoneNumber, emailAddress, u_name, u_pass, confirm, true);
 
 
                 }else{
@@ -125,8 +128,10 @@ public class MainActivity extends AppCompatActivity {
                     u_name = username.getText().toString();
                     u_pass = password.getText().toString();
                     confirm = confirmPassword.getText().toString();
+                    String emailAddress = "";
+                    emailAddress = email.getText().toString();
 
-                    createNewUser(phoneNumber, u_name, u_pass, confirm, false);
+                    createNewUser(phoneNumber, emailAddress, u_name, u_pass, confirm, false);
 
                 }else {
 
@@ -156,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void createNewUser( String phoneNumber, String username, String password, String confirm, boolean userBtnClicked)
+    private void createNewUser( String phoneNumber, String emailAddress, String username, String password, String confirm, boolean userBtnClicked)
     {
         if( assistantExists(phoneNumber) )
         {
@@ -171,11 +176,11 @@ public class MainActivity extends AppCompatActivity {
         else
         if(userBtnClicked){
             Toast.makeText(MainActivity.this, "Creating New User...", Toast.LENGTH_SHORT).show();
-            createUserOrAssistant(phoneNumber, username, password, confirm, userBtnClicked);
+            createUserOrAssistant(phoneNumber, emailAddress, username, password, confirm, true);
         }
         else{
             Toast.makeText(MainActivity.this, "Creating New Assistant", Toast.LENGTH_SHORT).show();
-            createUserOrAssistant(phoneNumber,username, password, confirm, userBtnClicked);
+            createUserOrAssistant(phoneNumber, emailAddress, username, password, confirm, false);
         }
     }
 
@@ -208,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void createUserOrAssistant(String phoneNumber, String u_name, String u_pass, String confirm, boolean isUser) {
+    private void createUserOrAssistant(String phoneNumber, String emailAddress, String u_name, String u_pass, String confirm, boolean isUser) {
 
 
         if( !MyFirebaseUtilityClass.validatePhone(this, phoneNumber ) )
@@ -216,6 +221,7 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Invalid Phone Number", Toast.LENGTH_SHORT).show();
             return;
         }
+
 
         if (!invalidDetails(u_name, phoneNumber, u_pass, confirm)) {//if the details are valid
             //if neither the username, the password nor the confirm password is blank
@@ -235,7 +241,7 @@ public class MainActivity extends AppCompatActivity {
                         user_OR_assistant = "assistant";
                     }
 
-                    launchTermsAndConditions( u_name, u_pass, phoneNumber, user_OR_assistant);
+                    launchTermsAndConditions( u_name, u_pass, phoneNumber, emailAddress, user_OR_assistant);
 
                 } else {
                     Toast.makeText(MainActivity.this, "Password and the \nconfirm password do not match! ", Toast.LENGTH_SHORT).show();
@@ -256,13 +262,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void launchTermsAndConditions(String username, String password, String phone, String isUser) {
+    private void launchTermsAndConditions(String username, String password, String phone, String emailAddress, String isUser) {
 
         Bundle data = new Bundle();
         data.putString("username", username);
         data.putString("password", password);
         data.putString("phone", phone);
         data.putString("isUser", isUser);
+        data.putString("email", emailAddress);
 
         Intent intent = new Intent(MainActivity.this, termsAndConditions.class);
         intent.putExtra("data", data);
@@ -271,6 +278,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private boolean invalidDetails(String name, String phoneNumber, String password, String confirm) {
+
         if (name.equals("")) {
             Toast.makeText(MainActivity.this, "Username cannot be blank!", Toast.LENGTH_SHORT).show();
             return true;
@@ -283,7 +291,13 @@ public class MainActivity extends AppCompatActivity {
         } else if (confirm.equals("")) {
             Toast.makeText(MainActivity.this, "Confirm Password cannot be blank!", Toast.LENGTH_SHORT).show();
             return true;
-        } else {
+        } else if( !MyFirebaseUtilityClass.validatePassword(password) )
+        {
+            Toast.makeText(this, "Password is weak!\n" +
+                    "password must be at least 8 characters long " +
+                    "and contain numbers, upper and lowercase letters", Toast.LENGTH_SHORT).show();
+            return true;
+        } else{
             return false;
         }
     }
@@ -294,10 +308,15 @@ class newUser
 {
     public String username;
     public String phone;
+    public String password;
 
-    public newUser(String name, String phoneNumber)
+    public String email;
+
+    public newUser(String name, String phoneNumber, String password, String email)
     {
         username = name;
         phone = phoneNumber;
+        this.password = password;
+        this.email = email;
     }
 }

@@ -107,8 +107,9 @@ public class chat extends AppCompatActivity {
                 public void onClick(View view) {
                     try {
 
+                        EncryptMessage em = new EncryptMessage();
                         String s = "";
-                        s = e.getText().toString();
+                        s = em.encrypt( e.getText().toString() );
                         e.setText("");
 
                         Calendar c = Calendar.getInstance();
@@ -117,7 +118,8 @@ public class chat extends AppCompatActivity {
                         String time = ((hr < 10) ? ("0" + hr) : ("" + hr)) + ":" + ((min < 10) ? ("0" + min) : ("" + min)) +
                                 ((c.get(Calendar.AM_PM) == Calendar.AM) ? " AM" : " PM");
 
-                        msg m = new msg(data[2], myRecipient, s, time);
+
+                        msg m = new msg(data[2], myRecipient, s , time);
 
                         if (thisChatKey == null) {
                             Toast.makeText(chat.this, "Check your internet connection\n and try again", Toast.LENGTH_SHORT).show();
@@ -127,7 +129,7 @@ public class chat extends AppCompatActivity {
                             ms.open();
                             ms.addNewMessage(new String(m.sender),
                                     new String(m.recipient),
-                                    new String(m.content),
+                                    new String( m.content ),
                                     new String(m.time));
                             ms.close();
                         }
@@ -161,6 +163,7 @@ public class chat extends AppCompatActivity {
     private void loadFromLocalDB(String recipient) {
         ArrayList<msg> ms = new ArrayList<>(10);
         //ArrayList<chatMessage> arr = new ArrayList<>(10);
+        EncryptMessage em = new EncryptMessage();
 
         messages messageDB = new messages(chat.this);
         messageDB.open();
@@ -169,10 +172,10 @@ public class chat extends AppCompatActivity {
 
         for (msg m : ms) {
             int g = (recipient.equals(m.recipient) ? Gravity.END : Gravity.START);
-            chatMessage chatM = new chatMessage(m.content, m.time, g);
+            chatMessage chatM = new chatMessage( em.decrypt( m.content), m.time, g);
 
             if (!contains(arr, chatM)) {
-                arr.add(new chatMessage(m.content, m.time, g));
+                arr.add(new chatMessage( chatM.getMessage() , m.time, g));
             }
 
         }
@@ -243,6 +246,8 @@ public class chat extends AppCompatActivity {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot snapshot) {
 
+                            EncryptMessage em = new EncryptMessage();
+
                             loadFromLocalDB( myRecipient );
 
                            // MyFirebaseUtilityClass.valueChangedForThisChatRoom( chatList, snapshot, chat.this, myRecipient);
@@ -273,14 +278,14 @@ public class chat extends AppCompatActivity {
                                         mess.recipient = new String(r);
                                     }
 
-                                    chatMessage meso = new chatMessage(new String(mess.content), new String(mess.time), g);
+                                    chatMessage meso = new chatMessage(new String( em.decrypt(mess.content) ), new String(mess.time), g);
                                     if (!contains(arr, meso)) {
                                        // Toast.makeText(chat.this, "inserted " + meso.getMessage(), Toast.LENGTH_SHORT).show();
                                         arr.add(meso);
                                         try {
                                             messages ms = new messages(chat.this);
                                             ms.open();
-                                            ms.addNewMessage(mess.sender, mess.recipient, mess.content, mess.time);
+                                            ms.addNewMessage(mess.sender, mess.recipient,  mess.content, mess.time);
                                             ms.close();
                                         } catch (Exception e) {
                                             Toast.makeText(chat.this, e.toString(), Toast.LENGTH_SHORT).show();

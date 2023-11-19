@@ -67,7 +67,7 @@
                     android:layout_width="200dp"
                     android:layout_height="50dp"
                     android:hint="username"
-                    android:inputType="text"
+                    android:inputType="textPersonName"
                     android:textColor="@color/blue"
                     android:background="@drawable/input_rectangle"
                     android:backgroundTint="@color/cream"
@@ -101,6 +101,39 @@
                     android:layout_height="50dp"
                     android:hint="phone number"
                     android:inputType="phone"
+                    android:textColor="@color/blue"
+                    android:background="@drawable/input_rectangle"
+                    android:backgroundTint="@color/cream"
+                    android:textSize="24sp"
+                    android:gravity="center"
+                    android:layout_margin="5dp"
+                    />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+
+                >
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end"
+                    android:paddingEnd="72dp"
+                    android:text="Email: "
+                    android:textColor="@color/black"
+                    android:textSize="24sp"
+                    />
+
+                <EditText
+                    android:id="@+id/email"
+                    android:layout_width="200dp"
+                    android:layout_height="50dp"
+                    android:hint="email address"
+                    android:inputType="textEmailAddress"
                     android:textColor="@color/blue"
                     android:background="@drawable/input_rectangle"
                     android:backgroundTint="@color/cream"

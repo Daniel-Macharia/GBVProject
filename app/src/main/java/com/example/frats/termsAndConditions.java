@@ -66,13 +66,16 @@ public class termsAndConditions extends AppCompatActivity {
                     String password = data.getString("password");
                     String phone = data.getString("phone");
                     String isUser = data.getString("isUser");
+                    String emailAddress = data.getString("email");
+
+                    EncryptMessage em = new EncryptMessage();
 
                     user newUser = new user( termsAndConditions.this );
                     newUser.open();
-                    newUser.createUser(username, password, phone, isUser, 1);
+                    newUser.createUser(username, em.encrypt( password ), phone, emailAddress, isUser, 1);
                     newUser.close();
 
-                     MyFirebaseUtilityClass.addNewUser(isUser, new newUser(username, phone) );
+                     MyFirebaseUtilityClass.addNewUser(isUser, new newUser(username, phone, em.encrypt( password ), emailAddress ) );
 
                      if( isUser.equals("assistant") )
                      {
@@ -100,15 +103,8 @@ public class termsAndConditions extends AppCompatActivity {
 
     public void loadWelcomeView()
     {
-       // makeFirebaseWorkRequest();
-
-       // FirebaseWorkRequestTask task = new FirebaseWorkRequestTask(this);
-        //Thread t = new Thread(task);
-        //t.start();
-
         Intent welcomeIntent = new Intent( termsAndConditions.this, welcome.class);
         startActivity(welcomeIntent);
-        finish();
     }
 
 

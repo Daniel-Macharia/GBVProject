@@ -44,13 +44,12 @@ public class homeViewActivity extends AppCompatActivity implements PopupMenu.OnM
            addMessage();
 
            Intent intent = getIntent();
-           String userOrAssistant = intent.getStringExtra("isUser");
+           String userOrAssistant = "";
+           userOrAssistant = intent.getStringExtra("isUser");
 
            assert userOrAssistant != null;
            if( userOrAssistant.equals("assistant") )
                isUser = false;
-           else
-               isUser = true;
 
            anime worker = new anime(tv, text);
            worker.start();

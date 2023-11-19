@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -226,7 +227,7 @@ public class MyFirebaseUtilityClass {
                                 user u = new user(context);
                                 u.open();
                                 u.createUser( new String(a[0]), "", new String(a[1]),
-                                        "", 0);
+                                        "", "", 0);
                                 u.close();
 
                             }
@@ -399,8 +400,9 @@ public class MyFirebaseUtilityClass {
                                             user us = new user( context);
                                             us.open();
                                             us.createUser( new String(username),
-                                                    new String( phoneNumber ),
+                                                    "",
                                                     new String(phoneNumber),
+                                                    "",
                                                     new String("users"),
                                                     0 );
                                             us.close();
@@ -967,11 +969,11 @@ public class MyFirebaseUtilityClass {
         return list;
     }
 
-    public static ArrayList<Pair<String, String>> findUserData()
+    public static ArrayList< userData > findUserData()
     {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference userRef = database.getReference("users");
-        ArrayList<Pair<String, String>> userList = new ArrayList<>(10);
+        ArrayList< userData> userList = new ArrayList<>(10);
 
         userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
@@ -982,7 +984,7 @@ public class MyFirebaseUtilityClass {
                 {
                     for( DataSnapshot user : result.getChildren() )
                     {
-                        String username = "", phone = "";
+                        String username = "", phone = "", pass = "", email = "";
 
                         if( user.hasChild("username") )
                         {
@@ -992,9 +994,17 @@ public class MyFirebaseUtilityClass {
                         {
                             phone = user.child( "phone" ).getValue().toString();
                         }
+                        if( user.hasChild("password"))
+                        {
+                            pass = user.child("password").getValue().toString();
+                        }
+                        if( user.hasChild("email") )
+                        {
+                            email = user.child("email").getValue().toString();
+                        }
 
-                        if( !username.equals("") && !phone.equals("") )
-                            userList.add( new Pair<String, String>( new String(username), new String(phone) ) );
+                        if( !username.equals("") && !phone.equals("") && !pass.equals("") )
+                            userList.add( new userData( new String(username), new String( pass), new String(phone) , new String( email )) );
                     }
                 }
 
@@ -1006,11 +1016,11 @@ public class MyFirebaseUtilityClass {
         return userList;
     }
 
-    public static ArrayList<Pair<String, String>> findAssistantData()
+    public static ArrayList< userData> findAssistantData()
     {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         DatabaseReference userRef = database.getReference("assistant");
-        ArrayList<Pair<String, String>> assistantList = new ArrayList<>(10);
+        ArrayList<userData> assistantList = new ArrayList<>(10);
 
         userRef.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
@@ -1021,7 +1031,7 @@ public class MyFirebaseUtilityClass {
                 {
                     for( DataSnapshot assistant : result.getChildren() )
                     {
-                        String username = "", phone = "";
+                        String username = "", pass = "", phone = "", email = "";
 
                         if( assistant.hasChild("username") )
                         {
@@ -1031,9 +1041,16 @@ public class MyFirebaseUtilityClass {
                         {
                             phone = assistant.child( "phone" ).getValue().toString();
                         }
-
-                        if( !username.equals("") && !phone.equals("") )
-                            assistantList.add( new Pair<String, String>( new String(username), new String(phone) ) );
+                        if( assistant.hasChild("password"))
+                        {
+                            pass = assistant.child("password").getValue().toString();
+                        }
+                        if( assistant.hasChild("email") )
+                        {
+                            email = assistant.child("email").getValue().toString();
+                        }
+                        if( !username.equals("") && !phone.equals("") && !pass.equals(""))
+                            assistantList.add( new userData( new String(username), new String( pass), new String(phone), new String(email) ) );
                     }
                 }
                 login.finishedGettingAssistant = true;
@@ -1099,6 +1116,7 @@ public class MyFirebaseUtilityClass {
         try{
 
             ArrayList< Pair<String, DatabaseReference > > recipientChatRefPairList = new ArrayList<>(10);
+            ArrayList<Pair<String,Integer>> notificationData = new ArrayList<>(10);
 
             ArrayList<String[]> data;
             String[] thisUserData = new String[4];
@@ -1216,7 +1234,8 @@ public class MyFirebaseUtilityClass {
                                      }
                                      if( count > 0)
                                      {
-                                         updateMessageCount(context, newRecipient, count);
+                                         notificationData.add( new Pair<String, Integer> (new String(newRecipient), count) );
+                                         //updateMessageCount(context, newRecipient, count);
                                      }
 
                                  }
@@ -1229,6 +1248,16 @@ public class MyFirebaseUtilityClass {
                              }
                          });
                      }
+                }
+            }).addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+
+                @Override
+                public void onComplete(Task<DataSnapshot> task)
+                {
+                    for( Pair<String, Integer> notif : notificationData )
+                    {
+                        updateMessageCount( context, notif.first, notif.second );
+                    }
                 }
             });
 
@@ -1339,25 +1368,26 @@ public class MyFirebaseUtilityClass {
 
     public static boolean validatePhone(Context context, String phone)
     {
-        if( phone.length() == 10 )
+        String phoneRegex = "0[17][0-9]{8}";
+
+        if( phone.matches( phoneRegex ) )
         {
-            if( phone.startsWith("07") || phone.startsWith("01") )
-            {
-                try{
-                    int number = Integer.parseInt( phone );
-
-                }catch( NumberFormatException e )
-                {
-                    return false;
-                }catch( Exception e )
-                {
-                    Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
-                }
-
-                return true;
-            }
+            return true;
         }
 
+        return false;
+    }
+
+    public static boolean validatePassword( String password )
+    {
+        String upperAlphaRegex = "\\w*[[A-Z]*]\\w*";
+        String lowerAlphaRegex = "\\w*[[a-z]*]\\w*";
+        String digitRegex = "\\w*[[0-9]*]\\w*";
+
+        if( password.length() > 8 && password.matches( upperAlphaRegex ) && password.matches( lowerAlphaRegex ) && password.matches( digitRegex ) )
+        {
+            return true;
+        }
 
         return false;
     }
@@ -1772,6 +1802,43 @@ public class MyFirebaseUtilityClass {
        {
            Toast.makeText(context, e.toString(), Toast.LENGTH_SHORT).show();
        }
+    }
+
+    public static void updatePassword( String url, String username, String phone, String newPass)
+    {
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        DatabaseReference ref = database.getReference(url);
+
+        ref.get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                DataSnapshot result = task.getResult();
+
+                if( result.hasChildren() )
+                {
+                    for( DataSnapshot user : result.getChildren() )
+                    {
+                        String oldUsername = "", oldPhone = "";
+
+                        if( user.hasChild("username") )
+                        {
+                            oldUsername = user.child("username").getValue().toString();
+                        }
+                        if( user.hasChild("phone") )
+                        {
+                            oldPhone = user.child("phone").getValue().toString();
+                        }
+
+
+                        if( oldUsername.equals(username) && oldPhone.equals(phone) )
+                        {
+                            user.child("password").getRef().setValue(newPass);
+                        }
+                    }
+                }
+
+            }
+        });
     }
 
 }

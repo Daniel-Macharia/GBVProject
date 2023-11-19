@@ -1,34 +1,56 @@
 package com.example.frats;
 
 import android.app.Dialog;
+import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Pair;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.work.Constraints;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import com.google.android.gms.auth.api.identity.GetPhoneNumberHintIntentRequest;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 public class login extends AppCompatActivity {
 
-    Button login;
+    Button login, forgot;
     //Button signup;
     EditText userName,userPassWord;
-    TextView password;
+    TextView password, usernameLabel;
 
     public static String isUserOrAssistant = null;
     public static boolean found = false;
     public static boolean finishedGettingUser = false;
     public static boolean finishedGettingAssistant = false;
-    ArrayList<Pair<String, String>> userList = new ArrayList<>(10);
-    ArrayList<Pair<String, String>> assistantList = new ArrayList<>(10);
+
+    String[] data = new String[4];
+    ArrayList<userData> userList = new ArrayList<>(10);
+    ArrayList<userData> assistantList = new ArrayList<>(10);
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -37,18 +59,23 @@ public class login extends AppCompatActivity {
         setContentView(R.layout.login_xml);
 
         login = findViewById(R.id.login);
-        //signup = findViewById(R.id.signup);
+        forgot = findViewById(R.id.forgotPassword);
         userName = findViewById(R.id.user_name);
         userPassWord = findViewById(R.id.user_password);
         password = findViewById( R.id.passLabel);
+        usernameLabel = findViewById(R.id.usernameLabel);
+
+        //boolean cancelled = false;
+        //cancelled = launchPhoneHintPicker();
 
         user validateUser = new user(login.this);
         validateUser.open();
-        String[] data = validateUser.readData();
+        data = validateUser.readData();
         validateUser.close();
 
         if( data[0].equals("") )
         {
+            forgot.setVisibility(View.INVISIBLE);
 
             if( !MyFirebaseUtilityClass.isConnectedToNetwork( this ) )
             {
@@ -59,17 +86,22 @@ public class login extends AppCompatActivity {
             assistantList = MyFirebaseUtilityClass.findAssistantData();
 
             //Toast.makeText(login.this, "User not in local database", Toast.LENGTH_SHORT).show();
-            password.setText("phone:");
-            userPassWord.setInputType(InputType.TYPE_CLASS_PHONE);
-            userPassWord.setHint("phone number");
+            usernameLabel.setText("Phone:     ");
+            userName.setInputType(InputType.TYPE_CLASS_PHONE);
+            userName.setHint("phone number");
+
+            password.setText("Password: ");
+            userPassWord.setHint("password");
+
 
             login.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                   try{
-                      String name, phone;
-                      name = userName.getText().toString();
-                      phone = userPassWord.getText().toString();
+                      String pass, phone;
+                      String username = "";
+                      phone = userName.getText().toString();
+                      pass = userPassWord.getText().toString();
 
                       if( !MyFirebaseUtilityClass.isConnectedToNetwork( login.this ) )
                       {
@@ -77,34 +109,52 @@ public class login extends AppCompatActivity {
                       }
 
 
-                      if( name.equals("") || phone.equals(""))
+                      if( pass.equals("") || phone.equals(""))
                       {
-                          Toast.makeText(login.this, "Invalid username or phone number", Toast.LENGTH_SHORT).show();
+                          Toast.makeText(login.this, "Invalid phone or password", Toast.LENGTH_SHORT).show();
                       }
                       else
                       {
-                          if( !userList.isEmpty() && !assistantList.isEmpty())
+                          if( finishedGettingAssistant && finishedGettingUser)
                           {
-                              if( userExists(new Pair<String, String>( name, phone) ) )
+                              EncryptMessage em = new EncryptMessage();
+                              userData d = getThisUserData( new userData("", em.encrypt( pass ), phone, "") );
+                              if( !d.phone.equals("") && !d.password.equals("") )
                               {
-                                  Intent intent = new Intent( login.this, CreateNewPassword.class);
-                                  intent.putExtra("username", name);
-                                  intent.putExtra("phone", phone);
-                                  intent.putExtra("isUser", isUserOrAssistant.equals("assistant") ? false : true );
-                                  startActivity(intent);
-                                  return;
-                              }
-                              else{
-                                  return;
-                              }
-                          }
 
-                          if( finishedGettingAssistant && finishedGettingUser )
-                          {
-                              Toast.makeText(login.this, "The User does not exist.\n" +
-                                      "Please go back and create a new account", Toast.LENGTH_SHORT).show();
-                          }
-                          else
+
+                                  user u = new user(login.this);
+                                  u.open();
+                                  u.createUser( d.username, d.password, d.phone, d.email, isUserOrAssistant, 1);
+                                  u.close();
+
+                                  Intent intent = new Intent( login.this, homeViewActivity.class);
+                                  //intent.putExtra("username", d.username);
+                                  //intent.putExtra("phone", d.phone);
+                                  intent.putExtra("isUser", isUserOrAssistant);
+                                  startActivity(intent);
+
+                                  initData( d.phone, isUserOrAssistant.equals("users") ? "assistant" : "users" );
+
+                                  Constraints constraints = new Constraints.Builder()
+                                          .setRequiredNetworkType(NetworkType.CONNECTED)
+                                          .build();
+
+                                  PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( MyNewWorker.class, 15, TimeUnit.MINUTES )
+                                          .setConstraints(constraints)
+                                          .build();
+
+                                  WorkManager.getInstance( getApplicationContext() ).enqueue(request);
+
+                                  finishAffinity();
+
+                              }
+                              else
+                              {
+                                  Toast.makeText(login.this, "The User does not exist.\n" +
+                                          "Please go back and create a new account", Toast.LENGTH_SHORT).show();
+                              }
+                          }else
                           {
                               Toast.makeText(login.this, "Loading, please wait ...", Toast.LENGTH_SHORT).show();
                           }
@@ -131,8 +181,9 @@ public class login extends AppCompatActivity {
 
                     try {
 
+                        EncryptMessage em = new EncryptMessage();
                         u_name = data[0];
-                        u_pass = data[1];
+                        u_pass = em.decrypt( data[1] );
 
                         //validate info
                         if( name.equals(u_name) )
@@ -146,9 +197,10 @@ public class login extends AppCompatActivity {
                                 tv.setTextColor(Color.BLUE);
                                 tv.setText("Login Successful!");
                                 d.setContentView(tv);
-                                d.show();
+                                //d.show();
 
-                                Toast.makeText(login.this,data[2],Toast.LENGTH_SHORT).show();
+                                alert( getApplicationContext(),"Login Successful");
+
                                 initData( data[2], data[3].equals("users") ? "assistant" : "users" );
 
                                 loadHomeView(data[3]);
@@ -160,7 +212,8 @@ public class login extends AppCompatActivity {
                                 TextView tv = new TextView(login.this);
                                 tv.setText("Invalid password!");
                                 d.setContentView(tv);
-                                d.show();
+                                //d.show();
+                                alert( getApplicationContext(),"Invalid Password");
 
                                 userPassWord.setText("");
 
@@ -171,7 +224,8 @@ public class login extends AppCompatActivity {
                             TextView tv = new TextView(login.this);
                             tv.setText("Invalid Username!");
                             d.setContentView(tv);
-                            d.show();
+                            //d.show();
+                            alert( getApplicationContext(),"Invalid Username");
 
                             userPassWord.setText("");
                             userName.setText("");
@@ -187,53 +241,177 @@ public class login extends AppCompatActivity {
                 }
             });
 
+            forgot.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent( login.this, CreateNewPassword.class);
+                    startActivity(intent);
+                }
+            });
+
         }
 
     }
 
-    private boolean userExists( Pair<String, String> value)
+    private userData getThisUserData(userData value)
     {
-        for( Pair<String, String> current : assistantList )
+        userData data = new userData("","","", "");
+
+        for( userData current : assistantList )
         {
-            if( current.first.equals( value.first) && current.second.equals( value.second ) )
+            if( current.phone.equals( value.phone) && current.password.equals( value.password ) )
+            {
+                isUserOrAssistant = "assistant";
+
+                data.username = new String(current.username);
+                data.phone = new String(current.phone);
+                data.password = new String(current.password);
+                data.email = new String( current.email );
+                //return true;
+            }
+            else
+            {
+                if( !current.phone.equals( value.phone) && current.password.equals( value.password) )
+                {
+                    Toast.makeText(this, "Invalid Phone", Toast.LENGTH_SHORT).show();
+                   // return false;
+                }
+
+                if( current.phone.equals( value.phone) && !current.password.equals( value.password) )
+                {
+                    Toast.makeText(this, "Invalid Password", Toast.LENGTH_SHORT).show();
+                   // return false;
+                }
+            }
+        }
+
+        for( userData current : userList )
+        {
+            if( current.phone.equals( value.phone) && current.password.equals( value.password ) )
+            {
+                isUserOrAssistant = "users";
+
+                data.username = new String(current.username);
+                data.phone = new String(current.phone);
+                data.password = new String(current.password);
+                data.email = new String( current.email );
+               // return true;
+            }
+            else
+            {
+                if( !current.phone.equals( value.phone) && current.password.equals( value.password))
+                {
+                    Toast.makeText(this, "Invalid Phone", Toast.LENGTH_SHORT).show();
+                    //return false;
+                }
+
+                if( current.phone.equals( value.phone) && !current.password.equals( value.password))
+                {
+                    Toast.makeText(this, "Invalid Password", Toast.LENGTH_SHORT).show();
+                   // return false;
+                }
+            }
+        }
+
+        return data;
+    }
+
+    public static void alert(Context context, String message)
+    {
+        try{
+            Toast t = Toast.makeText(context,message,Toast.LENGTH_SHORT);
+            t.setGravity(Gravity.CENTER,0,0);
+            t.getView().setBackground( context.getDrawable( R.drawable.toast_drawable) );
+            t.show();
+        }catch(Exception e )
+        {
+            Toast.makeText(context, "error: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean launchPhoneHintPicker()
+    {
+        try{
+
+            ActivityResultLauncher<IntentSenderRequest> PhoneNumberHintIntentResultLauncher =
+                    registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), new ActivityResultCallback<ActivityResult>() {
+                        @Override
+                        public void onActivityResult(ActivityResult result) {
+                            try{
+                                String phoneNumber = Identity.getSignInClient(login.this).getPhoneNumberFromIntent(result.getData());
+                                Toast.makeText(login.this, "Phone Number is: " + phoneNumber, Toast.LENGTH_SHORT).show();
+                            }catch( Exception e )
+                            {
+                                Toast.makeText(login.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+            GetPhoneNumberHintIntentRequest request = GetPhoneNumberHintIntentRequest.builder().build();
+
+            Identity.getSignInClient(this).getPhoneNumberHintIntent( request )
+                    .addOnSuccessListener(new OnSuccessListener<PendingIntent>() {
+                        @Override
+                        public void onSuccess(PendingIntent pendingIntent) {
+                            IntentSender intentSender = pendingIntent.getIntentSender();
+                            PhoneNumberHintIntentResultLauncher.launch( new IntentSenderRequest.Builder(intentSender).build() );
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(login.this, "Phone Number Hint Failed!", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }catch ( Exception e )
+        {
+            Toast.makeText(this, "Error Launching Phone Hint Picker: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+        return true;
+    }
+
+    private boolean userExists( userData value)
+    {
+        for( userData current : assistantList )
+        {
+            if( current.phone.equals( value.phone) && current.password.equals( value.password ) )
             {
                 isUserOrAssistant = "assistant";
                 return true;
             }
             else
             {
-                if( !current.first.equals(( value.first)) && current.second.equals( value.second) )
-                {
-                    Toast.makeText(this, "Invalid Username", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-                else
-                if( current.first.equals(( value.first)) && !current.second.equals( value.second) )
+                if( !current.phone.equals(( value.phone)) )
                 {
                     Toast.makeText(this, "Invalid Phone", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                if( !current.password.equals( value.password) )
+                {
+                    Toast.makeText(this, "Invalid Password", Toast.LENGTH_SHORT).show();
                     return false;
                 }
             }
         }
 
-        for( Pair<String, String> current : userList )
+        for( userData current : userList )
         {
-            if( current.first.equals( value.first) && current.second.equals( value.second ) )
+            if( current.phone.equals( value.phone) && current.password.equals( value.password ) )
             {
                 isUserOrAssistant = "users";
                 return true;
             }
             else
             {
-                if( !current.first.equals(( value.first)) && current.second.equals( value.second) )
-                {
-                    Toast.makeText(this, "Invalid Username", Toast.LENGTH_SHORT).show();
-                    return false;
-                }
-                else
-                if( current.first.equals(( value.first)) && !current.second.equals( value.second) )
+                if( !current.phone.equals( value.phone) )
                 {
                     Toast.makeText(this, "Invalid Phone", Toast.LENGTH_SHORT).show();
+                    return false;
+                }
+
+                if( !current.password.equals( value.password))
+                {
+                    Toast.makeText(this, "Invalid Password", Toast.LENGTH_SHORT).show();
                     return false;
                 }
             }
@@ -256,11 +434,43 @@ public class login extends AppCompatActivity {
         Intent toHome = new Intent( login.this, homeViewActivity.class );
         toHome.putExtra("isUser", is_user_or_assistant);
         startActivity(toHome);
-        finish();
+    }
 
+    @Override
+    public void onResume()
+    {
+        try{
+            super.onResume();
+            userName.setText("");
+            userPassWord.setText("");
+
+            user u = new user( login.this );
+            u.open();
+            data = u.readData();
+            u.close();
+        }catch( Exception e )
+        {
+            Toast.makeText(getApplicationContext(), "error: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
     }
 
 
 }
 
+
+class userData
+{
+    public String username = "";
+    public String password = "";
+    public String phone = "";
+    public String email = "";
+
+    public userData( String username, String password, String phone, String email )
+    {
+        this.username = username;
+        this.password = password;
+        this.phone = phone;
+        this.email = email;
+    }
+}
 

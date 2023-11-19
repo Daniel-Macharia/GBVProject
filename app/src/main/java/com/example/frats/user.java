@@ -17,7 +17,7 @@ public class user {
     public static final String passWord = "user_password";
     public static final String phoneNumber = "phone_number";
     public static final String userOrAssistant = "user_or_assistant";
-    private static final String imageURI = "image_uri";
+    private static final String email = "email_address";
     private static final String thisUser = "this_user";
 
     private static final String userID = "user_id";
@@ -46,7 +46,7 @@ public class user {
                     passWord + " TEXT NOT NULL, " +
                     phoneNumber + " TEXT NOT NULL, " +
                     userOrAssistant + " TEXT NOT NULL, " +
-                    imageURI + " TEXT , " +
+                    email + " TEXT NOT NULL, " +
                     thisUser + " INTEGER NOT NULL );"
 
             );
@@ -84,7 +84,7 @@ public class user {
         helper.close();
     }
 
-    public long createUser(String name, String password, String phone, String user_or_assistant, int isThisUser )
+    public long createUser(String name, String password, String phone, String emailAddress, String user_or_assistant, int isThisUser )
     {
         ContentValues cv = new ContentValues();
         cv.put(userName,name);
@@ -94,6 +94,7 @@ public class user {
         //if( user_or_assistant == null)
          //   user_or_assistant = "users";
         cv.put(userOrAssistant, user_or_assistant);
+        cv.put(email, emailAddress);
         cv.put( thisUser, isThisUser);
         long l = userdb.insert(tableName,null,cv);
 
@@ -111,7 +112,7 @@ public class user {
         int nameIndex = c.getColumnIndex( userName);
         int phoneIndex = c.getColumnIndex( phoneNumber );
         //int userIds = c.getColumnIndex( userID );
-        int imageURIIndex = c.getColumnIndex( imageURI );
+        int imageURIIndex = c.getColumnIndex( email );
 
         ArrayList<String[]> result = new ArrayList<>(10);
         //String ids = "";

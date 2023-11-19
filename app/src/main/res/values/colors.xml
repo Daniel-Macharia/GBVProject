@@ -5,6 +5,7 @@
     <color name="red">#FFFF0000</color>
     <color name="green">#FF00FF00</color>
     <color name="blue">#FF0000FF</color>
+    <color name="darkBlue">#FF3333AA</color>
     <color name="cream">#FFBBBBBB</color>
     <color name="cream2">#FFEDEDED</color>
     <color name="accent">#D81B60</color>

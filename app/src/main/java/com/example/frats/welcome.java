@@ -45,7 +45,7 @@ public class welcome extends AppCompatActivity {
             }
 
             w.loadLogin();
-            w.finish();
+            w.finishAffinity();
 
         }
 
