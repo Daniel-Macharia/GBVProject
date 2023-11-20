@@ -5,8 +5,9 @@ import java.util.ArrayList;
 class EncryptMessage {
 
     private ArrayList<letter> letterMap = new ArrayList<>(10);
+    private ArrayList padVals = new ArrayList<>(10);
 
-    private int pad = 12;
+    private int pointer;
     private String cipherText = new String("");
     private String originalMessage = new String("");
 
@@ -17,10 +18,14 @@ class EncryptMessage {
         {
             letterMap.add( new letter( (char) u, (char) l, count));
         }
+
+        padVals = getPad();
+        pointer = 0;
     }
 
     public String encrypt( String message )
     {
+        pointer = 0;
         cipherText = "";
 
         char[] charArray = message.toCharArray();
@@ -29,12 +34,12 @@ class EncryptMessage {
         {
             if( containsLower(c) )
             {
-                cipherText += getLowerCipher(c, pad);
+                cipherText += getLowerCipher(c, getPadValue());
             }
             else
             if( containsUpper( c ) )
             {
-                cipherText += getUpperCipher(c, pad);
+                cipherText += getUpperCipher(c, getPadValue());
             }
             else
             {
@@ -47,7 +52,7 @@ class EncryptMessage {
 
     public String decrypt( String cipher)
     {
-
+        pointer = 0;
         originalMessage = "";
 
         char[] charArray = cipher.toCharArray();
@@ -56,12 +61,12 @@ class EncryptMessage {
         {
             if( containsLower(c) )
             {
-                originalMessage += getLowerOriginal(c, pad);
+                originalMessage += getLowerOriginal(c, getPadValue());
             }
             else
             if( containsUpper( c ) )
             {
-                originalMessage += getUpperOriginal(c, pad);
+                originalMessage += getUpperOriginal(c, getPadValue());
             }
             else
             {
@@ -141,6 +146,48 @@ class EncryptMessage {
                 return true;
         }
         return false;
+    }
+
+    public ArrayList getPad()
+    {
+        ArrayList vals = new ArrayList(10);
+        boolean isPrime;
+        int count = 0;
+        for( int num = 1; num <= 1000; num++ )
+        {
+            if( count == 101 )
+                break;
+
+            isPrime = true;
+            for( int div = 1; div <= num; div++)
+            {
+                if( div != num && div != 1 && num % div == 0 )
+                {
+                    isPrime = false;
+                }
+            }
+
+            if( isPrime )
+            {
+                vals.add(num % 26);
+                count++;
+            }
+        }
+
+        return vals;
+    }
+
+    private int getPadValue()
+    {
+        if( pointer == padVals.size() )
+        {
+            pointer = 0;
+        }
+
+        int value = (int) padVals.get(pointer);
+
+        pointer++;
+        return value;
     }
 
 }

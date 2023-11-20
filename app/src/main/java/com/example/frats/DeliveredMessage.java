@@ -19,12 +19,18 @@ public class DeliveredMessage extends BroadcastReceiver {
         {
             String recipient = "" + intent.getStringExtra("recipient");
             //Toast.makeText(context, "Delivered Result Ok", Toast.LENGTH_SHORT).show();
-            MyFirebaseUtilityClass.postNotification(context.getApplicationContext(),
+            NotifyUser n = new NotifyUser( context.getApplicationContext(),
                     110, "Delivered to " + recipient, "Your Statement has been delivered");
+            n.postNotification();
+            //MyFirebaseUtilityClass.postNotification(context.getApplicationContext(),
+            //        110, "Delivered to " + recipient, "Your Statement has been delivered");
         }else {
             //Toast.makeText(context, "Delivered Result not okay", Toast.LENGTH_SHORT).show();
-            MyFirebaseUtilityClass.postNotification(context.getApplicationContext(),
+            NotifyUser n = new NotifyUser(context.getApplicationContext(),
                     110, "Delivery Failure", "Your Statement has not been delivered!");
+            n.postNotification();
+            //MyFirebaseUtilityClass.postNotification(context.getApplicationContext(),
+               //     110, "Delivery Failure", "Your Statement has not been delivered!");
         }
 
     }

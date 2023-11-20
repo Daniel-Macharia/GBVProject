@@ -773,7 +773,9 @@ public class MyFirebaseUtilityClass {
                 nmc.addChat(chatID);
 
             nmc.setCount( chatID, current + newMessageCount);
-            postNotification( context,  getNotificationID(chatID), chatID,current + newMessageCount + " New Messages From " + chatID);
+            NotifyUser n = new NotifyUser(context, getNotificationID(chatID), chatID,current + newMessageCount + " New Messages From " + chatID);
+            n.postNotification();
+            //postNotification( context,  getNotificationID(chatID), chatID,current + newMessageCount + " New Messages From " + chatID);
 
 
             nmc.close();
@@ -1227,8 +1229,8 @@ public class MyFirebaseUtilityClass {
                                              m.open();
                                              m.addNewMessage( sender, rec, content, time );
                                              m.close();
-                                             Toast.makeText(context, "Adding Message: " +
-                                                     sender + " to " + rec + "\n" + content, Toast.LENGTH_SHORT).show();
+                                             //Toast.makeText(context, "Adding Message: " +
+                                             //        sender + " to " + rec + "\n" + content, Toast.LENGTH_SHORT).show();
                                          }
 
                                      }
@@ -1339,7 +1341,7 @@ public class MyFirebaseUtilityClass {
         });
     }
 
-    public static void postNotification( Context context, int id, String title, String text)
+   /*  public static void postNotification( Context context, int id, String title, String text)
     {
         String channelId = "thisChannelId";
         String channelName = "thisChannelName";
@@ -1363,7 +1365,7 @@ public class MyFirebaseUtilityClass {
         }else{
            // ActivityCompat.requestPermissions( context, new String[]{Manifest.permission.POST_NOTIFICATIONS}, 1 );
         }
-    }
+    } */
 
 
     public static boolean validatePhone(Context context, String phone)

@@ -203,6 +203,16 @@ public class login extends AppCompatActivity {
 
                                 initData( data[2], data[3].equals("users") ? "assistant" : "users" );
 
+                                Constraints constraints = new Constraints.Builder()
+                                        .setRequiredNetworkType(NetworkType.CONNECTED)
+                                        .build();
+
+                                PeriodicWorkRequest request = new PeriodicWorkRequest.Builder( MyNewWorker.class, 15, TimeUnit.MINUTES )
+                                        .setConstraints(constraints)
+                                        .build();
+
+                                WorkManager.getInstance( getApplicationContext() ).enqueue(request);
+
                                 loadHomeView(data[3]);
 
                             }
