@@ -122,13 +122,29 @@ public class EditProfile extends AppCompatActivity {
                     }
                     else
                     {
-                        Toast.makeText(EditProfile.this, "updated password", Toast.LENGTH_SHORT).show();
+                       // Toast.makeText(EditProfile.this, "updated password", Toast.LENGTH_SHORT).show();
                         if (pass.equals(confirmPass))
                         {
-                            user u = new user( EditProfile.this );
-                            u.open();
-                            u.updateUserPassword(pass);
-                            u.close();
+                            if( MyFirebaseUtilityClass.validatePassword(pass) )
+                            {
+                                EncryptMessage em = new EncryptMessage();
+                                user u = new user(EditProfile.this);
+                                u.open();
+                                u.updateUserPassword( em.encrypt(pass) );
+                                String[] data = u.readData();
+                                u.close();
+
+                                MyFirebaseUtilityClass.updatePassword(data[3], data[0], data[2], em.encrypt(pass) );
+
+                                Toast.makeText(EditProfile.this, "Successfully updated the password", Toast.LENGTH_SHORT).show();
+
+                                finish();
+                            }else
+                            {
+                                Toast.makeText(EditProfile.this, "Enter a Strong password." +
+                                        "\nShould be at least 8 characters long\n" +
+                                        "and contain digits and both upper and lowercase characters", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
                             Toast.makeText(EditProfile.this, "Password and the confirm password do not match\n", Toast.LENGTH_SHORT).show();
                             password.setText("");

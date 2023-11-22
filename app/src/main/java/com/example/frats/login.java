@@ -254,7 +254,7 @@ public class login extends AppCompatActivity {
             forgot.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    Intent intent = new Intent( login.this, CreateNewPassword.class);
+                    Intent intent = new Intent( login.this, PasswordRecovery.class);
                     startActivity(intent);
                 }
             });
