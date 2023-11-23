@@ -8,7 +8,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkCapabilities;
 import android.net.NetworkInfo;
+import android.net.NetworkRequest;
 import android.os.Build;
 import android.provider.ContactsContract;
 import android.util.Pair;
@@ -48,6 +51,23 @@ public class MyFirebaseUtilityClass {
             return true;
         }
 
+
+        return false;
+    }
+
+    public static boolean hasInternetAccess(Context context)
+    {
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService( Context.CONNECTIVITY_SERVICE);
+
+        Network network = cm.getActiveNetwork();
+
+        if( network != null )
+        {
+            NetworkCapabilities netCaps = cm.getNetworkCapabilities( network );
+
+            if( netCaps.hasCapability( NetworkCapabilities.NET_CAPABILITY_VALIDATED ) )
+                return true;
+        }
 
         return false;
     }

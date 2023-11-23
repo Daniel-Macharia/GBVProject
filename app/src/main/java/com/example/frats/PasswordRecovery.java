@@ -13,6 +13,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.Properties;
 
 import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.SendFailedException;
 import javax.mail.Session;
 import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
@@ -26,6 +28,7 @@ public class PasswordRecovery extends AppCompatActivity {
     private Button resend, ok;
     private EditText enteredCode;
     String sentCode = new String("");
+    String email = new String("");
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -40,13 +43,14 @@ public class PasswordRecovery extends AppCompatActivity {
 
             user u = new user( this );
             u.open();
-            String email = u.getEmail();
+            email = u.getEmail();
             u.close();
 
             sentCode = "" + (int) ( 100000 + Math.random() * 900000 );
 
-            if( MyFirebaseUtilityClass.isConnectedToNetwork( getApplicationContext() ) )
+            if( MyFirebaseUtilityClass.hasInternetAccess( PasswordRecovery.this ) )
             {
+                //Toast.makeText(this, "Email: " + email, Toast.LENGTH_SHORT).show();
                 sendPasswordRecoveryEmail(email, sentCode);
             }
             else
@@ -77,7 +81,7 @@ public class PasswordRecovery extends AppCompatActivity {
                 public void onClick(View view) {
                     sentCode = "" + (int) ( 100000 + Math.random() * 900000 );
 
-                    if( MyFirebaseUtilityClass.isConnectedToNetwork( getApplicationContext() ) )
+                    if( MyFirebaseUtilityClass.hasInternetAccess( PasswordRecovery.this ) )
                     {
                         sendPasswordRecoveryEmail(email, sentCode);
                     }else
@@ -123,8 +127,8 @@ public class PasswordRecovery extends AppCompatActivity {
 
         public sendMessageTask( String userEmail, String code)
         {
-            this.userEmail = userEmail;
-            this.code = code;
+            this.userEmail = new String( userEmail );
+            this.code = new String( code );
         }
         @Override
         public void run()
@@ -168,7 +172,12 @@ public class PasswordRecovery extends AppCompatActivity {
 
                 Transport.send(mimeMessage);
 
-            }catch( Exception e )
+            }
+            catch( MessagingException me)
+            {
+                Toast.makeText(PasswordRecovery.this, "Messaging Exception: " + me, Toast.LENGTH_SHORT).show();
+            }
+            catch( Exception e )
             {
                 Toast.makeText(PasswordRecovery.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
             }
