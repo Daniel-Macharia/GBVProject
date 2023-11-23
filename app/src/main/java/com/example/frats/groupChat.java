@@ -179,54 +179,6 @@ public class groupChat extends AppCompatActivity {
         return false;
     }
 
-    private void notifyOfMessage()
-    {
-        String id = "noId";
-        String body = " new Message(s)";
-       /*  NotificationManager nm = (NotificationManager) getSystemService( Context.NOTIFICATION_SERVICE );
-
-        Notification notify = new Notification.Builder( getApplicationContext() )
-                .setContentTitle( "Notification" )
-                .setContentText(body)
-                .setSmallIcon(R.drawable.balloon1).build();
-
-        //notify.flags |= Notification.FLAG_AUTO_CANCEL;
-
-        nm.notify(0, notify); */
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O )
-        {
-            CharSequence name = "name";
-            String description = "desc";
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-
-            NotificationChannel channel = new NotificationChannel( id, name, importance);
-            channel.setDescription(description);
-
-            NotificationManager nm = getSystemService(NotificationManager.class);
-            nm.createNotificationChannel(channel);
-        }
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(groupChat.this, id)
-                .setSmallIcon(R.drawable.balloon1)
-                .setContentTitle("Notification")
-                .setContentText(body)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-        NotificationManagerCompat nmc = NotificationManagerCompat.from( this);
-
-        if( ActivityCompat.checkSelfPermission( this, Manifest.permission.POST_NOTIFICATIONS )
-        != PackageManager.PERMISSION_GRANTED )
-        {
-
-            ActivityCompat.requestPermissions( this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
-
-        }
-
-        nmc.notify( 7, builder.build() );
-    }
-
-
-
     class myTask implements Runnable
     {
         DatabaseReference dbRef;

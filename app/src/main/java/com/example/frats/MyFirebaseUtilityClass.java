@@ -42,32 +42,7 @@ public class MyFirebaseUtilityClass {
 
         NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 
-        if( networkInfo == null )
-        {
-            //Toast.makeText(context, "Not Connected to Network", Toast.LENGTH_SHORT).show();
-        }
-        else if( networkInfo.isAvailable() )
-        {
-            //Toast.makeText(context, "Connected to Network\n\n" , Toast.LENGTH_SHORT).show();
-            return true;
-        }
-
-
-        return false;
-    }
-
-    public static boolean isRoamingNetwork(Context context)
-    {
-
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService( Context.CONNECTIVITY_SERVICE);
-
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-
-        if( networkInfo == null )
-        {
-            //Toast.makeText(context, "Not Connected to Network", Toast.LENGTH_SHORT).show();
-        }
-        else if( networkInfo.isRoaming() )
+        if( networkInfo != null && networkInfo.isAvailable() )
         {
             //Toast.makeText(context, "Connected to Network\n\n" , Toast.LENGTH_SHORT).show();
             return true;

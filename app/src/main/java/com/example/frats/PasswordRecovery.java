@@ -1,5 +1,6 @@
 package com.example.frats;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
@@ -24,6 +25,7 @@ public class PasswordRecovery extends AppCompatActivity {
 
     private Button resend, ok;
     private EditText enteredCode;
+    String sentCode = new String("");
 
     @Override
     protected void onCreate( Bundle savedInstanceState )
@@ -41,9 +43,9 @@ public class PasswordRecovery extends AppCompatActivity {
             String email = u.getEmail();
             u.close();
 
-            String sentCode = "" + (int) ( 100000 + Math.random() * 900000 );
+            sentCode = "" + (int) ( 100000 + Math.random() * 900000 );
 
-            if( MyFirebaseUtilityClass.isRoamingNetwork( PasswordRecovery.this ) )
+            if( MyFirebaseUtilityClass.isConnectedToNetwork( getApplicationContext() ) )
             {
                 sendPasswordRecoveryEmail(email, sentCode);
             }
@@ -73,11 +75,11 @@ public class PasswordRecovery extends AppCompatActivity {
             resend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    String newSentCode = "" + (int) ( 100000 + Math.random() * 900000 );
+                    sentCode = "" + (int) ( 100000 + Math.random() * 900000 );
 
-                    if( MyFirebaseUtilityClass.isRoamingNetwork( getApplicationContext() ) )
+                    if( MyFirebaseUtilityClass.isConnectedToNetwork( getApplicationContext() ) )
                     {
-                        sendPasswordRecoveryEmail(email, newSentCode);
+                        sendPasswordRecoveryEmail(email, sentCode);
                     }else
                     {
                         Toast.makeText(PasswordRecovery.this, "No active internet connection!\nPlease check your internet connection", Toast.LENGTH_SHORT).show();
@@ -94,62 +96,83 @@ public class PasswordRecovery extends AppCompatActivity {
     public void sendPasswordRecoveryEmail( String userEmail, String code)
     {
         try{
-            if( userEmail.equals("") )
-            {
-                Toast.makeText(this, "No registered Email!", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            Context c = getApplicationContext();
 
-            String senderEmail = "dev.frats@gmail.com";
-            String senderEmailPassword = "bjvd mkbv eugc qqpk";
-            String host = "smtp.gmail.com";
-
-            //Toast.makeText(this, "Setting up properties", Toast.LENGTH_SHORT).show();
-
-            Properties properties = System.getProperties();
-            properties.put("mail.smtp.host", host);
-            properties.put("mail.smtp.port", "465");
-            //properties.put("mail.smtp.port", "587");
-            properties.put("mail.smtp.ssl.enable", true);
-            properties.put("mail.smtp.auth", true);
-
-            //Toast.makeText(this, "After Setting up Properties", Toast.LENGTH_SHORT).show();
-
-            Session  session = Session.getInstance( properties, new Authenticator(){
-                @Override
-                protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(senderEmail, senderEmailPassword );
-                }
-            });
-
-           // Toast.makeText(this, "After Creating Session", Toast.LENGTH_SHORT).show();
-
-            MimeMessage mimeMessage = new MimeMessage(session);
-            mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(userEmail) );
-            mimeMessage.setSubject("Subject: Frats Password Recovery");
-            mimeMessage.setText(code);
-
-            Thread task = new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        Transport.send(mimeMessage);
-                        //Transport.send(mimeMessage, senderEmail, senderEmailPassword);
-                    }catch( Exception e )
-                    {
-                        Toast.makeText(PasswordRecovery.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
-                    }
-
-                }
-            });
-
-            task.start();
+            sendMessageTask sendTask = new sendMessageTask(userEmail, code);
+            Thread thread = new Thread( sendTask );
+            thread.start();
 
             //Toast.makeText(this, "Finished sending Email", Toast.LENGTH_SHORT).show();
 
         }catch( Exception e )
         {
             Toast.makeText(this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private boolean getNetworkState()
+    {
+        return false;
+    }
+
+
+    class sendMessageTask implements Runnable
+    {
+        private String code;
+        private String userEmail;
+
+        public sendMessageTask( String userEmail, String code)
+        {
+            this.userEmail = userEmail;
+            this.code = code;
+        }
+        @Override
+        public void run()
+        {
+            try {
+
+                if( userEmail.equals("") )
+                {
+                    Toast.makeText( getApplicationContext(), "No registered Email!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                String senderEmail = "dev.frats@gmail.com";
+                String senderEmailPassword = "bjvd mkbv eugc qqpk";
+                String host = "smtp.gmail.com";
+
+                //Toast.makeText(this, "Setting up properties", Toast.LENGTH_SHORT).show();
+
+                Properties properties = System.getProperties();
+                properties.put("mail.smtp.host", host);
+                properties.put("mail.smtp.port", "465");
+                //properties.put("mail.smtp.port", "587");
+                properties.put("mail.smtp.ssl.enable", true);
+                properties.put("mail.smtp.auth", true);
+
+                //Toast.makeText(this, "After Setting up Properties", Toast.LENGTH_SHORT).show();
+
+                Session  session = Session.getInstance( properties, new Authenticator(){
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(senderEmail, senderEmailPassword );
+                    }
+                });
+
+                // Toast.makeText(this, "After Creating Session", Toast.LENGTH_SHORT).show();
+
+                MimeMessage mimeMessage = new MimeMessage(session);
+                mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(userEmail) );
+                mimeMessage.setSubject("Subject: Frats Password Recovery");
+                mimeMessage.setText("Your FRATS password recovery code is: " + code);
+
+                Transport.send(mimeMessage);
+
+            }catch( Exception e )
+            {
+                Toast.makeText(PasswordRecovery.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
+            }
+
         }
     }
 }
