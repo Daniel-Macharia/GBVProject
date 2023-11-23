@@ -70,7 +70,10 @@ public class CreateNewPassword extends AppCompatActivity  {
 
                         Toast.makeText(CreateNewPassword.this, "Successfully updated the password", Toast.LENGTH_SHORT).show();
 
-                        finish();
+                        Intent loginIntent = new Intent( CreateNewPassword.this, login.class );
+                        startActivity( loginIntent);
+
+                        finishAffinity();
                     }else
                     {
                         Toast.makeText(CreateNewPassword.this, "Enter a Strong password." +

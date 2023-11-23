@@ -56,6 +56,27 @@ public class MyFirebaseUtilityClass {
         return false;
     }
 
+    public static boolean isRoamingNetwork(Context context)
+    {
+
+        ConnectivityManager cm = (ConnectivityManager) context.getSystemService( Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+
+        if( networkInfo == null )
+        {
+            //Toast.makeText(context, "Not Connected to Network", Toast.LENGTH_SHORT).show();
+        }
+        else if( networkInfo.isRoaming() )
+        {
+            //Toast.makeText(context, "Connected to Network\n\n" , Toast.LENGTH_SHORT).show();
+            return true;
+        }
+
+
+        return false;
+    }
+
     public static void addNewUser(String url, newUser u)
     {
         FirebaseDatabase database = FirebaseDatabase.getInstance();
@@ -1386,7 +1407,7 @@ public class MyFirebaseUtilityClass {
         String lowerAlphaRegex = "\\w*[[a-z]*]\\w*";
         String digitRegex = "\\w*[[0-9]*]\\w*";
 
-        if( password.length() > 8 && password.matches( upperAlphaRegex ) && password.matches( lowerAlphaRegex ) && password.matches( digitRegex ) )
+        if( password.length() >= 8 && password.matches( upperAlphaRegex ) && password.matches( lowerAlphaRegex ) && password.matches( digitRegex ) )
         {
             return true;
         }

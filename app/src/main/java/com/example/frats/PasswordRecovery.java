@@ -1,5 +1,6 @@
 package com.example.frats;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -35,9 +36,36 @@ public class PasswordRecovery extends AppCompatActivity {
             ok = findViewById(R.id.confirmCode);
             enteredCode = findViewById( R.id.enteredCode);
 
+            user u = new user( this );
+            u.open();
+            String email = u.getEmail();
+            u.close();
+
+            String sentCode = "" + (int) ( 100000 + Math.random() * 900000 );
+
+            if( MyFirebaseUtilityClass.isRoamingNetwork( PasswordRecovery.this ) )
+            {
+                sendPasswordRecoveryEmail(email, sentCode);
+            }
+            else
+            {
+                Toast.makeText(this, "No active internet connection!\nPlease check your internet connection", Toast.LENGTH_SHORT).show();
+            }
+
             ok.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    String code = "";
+                    code = enteredCode.getText().toString();
+
+                    if( code.equals( sentCode ) )
+                    {
+                        Intent intent = new Intent( PasswordRecovery.this, CreateNewPassword.class );
+                        startActivity( intent );
+                    }
+                    else{
+                        Toast.makeText(PasswordRecovery.this, "Incorrect code!\nClick resend to send another code", Toast.LENGTH_SHORT).show();
+                    }
 
                 }
             });
@@ -45,17 +73,15 @@ public class PasswordRecovery extends AppCompatActivity {
             resend.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    String newSentCode = "" + (int) ( 100000 + Math.random() * 900000 );
 
-                    //Thread task = new Thread(new Runnable() {
-                    //    @Override
-                     //   public void run() {
-                            Toast.makeText(PasswordRecovery.this, "Sending mail", Toast.LENGTH_SHORT).show();
-                            sendPasswordRecoveryEmail("", "Hello Email");
-                            Toast.makeText(PasswordRecovery.this, "After Sending mail", Toast.LENGTH_SHORT).show();
-                     //   }
-                   // });
-
-                   // task.start();
+                    if( MyFirebaseUtilityClass.isRoamingNetwork( getApplicationContext() ) )
+                    {
+                        sendPasswordRecoveryEmail(email, newSentCode);
+                    }else
+                    {
+                        Toast.makeText(PasswordRecovery.this, "No active internet connection!\nPlease check your internet connection", Toast.LENGTH_SHORT).show();
+                    }
                 }
             });
         }catch( Exception e )
@@ -68,24 +94,26 @@ public class PasswordRecovery extends AppCompatActivity {
     public void sendPasswordRecoveryEmail( String userEmail, String code)
     {
         try{
+            if( userEmail.equals("") )
+            {
+                Toast.makeText(this, "No registered Email!", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             String senderEmail = "dev.frats@gmail.com";
-            String recipientEmail = "ndungudaniel2261@gmail.com";
-            //String senderEmailPassword = "FratsDevSupportTeam";
             String senderEmailPassword = "bjvd mkbv eugc qqpk";
-
             String host = "smtp.gmail.com";
 
-            Toast.makeText(this, "Setting up properties", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "Setting up properties", Toast.LENGTH_SHORT).show();
 
             Properties properties = System.getProperties();
             properties.put("mail.smtp.host", host);
             properties.put("mail.smtp.port", "465");
             //properties.put("mail.smtp.port", "587");
             properties.put("mail.smtp.ssl.enable", true);
-            properties.put("mail.smtp.auth", "true");
+            properties.put("mail.smtp.auth", true);
 
-            Toast.makeText(this, "After Setting up Properties", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(this, "After Setting up Properties", Toast.LENGTH_SHORT).show();
 
             Session  session = Session.getInstance( properties, new Authenticator(){
                 @Override
@@ -94,11 +122,10 @@ public class PasswordRecovery extends AppCompatActivity {
                 }
             });
 
-            Toast.makeText(this, "After Creating Session", Toast.LENGTH_SHORT).show();
+           // Toast.makeText(this, "After Creating Session", Toast.LENGTH_SHORT).show();
 
             MimeMessage mimeMessage = new MimeMessage(session);
-
-            mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(recipientEmail) );
+            mimeMessage.addRecipient(Message.RecipientType.TO, new InternetAddress(userEmail) );
             mimeMessage.setSubject("Subject: Frats Password Recovery");
             mimeMessage.setText(code);
 
@@ -107,6 +134,7 @@ public class PasswordRecovery extends AppCompatActivity {
                 public void run() {
                     try {
                         Transport.send(mimeMessage);
+                        //Transport.send(mimeMessage, senderEmail, senderEmailPassword);
                     }catch( Exception e )
                     {
                         Toast.makeText(PasswordRecovery.this, "Error: " + e.toString(), Toast.LENGTH_SHORT).show();
@@ -114,7 +142,10 @@ public class PasswordRecovery extends AppCompatActivity {
 
                 }
             });
-            Toast.makeText(this, "Finished sending Email", Toast.LENGTH_SHORT).show();
+
+            task.start();
+
+            //Toast.makeText(this, "Finished sending Email", Toast.LENGTH_SHORT).show();
 
         }catch( Exception e )
         {

@@ -130,6 +130,27 @@ public class user {
         return result;
     }
 
+    public String getEmail()
+    {
+        String emailAddress = "";
+
+        String sqlQuerry = " SELECT * FROM " + tableName
+                + " WHERE " + thisUser + " = 1; ";
+
+        Cursor c = userdb.rawQuery( sqlQuerry , null);
+
+        int emailIndex = c.getColumnIndex(email);
+
+        if( c.getCount() > 0 )
+        {
+            c.moveToFirst();
+            emailAddress = c.getString( emailIndex );
+        }
+        c.close();
+
+        return emailAddress;
+    }
+
     public void updateUserName(String name)
     {
         try{
